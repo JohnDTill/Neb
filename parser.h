@@ -16,9 +16,13 @@ public:
 
 private:
     enum TokenType {
+        ArrowAccent,
         At,
         Backslash,
         Bar,
+        BarAccent,
+        BigProduct,
+        BigSum,
         Binomial,
         Cap,
         Cos,
@@ -33,21 +37,30 @@ private:
         Disjunction,
         Divide,
         Dollar,
-        Dot,
+        DotAccent,
+        DotAccentDouble,
+        DotAccentTriple,
+        DotProduct,
         DoubleBar,
+        DoubleDagger,
         DoubleExclam,
+        Dualscript,
         EmptySet,
         Equals,
         Exclam,
+        Exists,
+        ForAll,
         Forwardslash,
         Fraction,
         Greater,
         GreaterEqual,
         Hash,
+        Hat,
         Identifier,
         In,
         Infinity,
         Integer,
+        Integral,
         LeftAngle,
         LeftArrow,
         LeftBrace,
@@ -58,12 +71,14 @@ private:
         LeftParen,
         Less,
         LessEqual,
+        MapsTo,
         Matrix,
         Minus,
         Multiply,
         Natural,
         Newline,
         Not,
+        NotEqual,
         Number,
         Partial,
         Percent,
@@ -92,8 +107,10 @@ private:
         Superscript,
         Tick,
         Tilde,
+        TildeAccent,
         Times,
-        Transpose
+        Transpose,
+        UnderscriptedWord
     };
 
     static const QMap<QString, TokenType> keywords;
@@ -109,6 +126,8 @@ private:
     std::vector<Token> tokens;
     std::vector<Token>::size_type token_index = 0;
     std::vector<Node*> statements;
+
+    uint64_t line = 0;
 
 public:
     static std::vector<Node*> parse(const QString& source);
@@ -135,13 +154,22 @@ private:
 
     Node* statement();
     Node* expression();
+    Node* conjunction();
+    Node* disjunction();
     Node* addition();
     Node* multiplication();
     Node* leftUnary();
     Node* rightUnary();
     Node* exponent();
     Node* grouping();
+    Node* callArgs();
     Node* escape();
+    Node* escapeBinary();
+    Node* escapeCases();
+    Node* escapeMatrix();
+    Node* escapeRoot();
+    Node* escapeSuperscript();
+    Node* escapeSubscript();
     Node* terminal();
 
     void scan();

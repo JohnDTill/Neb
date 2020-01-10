@@ -173,19 +173,75 @@ Parser::Node* Parser::statement(){
     if(match(Equals)){
         match(Newline);
         n = createNode('=', n, expression());
-        while(match(Equals)) n->children.push_back(expression());
+        while(match(Equals)){
+            match(Newline);
+            n->children.push_back(expression());
+        }
+
+        return n;
+    }else if(match({Less, LessEqual})){
+        QChar c = source[tokens[token_index-1].start];
+        match(Newline);
+        n = createNode(c, n, expression());
+        while(match({Less, LessEqual})){
+            QChar c = source[tokens[token_index-1].start];
+            match(Newline);
+            n = createNode(c, n, expression());
+        }
+
+        return n;
+    }else if(match({Greater, GreaterEqual})){
+        QChar c = source[tokens[token_index-1].start];
+        match(Newline);
+        n = createNode(c, n, expression());
+        while(match({Greater, GreaterEqual})){
+            QChar c = source[tokens[token_index-1].start];
+            match(Newline);
+            n = createNode(c, n, expression());
+        }
 
         return n;
     }else if(match(In)){
         QChar c = source[tokens[token_index-1].start];
         return createNode(c, n, expression());
+    }else if(match({DefEquals, NotEqual})){
+        QChar c = source[tokens[token_index-1].start];
+        return createNode(c, n, expression());
+    }else{
+        return createNode('E', n);
     }
-
-    fatalError("No valid statement found");
 }
 
 Parser::Node* Parser::expression(){
-    return addition();
+    return conjunction();
+}
+
+Parser::Node* Parser::conjunction(){
+    Node* expr = disjunction();
+    if(match(Conjunction)){
+        match(Newline);
+        expr = createNode(QChar(8743), expr, disjunction());
+        while(match(Conjunction)){
+            match(Newline);
+            expr->children.push_back(disjunction());
+        }
+    }
+
+    return expr;
+}
+
+Parser::Node* Parser::disjunction(){
+    Node* expr = addition();
+    if(match(Disjunction)){
+        match(Newline);
+        expr = createNode(QChar(8744), expr, addition());
+        while(match(Disjunction)){
+            match(Newline);
+            expr->children.push_back(addition());
+        }
+    }
+
+    return expr;
 }
 
 Parser::Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
@@ -201,7 +257,7 @@ Parser::Node* Parser::addition(){ //Left associative (subtraction is anti-commut
 
 Parser::Node* Parser::multiplication(){
     Node* expr = leftUnary();
-    while(match({Backslash, Divide, Dot, Forwardslash, Multiply, Percent, Times})){
+    while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, Percent, Times})){
         QChar c = source[tokens[token_index-1].start];
         match(Newline);
         expr = createNode(c, expr, leftUnary());
@@ -239,8 +295,49 @@ Parser::Node* Parser::exponent(){
 Parser::Node* Parser::grouping(){
     if(match(LeftParen)){
         Node* expr = expression();
-        consume(RightParen);
-        return createNode('(', expr);
+        if(match(Comma)){
+            //Exclusive start of range
+            expr = createNode('R', expr, expression());
+
+            if(match(RightParen)){
+                expr->subtext = "()";
+            }else{
+                consume(RightBracket);
+                expr->subtext = "(]";
+            }
+
+            return expr;
+        }else{
+            consume(RightParen);
+            return createNode('(', expr);
+        }
+    }else if(match(LeftBracket)){
+        Node* expr = expression();
+        if(match(Comma)){
+            //Inclusive start of range
+            expr = createNode('R', expr, expression());
+
+            if(match(RightParen)){
+                expr->subtext = "[)";
+            }else{
+                consume(RightBracket);
+                expr->subtext = "[]";
+            }
+
+            return expr;
+        }else{
+            consume(RightBracket);
+            return createNode('[', expr);
+        }
+    }else if(match(LeftBrace)){
+        Node* expr = createNode('[', expression());
+        while(match(Comma)){
+            match(Newline);
+            expr->children.push_back( expression() );
+        }
+        consume(RightBrace);
+
+        return expr;
     }else if(match(Bar)){
         Node* expr = expression();
         consume(Bar);
@@ -256,71 +353,215 @@ Parser::Node* Parser::grouping(){
     }
 }
 
-Parser::Node* Parser::escape(){
-    if(match(Fraction)){
-        consume(SpecialOpen);
-        Node* num = expression();
-        consume(SpecialClose);
-        consume(SpecialOpen);
-        Node* den = expression();
-        consume(SpecialClose);
-        return createNode('f', num, den);
-    }else if(match(Superscript)){
-        consume(SpecialOpen);
-        std::vector<Token>::size_type marker = token_index;
-        skipPastSpecialClose();
-        consume(SpecialOpen);
+Parser::Node* Parser::callArgs(){
+    Node* n = createNode('A');
 
-        if(match(Multiply)){
-            consume(SpecialClose);
-            std::vector<Token>::size_type end_marker = token_index;
+    if(!match(RightParen)){
+        match(Newline);
+        n->children.push_back( expression() );
 
-            token_index = marker;
-            consume(Identifier);
-            consume(SpecialClose);
-            token_index -= 2;
-            Node* id = terminal();
-            id->subtext += "^*";
-            token_index = end_marker;
-
-            return id;
-        }else if(match( {Transpose, Dagger} )){
-            QChar c = source[tokens[token_index-1].start];
-            consume(SpecialClose);
-            std::vector<Token>::size_type end_marker = token_index;
-
-            token_index = marker;
-            Node* expr = createNode(c, rightUnary());
-            token_index = end_marker;
-
-            return expr;
-        }else if(peek( {Plus, Minus} )){
-            QChar c;
-            if(match(Plus)) c = QChar(8314);
-            else if(match(Minus)) c = QChar(8315);
-
-            consume(SpecialClose);
-            std::vector<Token>::size_type end_marker = token_index;
-
-            token_index = marker;
-            Node* expr = createNode(c, rightUnary());
-            token_index = end_marker;
-
-            return expr;
-        }else{
-            token_index = marker;
-            Node* lhs = leftUnary();
-            consume(SpecialClose);
-            consume(SpecialOpen);
-            Node* expr = createNode('^', lhs, expression());
-            expr->subtext = "typeset";
-            consume(SpecialClose);
-
-            return expr;
+        while(!match(RightParen)){
+            consume(Comma);
+            match(Newline);
+            n->children.push_back( expression() );
         }
-    }else{
-        fatalError("Invalid escape code");
     }
+
+    return n;
+}
+
+Parser::Node* Parser::escape(){
+    if(match({Binomial, Fraction})) return escapeBinary();
+    else if(match(Cases)) return escapeCases();
+    else if(match(Matrix)) return escapeMatrix();
+    else if(match(Subscript)) return escapeSubscript();
+    else if(match(Superscript)) return escapeSuperscript();
+    else if(match(Root)) return escapeRoot();
+    else fatalError("Invalid escape code");
+}
+
+Parser::Node* Parser::escapeBinary(){
+    QChar c = source[tokens[token_index-1].start];
+    consume(SpecialOpen);
+    Node* num = expression();
+    consume(SpecialClose);
+    consume(SpecialOpen);
+    Node* den = expression();
+    consume(SpecialClose);
+
+    return createNode(c, num, den);
+}
+
+Parser::Node* Parser::escapeCases(){
+    Node* n = createNode('C');
+
+    do{
+        consume(SpecialOpen);
+        n->children.push_back(expression());
+        consume(SpecialClose);
+        consume(SpecialOpen);
+        n->children.push_back(statement());
+        consume(SpecialClose);
+    } while(peek(SpecialOpen));
+
+    return n;
+}
+
+Parser::Node* Parser::escapeMatrix(){
+    Node* expr = createNode(QChar(8862));
+    consume(SpecialOpen);
+    consume(Number);
+    bool success;
+    QString::size_type start = tokens[token_index-1].start;
+    QString::size_type end = tokens[token_index-1].end;
+    uint rows = source.mid(start, end-start).toUInt(&success);
+    Q_ASSERT(success);
+    consume(SpecialClose);
+
+    consume(SpecialOpen);
+    consume(Number);
+    start = tokens[token_index-1].start;
+    end = tokens[token_index-1].end;
+    uint cols = source.mid(start, end-start).toUInt(&success);
+    Q_ASSERT(success);
+    expr->subtext = source.mid(start, end-start);
+    consume(SpecialClose);
+
+    for(uint i = 0; i < rows*cols; i++){
+        consume(SpecialOpen);
+        expr->children.push_back( expression() );
+        consume(SpecialClose);
+    }
+
+    return expr;
+}
+
+Parser::Node* Parser::escapeSubscript(){
+    consume(SpecialOpen);
+    std::vector<Token>::size_type marker = token_index;
+    skipPastSpecialClose();
+    consume(SpecialOpen);
+
+    if(match(Multiply)){
+        consume(SpecialClose);
+        std::vector<Token>::size_type end_marker = token_index;
+
+        token_index = marker;
+        consume(Identifier);
+        consume(SpecialClose);
+        token_index -= 2;
+        Node* id = terminal();
+        id->subtext += "_*";
+        token_index = end_marker;
+
+        return id;
+    }else if(match(Comma)){
+        //Subscript partial derivative
+        consume(Identifier);
+        token_index--;
+        Node* wrt = terminal();
+        consume(SpecialClose);
+        std::vector<Token>::size_type end_marker = token_index;
+
+        token_index = marker;
+        Node* expr = createNode('d', rightUnary(), wrt);
+        consume(SpecialClose);
+        token_index = end_marker;
+
+        return expr;
+    }else{
+        //Subscript access
+        token_index = marker;
+        Node* lhs = leftUnary();
+        consume(SpecialClose);
+        consume(SpecialOpen);
+        Node* expr = createNode('_', lhs, expression());
+        while(match(Comma))
+            expr->children.push_back(expression());
+        consume(SpecialClose);
+
+        //Note: this could be part of identifier if lhs is id and subscript is single id,
+        //      e.g. u = Kₚ * e
+
+        return expr;
+    }
+}
+
+Parser::Node* Parser::escapeSuperscript(){
+    consume(SpecialOpen);
+    std::vector<Token>::size_type marker = token_index;
+    skipPastSpecialClose();
+    consume(SpecialOpen);
+
+    if(match(Multiply)){
+        consume(SpecialClose);
+        std::vector<Token>::size_type end_marker = token_index;
+
+        token_index = marker;
+        consume(Identifier);
+        consume(SpecialClose);
+        token_index -= 2;
+        Node* id = terminal();
+        id->subtext += "^*";
+        token_index = end_marker;
+
+        return id;
+    }else if(match( {Transpose, Dagger} )){
+        QChar c = source[tokens[token_index-1].start];
+        consume(SpecialClose);
+        std::vector<Token>::size_type end_marker = token_index;
+
+        token_index = marker;
+        Node* expr = createNode(c, rightUnary());
+        consume(SpecialClose);
+        token_index = end_marker;
+
+        return expr;
+    }else if(peek( {Plus, Minus} )){
+        QChar c;
+        if(match(Plus)) c = QChar(8314);
+        else if(match(Minus)) c = QChar(8315);
+
+        consume(SpecialClose);
+        std::vector<Token>::size_type end_marker = token_index;
+
+        token_index = marker;
+
+        Node* expr;
+        if(match(Real)){
+            expr = createNode(source[tokens[token_index-1].start]);
+            expr->subtext = c;
+            consume(SpecialClose);
+        }else{
+            expr = createNode(c, rightUnary());
+            consume(SpecialClose);
+        }
+        token_index = end_marker;
+
+        return expr;
+    }else{
+        token_index = marker;
+        Node* lhs = leftUnary();
+        consume(SpecialClose);
+        consume(SpecialOpen);
+        Node* expr = createNode('^', lhs, expression());
+        expr->subtext = "typeset";
+        consume(SpecialClose);
+
+        return expr;
+    }
+}
+
+Parser::Node* Parser::escapeRoot(){
+    consume(SpecialOpen);
+    Node* expr = createNode(QChar(8730), expression());
+    consume(SpecialClose);
+    if(match(SpecialOpen)){
+        expr->children.push_back(expression());
+        consume(SpecialClose);
+    }
+
+    return expr;
 }
 
 Parser::Node* Parser::terminal(){
@@ -334,8 +575,27 @@ Parser::Node* Parser::terminal(){
 
     if(match(Number)){
         n->label = 'N';
+
+        if(match(LeftParen)){
+            n = createNode('*', n, expression());
+            consume(RightParen);
+            n->subtext = "No Operator";
+        }else if(peek(Identifier)){
+            n = createNode('*', n, terminal());
+            n->subtext = "No Operator";
+        }
     }else if(match(Identifier)){
         n->label = 'I';
+
+        if(match(LeftParen)){
+            n->label = 'F';
+            n->children.push_back( callArgs() );
+        }else if(peek(Identifier)){
+            //This implicit multiplication still requires a space unless we limit identifiers
+            //to a single character
+            n = createNode('*', n, terminal());
+            n->subtext = "No Operator";
+        }
     }else{
         fatalError("Invalid token");
     }
@@ -362,12 +622,15 @@ void Parser::scan(){
             case 8744:  emitToken(Disjunction); break;
             case 247:   emitToken(Divide); break;
             case '$':   emitToken(Dollar); break;
-            case 8901:  emitToken(Dot); break;
+            case 8901:  emitToken(DotProduct); break;
             case 8214:  emitToken(DoubleBar); break;
+            case 8225:  emitToken(DoubleDagger); break;
             case 8252:  emitToken(DoubleExclam); break;
             case 8709:  emitToken(EmptySet); break;
             case '=':   emitToken(Equals); break;
             case '!':   emitToken(Exclam); break;
+            case 8707:  emitToken(Exists); break;
+            case 8704:  emitToken(ForAll); break;
             case '/':   emitToken(Forwardslash); break;
             case '>':   emitToken(Greater); break;
             case 8805:  emitToken(GreaterEqual); break;
@@ -385,11 +648,14 @@ void Parser::scan(){
             case '(':   emitToken(LeftParen); break;
             case '<':   emitToken(Less); break;
             case 8804:  emitToken(LessEqual); break;
+            case 8614:  emitToken(MapsTo); break;
+            case 8862:  emitToken(Matrix); break;
             case '-':   emitToken(Minus); break;
             case '*':   emitToken(Multiply); break;
             case 8469:  emitToken(Natural); break;
-            case '\n':  emitToken(Newline); break;
+            case '\n':  emitToken(Newline); line++; break;
             case 172:   emitToken(Not); break;
+            case 8800:  emitToken(NotEqual); break;
             case 8706:  emitToken(Partial); break;
             case '%':   emitToken(Percent); break;
             case '.':   emitToken(Period); break;
@@ -407,6 +673,7 @@ void Parser::scan(){
             case 10219: emitToken(RightDoubleAngle); break;
             case 8971:  emitToken(RightFloor); break;
             case ')':   emitToken(RightParen); break;
+            case 8730:  emitToken(Root); break;
             case ';':   emitToken(Semicolon); break;
             case 9205:  emitToken(SpecialClose); break;
             case 9204:  emitToken(SpecialOpen); break;
@@ -430,13 +697,25 @@ void Parser::scanEscapeCode(){
     if(source_index >= source.size()) fatalError("Reached end of file while looking for Escape Code.");
 
     switch(source[source_index++].unicode()){
+        case 8594:  emitToken(ArrowAccent); break;
+        case 257:   emitToken(BarAccent); break;
+        case 8719:  emitToken(BigProduct); break;
+        case 8721:  emitToken(BigSum); break;
         case 'b':   emitToken(Binomial); break;
         case 'c':   emitToken(Cases); break;
+        case 551:   emitToken(DotAccent); break;
+        case 228:   emitToken(DotAccentDouble); break;
+        case 8943:  emitToken(DotAccentTriple); break;
+        case 916:   emitToken(Dualscript); break;
         case 'f':   emitToken(Fraction); break;
+        case 226:   emitToken(Hat); break;
+        case 8747:  emitToken(Integral); break;
         case 8862:  emitToken(Matrix); break;
         case 8730:  emitToken(Root); break;
         case '_':   emitToken(Subscript); break;
         case '^':   emitToken(Superscript); break;
+        case 227:   emitToken(TildeAccent); break;
+        case 'w':   emitToken(UnderscriptedWord); break;
 
     default:
         fatalError(QString("Unrecognized Escape Code '") + source[source_index-1] + "'");
