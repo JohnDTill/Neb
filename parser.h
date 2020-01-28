@@ -1,6 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "nodetype.h"
 #include <QMap>
 #include <QString>
 #include <QTextStream>
@@ -9,12 +10,14 @@
 class Parser{
 public:
     struct Node {
-        QChar label;
+        NodeType type;
         QString subtext;
         std::vector<Node*> children;
     };
 
 private:
+    static constexpr bool identifiers_use_multiple_chars = false;
+
     enum TokenType {
         ArrowAccent,
         At,
@@ -138,10 +141,10 @@ private:
     Parser(const QString& source);
     static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr);
     [[noreturn]] void fatalError(const QString& msg);
-    static Node* createNode(const QChar& label);
-    static Node* createNode(const QChar& label, Node* child);
-    static Node* createNode(const QChar& label, Node* lhs, Node* rhs);
-    static Node* createNode(const QChar& label, std::vector<Node*> children);
+    static Node* createNode(const NodeType& type);
+    static Node* createNode(const NodeType& type, Node* child);
+    static Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
+    static Node* createNode(const NodeType& type, std::vector<Node*> children);
 
     void parse();
     void consume(const TokenType& t);
@@ -181,6 +184,7 @@ private:
     bool advanceScanner();
     void emitToken(const TokenType& t);
     void emitToken(const TokenType& t, QString::size_type start);
+    void emitToken(const TokenType& t, QString::size_type start, QString::size_type end);
 };
 
 #endif // PARSER_H

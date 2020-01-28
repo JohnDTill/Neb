@@ -44,7 +44,7 @@ Parser::Parser(const QString& source)
 uint64_t Parser::writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     uint64_t id = curr++;
 
-    out << "\tn" << QString::number(id) << "[label=\"" << n.label;
+    out << "\tn" << QString::number(id) << "[label=\"" << labels[n.type];
     if(!n.subtext.isEmpty()) out << ": " << n.subtext;
     out << "\"]\n";
 
@@ -66,33 +66,33 @@ void Parser::fatalError(const QString& msg){
     exit(0);
 }
 
-Parser::Node* Parser::createNode(const QChar& label){
+Parser::Node* Parser::createNode(const NodeType& type){
     Node* n = new Node;
-    n->label = label;
+    n->type = type;
 
     return n;
 }
 
-Parser::Node* Parser::createNode(const QChar& label, Node* child){
+Parser::Node* Parser::createNode(const NodeType& type, Node* child){
     Node* n = new Node;
-    n->label = label;
+    n->type = type;
     n->children.push_back(child);
 
     return n;
 }
 
-Parser::Node* Parser::createNode(const QChar& label, Node* lhs, Node* rhs){
+Parser::Node* Parser::createNode(const NodeType& type, Node* lhs, Node* rhs){
     Node* n = new Node;
-    n->label = label;
+    n->type = type;
     n->children.push_back(lhs);
     n->children.push_back(rhs);
 
     return n;
 }
 
-Parser::Node* Parser::createNode(const QChar& label, std::vector<Node*> children){
+Parser::Node* Parser::createNode(const NodeType& type, std::vector<Node*> children){
     Node* n = new Node;
-    n->label = label;
+    n->type = type;
     n->children = children;
 
     return n;
@@ -172,7 +172,7 @@ Parser::Node* Parser::statement(){
 
     if(match(Equals)){
         match(Newline);
-        n = createNode('=', n, expression());
+        n = createNode(EQUAL, n, expression());
         while(match(Equals)){
             match(Newline);
             n->children.push_back(expression());
@@ -180,35 +180,35 @@ Parser::Node* Parser::statement(){
 
         return n;
     }else if(match({Less, LessEqual})){
-        QChar c = source[tokens[token_index-1].start];
+        bool inclusive = tokens[token_index-1].type == LessEqual;
         match(Newline);
-        n = createNode(c, n, expression());
+        n = createNode(inclusive ? LESS_EQUAL : LESS, n, expression());
         while(match({Less, LessEqual})){
-            QChar c = source[tokens[token_index-1].start];
+            bool inclusive = tokens[token_index-1].type == LessEqual;
             match(Newline);
-            n = createNode(c, n, expression());
+            n = createNode(inclusive ? LESS_EQUAL : LESS, n, expression());
         }
 
         return n;
     }else if(match({Greater, GreaterEqual})){
-        QChar c = source[tokens[token_index-1].start];
+        bool inclusive = tokens[token_index-1].type == GreaterEqual;
         match(Newline);
-        n = createNode(c, n, expression());
+        n = createNode(inclusive ? GREATER_EQUAL : GREATER, n, expression());
         while(match({Greater, GreaterEqual})){
-            QChar c = source[tokens[token_index-1].start];
+            bool inclusive = tokens[token_index-1].type == GreaterEqual;
             match(Newline);
-            n = createNode(c, n, expression());
+            n = createNode(inclusive ? GREATER_EQUAL : GREATER, n, expression());
         }
 
         return n;
     }else if(match(In)){
-        QChar c = source[tokens[token_index-1].start];
-        return createNode(c, n, expression());
-    }else if(match({DefEquals, NotEqual})){
-        QChar c = source[tokens[token_index-1].start];
-        return createNode(c, n, expression());
+        return createNode(IN, n, expression());
+    }else if(match(DefEquals)){
+        return createNode(DEFINE_EQUALS, n, expression());
+    }else if(match(NotEqual)){
+        return createNode(NOT_EQUAL, n, expression());
     }else{
-        return createNode('E', n);
+        return createNode(EXPR_STMT, n);
     }
 }
 
@@ -220,7 +220,7 @@ Parser::Node* Parser::conjunction(){
     Node* expr = disjunction();
     if(match(Conjunction)){
         match(Newline);
-        expr = createNode(QChar(8743), expr, disjunction());
+        expr = createNode(LOGICAL_AND, expr, disjunction());
         while(match(Conjunction)){
             match(Newline);
             expr->children.push_back(disjunction());
@@ -234,7 +234,7 @@ Parser::Node* Parser::disjunction(){
     Node* expr = addition();
     if(match(Disjunction)){
         match(Newline);
-        expr = createNode(QChar(8744), expr, addition());
+        expr = createNode(LOGICAL_OR, expr, addition());
         while(match(Disjunction)){
             match(Newline);
             expr->children.push_back(addition());
@@ -247,9 +247,16 @@ Parser::Node* Parser::disjunction(){
 Parser::Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
     Node* expr = multiplication();
     while(match({Plus, Minus, Cap, Cup})){
-        QChar c = source[tokens[token_index-1].start];
+        TokenType t = tokens[token_index-1].type;
         match(Newline);
-        expr = createNode(c, expr, multiplication());
+        Node* rhs = multiplication();
+        switch(t){
+            case Plus: expr = createNode(ADDITION, expr, rhs); break;
+            case Minus: expr = createNode(SUBTRACTION, expr, rhs); break;
+            case Cap: expr = createNode(INTERSECTION, expr, rhs); break;
+            case Cup: expr = createNode(UNION, expr, rhs); break;
+            default: break;
+        }
     }
 
     return expr;
@@ -258,18 +265,29 @@ Parser::Node* Parser::addition(){ //Left associative (subtraction is anti-commut
 Parser::Node* Parser::multiplication(){
     Node* expr = leftUnary();
     while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, Percent, Times})){
-        QChar c = source[tokens[token_index-1].start];
+        TokenType t = tokens[token_index-1].type;
         match(Newline);
-        expr = createNode(c, expr, leftUnary());
+        Node* rhs = leftUnary();
+        switch(t){
+            case Backslash: expr = createNode(BACKSLASH, expr, rhs); break;
+            case Divide: expr = createNode(DIVIDE, expr, rhs); break;
+            case DotProduct: expr = createNode(DOT, expr, rhs); break;
+            case Forwardslash: expr = createNode(FORWARDSLASH, expr, rhs); break;
+            case Multiply: expr = createNode(MULTIPLICATION, expr, rhs); break;
+            case Percent: expr = createNode(MODULUS, expr, rhs); break;
+            case Times: expr = createNode(CROSS, expr, rhs); break;
+            default: break;
+        }
     }
 
     return expr;
 }
 
 Parser::Node* Parser::leftUnary(){
-    if(match( {Minus, Not} )){
-        QChar c = source[tokens[token_index-1].start];
-        return createNode(c, rightUnary());
+    if(match(Minus)){
+        return createNode(UNARY_MINUS, rightUnary());
+    }else if(match(Not)){
+        return createNode(LOGICAL_NOT, rightUnary());
     }else{
         return rightUnary();
     }
@@ -277,9 +295,22 @@ Parser::Node* Parser::leftUnary(){
 
 Parser::Node* Parser::rightUnary(){
     Node* expr = exponent();
-    while(match( {Exclam, DoubleExclam, Tick} )){
-        QChar c = source[tokens[token_index-1].start];
-        expr = createNode(c, expr);
+    while(peek( {Exclam, DoubleExclam, Tick} )){
+        if(match(Exclam)){
+            if(peek(Exclam)){
+                int degree = 1;
+                while(match(Exclam)) degree++;
+                Node* n = createNode(MULTIFACTORIAL, expr);
+                n->subtext = QString::number(degree);
+
+                return n;
+            }else{
+                return createNode(FACTORIAL, expr);
+            }
+        }else{
+            consume(Tick);
+            return createNode(TICK_DERIVATIVE, expr);
+        }
     }
 
     return expr;
@@ -288,7 +319,7 @@ Parser::Node* Parser::rightUnary(){
 Parser::Node* Parser::exponent(){
     Node* expr = grouping();
     if(match(Caret))
-        expr = createNode('^', expr, leftUnary());
+        expr = createNode(POWER, expr, leftUnary());
     return expr;
 }
 
@@ -297,7 +328,7 @@ Parser::Node* Parser::grouping(){
         Node* expr = expression();
         if(match(Comma)){
             //Exclusive start of range
-            expr = createNode('R', expr, expression());
+            expr = createNode(RANGE, expr, expression());
 
             if(match(RightParen)){
                 expr->subtext = "()";
@@ -309,13 +340,13 @@ Parser::Node* Parser::grouping(){
             return expr;
         }else{
             consume(RightParen);
-            return createNode('(', expr);
+            return createNode(PAREN_GROUPING, expr);
         }
     }else if(match(LeftBracket)){
         Node* expr = expression();
         if(match(Comma)){
             //Inclusive start of range
-            expr = createNode('R', expr, expression());
+            expr = createNode(RANGE, expr, expression());
 
             if(match(RightParen)){
                 expr->subtext = "[)";
@@ -327,10 +358,10 @@ Parser::Node* Parser::grouping(){
             return expr;
         }else{
             consume(RightBracket);
-            return createNode('[', expr);
+            return createNode(BRACKET_GROUPING, expr);
         }
     }else if(match(LeftBrace)){
-        Node* expr = createNode('[', expression());
+        Node* expr = createNode(SET_LITERAL, expression());
         while(match(Comma)){
             match(Newline);
             expr->children.push_back( expression() );
@@ -341,11 +372,11 @@ Parser::Node* Parser::grouping(){
     }else if(match(Bar)){
         Node* expr = expression();
         consume(Bar);
-        return createNode('|', expr);
+        return createNode(ABS, expr);
     }else if(match(DoubleBar)){
         Node* expr = expression();
         consume(DoubleBar);
-        return createNode(QChar(8214), expr);
+        return createNode(NORM, expr);
     }else if(match(SpecialEscape)){
         return escape();
     }else{
@@ -354,7 +385,7 @@ Parser::Node* Parser::grouping(){
 }
 
 Parser::Node* Parser::callArgs(){
-    Node* n = createNode('A');
+    Node* n = createNode(ARGS);
 
     if(!match(RightParen)){
         match(Newline);
@@ -381,7 +412,7 @@ Parser::Node* Parser::escape(){
 }
 
 Parser::Node* Parser::escapeBinary(){
-    QChar c = source[tokens[token_index-1].start];
+    bool fraction = (tokens[token_index-1].type == Fraction);
     consume(SpecialOpen);
     Node* num = expression();
     consume(SpecialClose);
@@ -389,11 +420,11 @@ Parser::Node* Parser::escapeBinary(){
     Node* den = expression();
     consume(SpecialClose);
 
-    return createNode(c, num, den);
+    return createNode(fraction ? TYPED_FRACTION : TYPED_BINOMIAL, num, den);
 }
 
 Parser::Node* Parser::escapeCases(){
-    Node* n = createNode('C');
+    Node* n = createNode(TYPED_CASES);
 
     do{
         consume(SpecialOpen);
@@ -408,7 +439,7 @@ Parser::Node* Parser::escapeCases(){
 }
 
 Parser::Node* Parser::escapeMatrix(){
-    Node* expr = createNode(QChar(8862));
+    Node* expr = createNode(TYPED_MATRIX);
     consume(SpecialOpen);
     consume(Number);
     bool success;
@@ -464,7 +495,7 @@ Parser::Node* Parser::escapeSubscript(){
         std::vector<Token>::size_type end_marker = token_index;
 
         token_index = marker;
-        Node* expr = createNode('d', rightUnary(), wrt);
+        Node* expr = createNode(SUBSCRIPT_PARTIAL, rightUnary(), wrt);
         consume(SpecialClose);
         token_index = end_marker;
 
@@ -475,7 +506,7 @@ Parser::Node* Parser::escapeSubscript(){
         Node* lhs = leftUnary();
         consume(SpecialClose);
         consume(SpecialOpen);
-        Node* expr = createNode('_', lhs, expression());
+        Node* expr = createNode(SUBSCRIPT_ACCESS, lhs, expression());
         while(match(Comma))
             expr->children.push_back(expression());
         consume(SpecialClose);
@@ -507,20 +538,18 @@ Parser::Node* Parser::escapeSuperscript(){
 
         return id;
     }else if(match( {Transpose, Dagger} )){
-        QChar c = source[tokens[token_index-1].start];
+        bool transpose = tokens[token_index-1].type == Transpose;
         consume(SpecialClose);
         std::vector<Token>::size_type end_marker = token_index;
 
         token_index = marker;
-        Node* expr = createNode(c, rightUnary());
+        Node* expr = createNode(transpose ? TRANSPOSE : DAGGER, rightUnary());
         consume(SpecialClose);
         token_index = end_marker;
 
         return expr;
-    }else if(peek( {Plus, Minus} )){
-        QChar c;
-        if(match(Plus)) c = QChar(8314);
-        else if(match(Minus)) c = QChar(8315);
+    }else if(match( {Plus, Minus} )){
+        bool plus = tokens[token_index-1].type == Plus;
 
         consume(SpecialClose);
         std::vector<Token>::size_type end_marker = token_index;
@@ -529,11 +558,10 @@ Parser::Node* Parser::escapeSuperscript(){
 
         Node* expr;
         if(match(Real)){
-            expr = createNode(source[tokens[token_index-1].start]);
-            expr->subtext = c;
+            expr = createNode(plus ? POSITIVE_REALS : NEGATIVE_REALS);
             consume(SpecialClose);
         }else{
-            expr = createNode(c, rightUnary());
+            expr = createNode(plus ? INCREMENT : DECREMENT, rightUnary());
             consume(SpecialClose);
         }
         token_index = end_marker;
@@ -544,7 +572,7 @@ Parser::Node* Parser::escapeSuperscript(){
         Node* lhs = leftUnary();
         consume(SpecialClose);
         consume(SpecialOpen);
-        Node* expr = createNode('^', lhs, expression());
+        Node* expr = createNode(TYPED_POWER, lhs, expression());
         expr->subtext = "typeset";
         consume(SpecialClose);
 
@@ -554,19 +582,24 @@ Parser::Node* Parser::escapeSuperscript(){
 
 Parser::Node* Parser::escapeRoot(){
     consume(SpecialOpen);
-    Node* expr = createNode(QChar(8730), expression());
+    Node* child = expression();
     consume(SpecialClose);
     if(match(SpecialOpen)){
-        expr->children.push_back(expression());
+        Node* power = expression();
         consume(SpecialClose);
-    }
 
-    return expr;
+        return createNode(TYPED_ROOT, child, power);
+    }else{
+        return createNode(TYPED_SQRT, child);
+    }
 }
 
-Parser::Node* Parser::terminal(){
-    if(match({Integer, Natural, Rational, Real, Quaternion}))
-        return createNode(source[tokens[token_index-1].start]);
+Parser::Node* Parser::terminal(){   
+    if(match(Integer)) return createNode(INTEGERS);
+    else if(match(Natural)) return createNode(NATURAL_NUMS);
+    else if(match(Rational)) return createNode(RATIONAL_NUMS);
+    else if(match(Real)) return createNode(REALS);
+    else if(match(Quaternion)) return createNode(QUATERNIONS);
 
     Node* n = new Node();
     QString::size_type start = tokens[token_index].start;
@@ -574,26 +607,26 @@ Parser::Node* Parser::terminal(){
     n->subtext = source.mid(start, end-start);
 
     if(match(Number)){
-        n->label = 'N';
+        n->type = NUMBER;
 
         if(match(LeftParen)){
-            n = createNode('*', n, expression());
+            n = createNode(IMPLICIT_MULTIPLY, n, expression());
             consume(RightParen);
             n->subtext = "No Operator";
         }else if(peek(Identifier)){
-            n = createNode('*', n, terminal());
+            n = createNode(IMPLICIT_MULTIPLY, n, terminal());
             n->subtext = "No Operator";
         }
     }else if(match(Identifier)){
-        n->label = 'I';
+        n->type = IDENTIFIER;
 
         if(match(LeftParen)){
-            n->label = 'F';
+            n->type = CALL;
             n->children.push_back( callArgs() );
         }else if(peek(Identifier)){
             //This implicit multiplication still requires a space unless we limit identifiers
             //to a single character
-            n = createNode('*', n, terminal());
+            n = createNode(IMPLICIT_MULTIPLY, n, terminal());
             n->subtext = "No Operator";
         }
     }else{
@@ -745,8 +778,9 @@ void Parser::scanText(){
     QString str = source.mid(start, source_index-start);
 
     auto keyword_lookup = keywords.find(str);
-    if(keyword_lookup == keywords.end()) emitToken(Identifier, start);
-    else emitToken(keyword_lookup.value(), start);
+    if(keyword_lookup != keywords.end()) emitToken(keyword_lookup.value(), start);
+    else if(identifiers_use_multiple_chars) emitToken(Identifier, start);
+    else for(int i = start; i < source_index; i++) emitToken(Identifier, i, i+1);
 }
 
 bool Parser::isIdentifierQChar(const QChar& c) const{
@@ -766,6 +800,15 @@ void Parser::emitToken(const Parser::TokenType& t, QString::size_type start){
     token.type = t;
     token.start = start;
     token.end = source_index;
+
+    tokens.push_back(token);
+}
+
+void Parser::emitToken(const Parser::TokenType& t, QString::size_type start, QString::size_type end){
+    Token token;
+    token.type = t;
+    token.start = start;
+    token.end = end;
 
     tokens.push_back(token);
 }
