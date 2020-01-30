@@ -2,14 +2,16 @@
 #include <QFile>
 #include <QTextCodec>
 
-const int code = 106;
-
 void skipHeader(QFile& table_file){
     table_file.readLine(); //Discard headers
 }
 
 void createIncludes(QTextStream& out){
-    out << "#include <QString>\n"
+    out << "//CODE-GEN FILE\n"
+           "//This file is generated from subfolder \"meta\".\n"
+           "//Changes to this file must be made in the meta project.\n"
+           "\n"
+           "#include <QString>\n"
            "#include <QHash>\n"
            "\n";
 }
@@ -43,6 +45,8 @@ void createLabels(QFile& table_file, QTextStream& out){
         out << ("\t{" + name + ", \"" + label + "\"},\n");
     }
     out << "};\n";
+
+    table_file.reset();
 }
 
 void countEntries(QFile& table_file, QTextStream& out){
@@ -69,7 +73,7 @@ int main(int, char**){
     }
 
     QTextStream out(&gen_file);
-    out.setCodec(QTextCodec::codecForMib(code));
+    out.setCodec(QTextCodec::codecForMib(106)); //UTF8
     createIncludes(out);
     createEnum(table_file, out);
     countEntries(table_file, out);
