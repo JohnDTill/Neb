@@ -2,6 +2,54 @@
 #include <QFile>
 #include <QTextCodec>
 
+const int code = 106;
+
+void skipHeader(QFile& table_file){
+    table_file.readLine(); //Discard headers
+}
+
+void createIncludes(QTextStream& out){
+    out << "#include <QString>\n"
+           "#include <QHash>\n"
+           "\n";
+}
+
+void createEnum(QFile& table_file, QTextStream& out){
+    skipHeader(table_file);
+
+    out << "enum NodeType {\n";
+
+    while(!table_file.atEnd()){
+        QString line_str = table_file.readLine();
+        QList<QString> entries = line_str.split(',');
+        QString name = entries.at(0);
+        out << ('\t' + name + ",\n").toUtf8();
+    }
+    out << "};\n\n";
+
+    table_file.reset();
+}
+
+void createLabels(QFile& table_file, QTextStream& out){
+    skipHeader(table_file);
+
+    out << "static const QHash<NodeType, QString> labels {\n";
+    while(!table_file.atEnd()){
+        QString line_str = table_file.readLine();
+        QList<QString> entries = line_str.split(',');
+
+        QString name = entries.at(0);
+        QString label = entries.at(1);
+        out << ("\t{" + name + ", \"" + label + "\"},\n");
+    }
+    out << "};\n";
+}
+
+void countEntries(QFile& table_file, QTextStream& out){
+    out << "static constexpr int NodeType_Size = " << table_file.readAll().count('\n')-1 << ";\n\n";
+    table_file.reset();
+}
+
 int main(int, char**){
     QFile table_file(":/NodeTypes.csv");
     if(!table_file.open(QIODevice::ReadOnly)){
@@ -13,48 +61,20 @@ int main(int, char**){
         qDebug() << "File is empty.";
         return 0;
     }
-    table_file.readLine(); //Discard headers
 
-    QFile file("../nodetype.h");
-    if(!file.open(QIODevice::WriteOnly)){
-        qDebug() << file.errorString();
+    QFile gen_file("../nodetype.h");
+    if(!gen_file.open(QIODevice::WriteOnly)){
+        qDebug() << gen_file.errorString();
         return 0;
     }
-    file.write("#include <QString>\n"
-               "#include <QHash>\n"
-               "\n"
-               "enum NodeType {\n");
 
-    const int utf8_code = 106;
-    int code = utf8_code;
-
-    while(!table_file.atEnd()){
-        QByteArray line = table_file.readLine();
-        QString line_str = QTextCodec::codecForMib(code)->toUnicode(line);
-        QList<QString> entries = line_str.split(',');
-        qDebug() << line;
-
-        QString name = entries.at(0);
-        file.write(('\t' + name + ",\n").toUtf8());
-    }
-    file.write("};\n\n");
-
-    table_file.reset();
-    table_file.readLine(); //Discard headers
-
-    file.write("static const QHash<NodeType, QString> labels {\n");
-    while(!table_file.atEnd()){
-        QByteArray line = table_file.readLine();
-        QString line_str = QTextCodec::codecForMib(code)->toUnicode(line);
-        QList<QString> entries = line_str.split(',');
-
-        QString name = entries.at(0);
-        QString label = entries.at(1);
-        file.write(("\t{" + name + ", \"" + label + "\"},\n").toUtf8());
-    }
-    file.write("};\n");
-
-    file.close();
+    QTextStream out(&gen_file);
+    out.setCodec(QTextCodec::codecForMib(code));
+    createIncludes(out);
+    createEnum(table_file, out);
+    countEntries(table_file, out);
+    createLabels(table_file, out);
+    gen_file.close();
 
     return 0;
 }
