@@ -784,7 +784,10 @@ void Parser::scanText(){
 }
 
 bool Parser::isIdentifierQChar(const QChar& c) const{
-    return c.isLetter() || c.isNumber() || c == '_' || (c >= 913 && c <= 937) || (c >= 945 && c <= 969);
+    if(identifiers_use_multiple_chars)
+        return c.isLetter() || c.isNumber() || c == '_' || (c >= 913 && c <= 937) || (c >= 945 && c <= 969);
+    else
+        return c.isLetter() || (c >= 913 && c <= 937) || (c >= 945 && c <= 969);
 }
 
 bool Parser::advanceScanner(){
