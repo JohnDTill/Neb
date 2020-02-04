@@ -1,23 +1,12 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#include "nodetype.h"
-#include <QMap>
-#include <QString>
-#include <QTextStream>
-
+#include "node.h"
 #include "scanner.h"
 
 namespace Neb {
 
-struct Node {
-    NodeType type;
-    QString subtext;
-    std::vector<Node*> children;
-};
-
 class Parser{
-
 private:
     const QString& source;
     Scanner scanner;
@@ -31,12 +20,9 @@ public:
     std::vector<Node*> parse();
     Token lastExaminedToken();
     QString getErrorMessage();
-    static QString toDOT(const Node& n);
-    static QString toDOT(const std::vector<Node*>& nodes);
 
 private:
     [[noreturn]] void fatalError(const QString& msg);
-    static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr);
     static Node* createNode(const NodeType& type);
     static Node* createNode(const NodeType& type, Node* child);
     static Node* createNode(const NodeType& type, Node* lhs, Node* rhs);

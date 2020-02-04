@@ -11,13 +11,16 @@ CONFIG += c++11
 
 SOURCES += main.cpp
 
-HEADERS += ../nodetype.h
+HEADERS += ../nodetype.h \
+           ../tokentype.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += NodeTypes.csv
+DISTFILES += NodeTypes.csv \
+             TokenTypes.csv
 
-RESOURCES += NodeTypes.csv
+RESOURCES += NodeTypes.csv \
+             TokenTypes.csv

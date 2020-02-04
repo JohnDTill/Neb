@@ -12,14 +12,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     mainwindow.h \
+    node.h \
     nodetype.h \
     parser.h \
     scanner.h \
-    tokens.h
+    tokens.h \
+    tokentype.h
 
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
+        node.cpp \
         parser.cpp \
         scanner.cpp
 

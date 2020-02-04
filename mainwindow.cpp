@@ -21,7 +21,7 @@ void MainWindow::on_exec_button_clicked(){
 
     try{
         std::vector<Neb::Node*> statements = parser.parse();
-        QString DOT = Neb::Parser::toDOT(statements);
+        QString DOT = Neb::NodePrinter::toDOT(statements);
         ui->dot_view->setPlainText(DOT);
     }catch(int code){
         if(code == 646){

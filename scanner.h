@@ -2,7 +2,6 @@
 #define SCANNER_H
 
 #include "tokens.h"
-#include <exception>
 #include <vector>
 
 namespace Neb {

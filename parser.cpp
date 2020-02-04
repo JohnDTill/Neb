@@ -39,48 +39,9 @@ QString Parser::getErrorMessage(){
     return err_msg;
 }
 
-QString Parser::toDOT(const Node& n){
-    QString str;
-    QTextStream out(&str);
-
-    out << "digraph{\n";
-    uint64_t curr = 0;
-    writeDOT(out, n, curr);
-    out << "}";
-
-    return str;
-}
-
-QString Parser::toDOT(const std::vector<Node*>& nodes){
-    QString str;
-    QTextStream out(&str);
-
-    out << "digraph{\n";
-    uint64_t curr = 0;
-    for(Node* n : nodes) writeDOT(out, *n, curr);
-    out << "}";
-
-    return str;
-}
-
 void Parser::fatalError(const QString& msg){
     err_msg = "Parser Error:\n" + msg;
     throw 646;
-}
-
-uint64_t Parser::writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
-    uint64_t id = curr++;
-
-    out << "\tn" << QString::number(id) << "[label=\"" << labels[n.type];
-    if(!n.subtext.isEmpty()) out << ": " << n.subtext;
-    out << "\"]\n";
-
-    for(Node* n : n.children){
-        uint64_t child_id = writeDOT(out, *n, curr);
-        out << "\tn" << QString::number(id) << "->n" << QString::number(child_id) << '\n';
-    }
-
-    return id;
 }
 
 Node* Parser::createNode(const NodeType& type){
@@ -119,7 +80,8 @@ void Parser::consume(const TokenType& t){
     if(token_index >= tokens.size()) fatalError("Reached end of token stream while scanning");
     if(t != tokens[token_index++].type){
         token_index--;
-        fatalError(QString("Expected token type '") + t + "'");
+        fatalError(QString("Expected token type '") + token_names[t] + "', got type '"
+                   + token_names[tokens[token_index].type] + "'");
     }
 }
 
@@ -128,7 +90,7 @@ void Parser::consume(const std::vector<TokenType>& types){
     TokenType t = tokens[token_index++].type;
     for(TokenType type : types) if(type == t) return;
     token_index--;
-    fatalError(QString("Invalid token type '") + t + "'");
+    fatalError(QString("Invalid token type '") + token_names[t] + "'");
 }
 
 bool Parser::match(const TokenType& t){
