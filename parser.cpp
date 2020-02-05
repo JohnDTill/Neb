@@ -20,6 +20,7 @@ std::vector<Node*> Parser::parse(){
     while(match(Newline));
     while(token_index < tokens.size()){
         statements.push_back( statement() );
+        while(!dangling_nodes.empty()) dangling_nodes.pop();
         if(token_index < tokens.size()) consume({Newline, Comma});
         while(match(Newline));
     }
@@ -42,7 +43,10 @@ void Parser::fatalError(const QString& msg){
 
     //Clean up dynamically allocated memory
     for(Node* n : statements) NodeFunction::deletePostorder(n);
-    //DO THIS - fix memory leak for currently constructed statement
+    while(!dangling_nodes.empty()){
+        delete dangling_nodes.top();
+        dangling_nodes.pop();
+    }
 
     throw 646;
 }
@@ -50,6 +54,7 @@ void Parser::fatalError(const QString& msg){
 Node* Parser::createNode(const NodeType& type){
     Node* n = new Node;
     n->type = type;
+    dangling_nodes.push(n);
 
     return n;
 }
@@ -58,6 +63,7 @@ Node* Parser::createNode(const NodeType& type, Node* child){
     Node* n = new Node;
     n->type = type;
     n->children.push_back(child);
+    dangling_nodes.push(n);
 
     return n;
 }
@@ -67,6 +73,7 @@ Node* Parser::createNode(const NodeType& type, Node* lhs, Node* rhs){
     n->type = type;
     n->children.push_back(lhs);
     n->children.push_back(rhs);
+    dangling_nodes.push(n);
 
     return n;
 }
@@ -75,6 +82,7 @@ Node* Parser::createNode(const NodeType& type, std::vector<Node*> children){
     Node* n = new Node;
     n->type = type;
     n->children = children;
+    dangling_nodes.push(n);
 
     return n;
 }
@@ -588,39 +596,38 @@ Node* Parser::terminal(){
     if(token_index >= tokens.size())
         fatalError("Ran out of tokens (Call from parser.cpp " + QString::number(__LINE__) + ")");
 
-    Node* n = new Node();
     QString::size_type start = tokens[token_index].start;
     QString::size_type end = tokens[token_index].end;
-    n->subtext = source.mid(start, end-start);
+    QString source_text = source.mid(start, end-start);
 
     if(match(Number)){
-        n->type = NUMBER;
+        Node* n = createNode(NUMBER);
+        n->subtext = source_text;
 
         if(match(LeftParen)){
             n = createNode(IMPLICIT_MULTIPLY, n, expression());
             consume(RightParen);
-            n->subtext = "No Operator";
         }else if(peek(Identifier)){
             n = createNode(IMPLICIT_MULTIPLY, n, terminal());
-            n->subtext = "No Operator";
         }
+
+        return n;
     }else if(match(Identifier)){
-        n->type = IDENTIFIER;
+        Node* n = createNode(IDENTIFIER);
+        n->subtext = source_text;
 
         if(match(LeftParen)){
             n->type = CALL;
             n->children.push_back( callArgs() );
         }else if(peek(Identifier)){
-            //This implicit multiplication still requires a space unless we limit identifiers
-            //to a single character
+            //This implicit multiplication requires a space unless we limit identifiers to 1 char
             n = createNode(IMPLICIT_MULTIPLY, n, terminal());
-            n->subtext = "No Operator";
         }
+
+        return n;
     }else{
         fatalError("Invalid token (Call from parser.cpp " + QString::number(__LINE__) + ")");
     }
-
-    return n;
 }
 
 }

@@ -3,6 +3,7 @@
 
 #include "node.h"
 #include "scanner.h"
+#include <stack>
 
 namespace Neb {
 
@@ -13,6 +14,7 @@ private:
     const std::vector<Token>& tokens;
     std::vector<Token>::size_type token_index = 0;
     std::vector<Node*> statements;
+    std::stack<Node*> dangling_nodes;
     QString err_msg;
 
 public:
@@ -23,10 +25,10 @@ public:
 
 private:
     [[noreturn]] void fatalError(const QString& msg);
-    static Node* createNode(const NodeType& type);
-    static Node* createNode(const NodeType& type, Node* child);
-    static Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
-    static Node* createNode(const NodeType& type, std::vector<Node*> children);
+    Node* createNode(const NodeType& type);
+    Node* createNode(const NodeType& type, Node* child);
+    Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
+    Node* createNode(const NodeType& type, std::vector<Node*> children);
 
     void consume(const TokenType& t);
     void consume(const std::vector<TokenType>& types);
