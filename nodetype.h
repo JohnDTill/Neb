@@ -13,6 +13,8 @@ enum NodeType {
 	BOOLEANS,
 	BRACKET_GROUPING,
 	CALL,
+	COMPLEX_NUMS,
+	CONTINUOUS,
 	CROSS,
 	DAGGER,
 	DECREMENT,
@@ -78,7 +80,7 @@ enum NodeType {
 	WEDGE,
 };
 
-static constexpr int NodeType_Size = 70;
+static constexpr int NodeType_Size = 72;
 
 static const QHash<NodeType, QString> labels {
 	{ABS, "|⋅|"},
@@ -88,6 +90,8 @@ static const QHash<NodeType, QString> labels {
 	{BOOLEANS, "𝔹"},
 	{BRACKET_GROUPING, "group[]"},
 	{CALL, "f()"},
+	{COMPLEX_NUMS, "ℂ "},
+	{CONTINUOUS, "ℂⁿ"},
 	{CROSS, "×"},
 	{DAGGER, "†"},
 	{DECREMENT, "x⁻"},
@@ -101,7 +105,7 @@ static const QHash<NodeType, QString> labels {
 	{FORWARDSLASH, "/"},
 	{GREATER, ">"},
 	{GREATER_EQUAL, "≥"},
-	{IDENTIFIER, "id"},
+	{IDENTIFIER, "id: "},
 	{IMPLICIT_MULTIPLY, "*imp"},
 	{IN, "∈"},
 	{INCREMENT, "x⁺"},
@@ -122,7 +126,7 @@ static const QHash<NodeType, QString> labels {
 	{NORM, "‖⋅‖"},
 	{NOT_EQUAL, "≠"},
 	{NOT_IN, "∉"},
-	{NUMBER, "num"},
+	{NUMBER, ""},
 	{PAREN_GROUPING, "group()"},
 	{POSITIVE_REALS, "ℝ⁺"},
 	{POWER, "^"},
@@ -152,3 +156,20 @@ static const QHash<NodeType, QString> labels {
 	{VEE, "∨"},
 	{WEDGE, "∧"},
 };
+
+static const QHash<NodeType, QString> node_color {
+	{BOOLEANS, "orange"},
+	{COMPLEX_NUMS, "orange"},
+	{EMPTY_SET, "orange"},
+	{IDENTIFIER, "lightblue"},
+	{INFTY, "orange"},
+	{INTEGERS, "orange"},
+	{NATURAL_NUMS, "orange"},
+	{NEGATIVE_REALS, "orange"},
+	{NUMBER, "orange"},
+	{POSITIVE_REALS, "orange"},
+	{QUATERNIONS, "orange"},
+	{RATIONAL_NUMS, "orange"},
+	{REALS, "orange"},
+};
+

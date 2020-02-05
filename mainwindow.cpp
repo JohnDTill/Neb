@@ -21,8 +21,9 @@ void MainWindow::on_exec_button_clicked(){
 
     try{
         std::vector<Neb::Node*> statements = parser.parse();
-        QString DOT = Neb::NodePrinter::toDOT(statements);
+        QString DOT = Neb::NodeFunction::toDOT(statements);
         ui->dot_view->setPlainText(DOT);
+        for(Neb::Node* n : statements) Neb::NodeFunction::deletePostorder(n);
     }catch(int code){
         if(code == 646){
             ui->dot_view->setPlainText(parser.getErrorMessage());

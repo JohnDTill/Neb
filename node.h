@@ -14,10 +14,11 @@ struct Node {
     std::vector<Node*> children;
 };
 
-class NodePrinter{
+class NodeFunction{
 public:
     static QString toDOT(const Node& n);
     static QString toDOT(const std::vector<Node*>& nodes);
+    static void deletePostorder(Node* n);
 };
 
 }

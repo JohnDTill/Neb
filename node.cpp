@@ -6,8 +6,12 @@ static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     uint64_t id = curr++;
 
     out << "\tn" << QString::number(id) << "[label=\"" << labels[n.type];
-    if(!n.subtext.isEmpty()) out << ": " << n.subtext;
-    out << "\"]\n";
+    if(!n.subtext.isEmpty()) out << n.subtext;
+    out << '"';
+    auto color_lookup = node_color.find(n.type);
+    if(color_lookup != node_color.end())
+        out << ", style=filled, fillcolor=" << color_lookup.value();
+    out << "]\n";
 
     for(Node* n : n.children){
         uint64_t child_id = writeDOT(out, *n, curr);
@@ -17,7 +21,7 @@ static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     return id;
 }
 
-QString NodePrinter::toDOT(const Node& n){
+QString NodeFunction::toDOT(const Node& n){
     QString str;
     QTextStream out(&str);
 
@@ -29,7 +33,7 @@ QString NodePrinter::toDOT(const Node& n){
     return str;
 }
 
-QString NodePrinter::toDOT(const std::vector<Node*>& nodes){
+QString NodeFunction::toDOT(const std::vector<Node*>& nodes){
     QString str;
     QTextStream out(&str);
 
@@ -39,6 +43,11 @@ QString NodePrinter::toDOT(const std::vector<Node*>& nodes){
     out << "}";
 
     return str;
+}
+
+void NodeFunction::deletePostorder(Node* n){
+    for(Node* child : n->children) deletePostorder(child);
+    delete n;
 }
 
 }

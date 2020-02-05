@@ -12,7 +12,6 @@ class Scanner{
 private:
     friend Parser;
     static constexpr bool identifiers_use_multiple_chars = false;
-    static const QMap<QString, TokenType> keywords;
     const QString& source;
     QString::size_type source_index = 0;
     uint64_t line = 0;

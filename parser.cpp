@@ -39,6 +39,11 @@ QString Parser::getErrorMessage(){
 
 void Parser::fatalError(const QString& msg){
     err_msg = "Parser Error:\n" + msg;
+
+    //Clean up dynamically allocated memory
+    for(Node* n : statements) NodeFunction::deletePostorder(n);
+    //DO THIS - fix memory leak for currently constructed statement
+
     throw 646;
 }
 
@@ -538,14 +543,22 @@ Node* Parser::escapeSuperscript(){
         return expr;
     }else{
         token_index = marker;
-        Node* lhs = leftUnary();
-        consume(SpecialClose);
-        consume(SpecialOpen);
-        Node* expr = createNode(TYPED_POWER, lhs, expression());
-        expr->subtext = "typeset";
-        consume(SpecialClose);
+        if(match(Complex)){
+            consume(SpecialClose);
+            consume(SpecialOpen);
+            Node* expr = createNode(CONTINUOUS, expression());
+            consume(SpecialClose);
 
-        return expr;
+            return expr;
+        }else{
+            Node* lhs = leftUnary();
+            consume(SpecialClose);
+            consume(SpecialOpen);
+            Node* expr = createNode(TYPED_POWER, lhs, expression());
+            consume(SpecialClose);
+
+            return expr;
+        }
     }
 }
 
@@ -569,7 +582,8 @@ Node* Parser::terminal(){
     else if(match(Rational)) return createNode(RATIONAL_NUMS);
     else if(match(Real)) return createNode(REALS);
     else if(match(Quaternion)) return createNode(QUATERNIONS);
-    else if(match(Boolean)) return createNode(BOOLEANS);
+    else if(match(Complex)) return createNode(COMPLEX_NUMS);
+    else if(match(Infinity)) return createNode(INFTY);
 
     if(token_index >= tokens.size())
         fatalError("Ran out of tokens (Call from parser.cpp " + QString::number(__LINE__) + ")");

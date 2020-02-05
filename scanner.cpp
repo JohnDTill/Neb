@@ -4,11 +4,6 @@
 
 namespace Neb {
 
-const QMap<QString, TokenType> Scanner::keywords = {
-    {"cos", Cos},
-    {"sin", Sin}
-};
-
 Scanner::Scanner(const QString& source)
     : source(source) {
     source_index = 0;
@@ -26,7 +21,7 @@ void Scanner::fatalError(const QString& msg){
         tokens.front().end = source_index;
     }
 
-    throw(646); //Do this: MEMORY LEAK!
+    throw(646);
 }
 
 void Scanner::scan(){
@@ -34,15 +29,15 @@ void Scanner::scan(){
         switch(source[source_index++].unicode()){
             case ' ':   break;
             case '\t':  break;
-            case '@':   emitToken(At); break;
+            case '@':   emitToken(At); break; //DO THIS: Probably want to codegen
             case '\\':  emitToken(Backslash); break;
             case '|':   emitToken(Bar); break;
-            case 120121:emitToken(Boolean); break; //Do this: Boolean is outside range of UTF-8
             case 8745:  emitToken(Cap); break;
             case 8746:  emitToken(Cup); break;
             case '^':   emitToken(Caret); break;
             case ',':   emitToken(Comma); break;
             case ':':   emitToken(Colon); break;
+            case 8450:  emitToken(Complex); break;
             case 8743:  emitToken(Conjunction); break;
             case 8224:  emitToken(Dagger); break;
             case 8788:  emitToken(DefEquals); break;
