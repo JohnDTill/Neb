@@ -1,7 +1,5 @@
 #include "parser.h"
 
-#include <QDebug>
-
 namespace Neb {
 
 Parser::Parser(const QString& source)
@@ -303,16 +301,14 @@ Node* Parser::grouping(){
         Node* expr = expression();
         if(match(Comma)){
             //Exclusive start of range
-            expr = createNode(RANGE, expr, expression());
+            Node* range_end = expression();
 
             if(match(RightParen)){
-                expr->subtext = "()";
+                return createNode(RANGE_OPEN_OPEN, expr, range_end);
             }else{
                 consume(RightBracket);
-                expr->subtext = "(]";
+                return createNode(RANGE_OPEN_CLOSE, expr, range_end);
             }
-
-            return expr;
         }else{
             consume(RightParen);
             return createNode(PAREN_GROUPING, expr);
@@ -321,16 +317,14 @@ Node* Parser::grouping(){
         Node* expr = expression();
         if(match(Comma)){
             //Inclusive start of range
-            expr = createNode(RANGE, expr, expression());
+            Node* range_end = expression();
 
             if(match(RightParen)){
-                expr->subtext = "[)";
+                return createNode(RANGE_CLOSE_OPEN, expr, range_end);
             }else{
                 consume(RightBracket);
-                expr->subtext = "[]";
+                return createNode(RANGE_CLOSE_CLOSE, expr, range_end);
             }
-
-            return expr;
         }else{
             consume(RightBracket);
             return createNode(BRACKET_GROUPING, expr);
@@ -575,6 +569,7 @@ Node* Parser::terminal(){
     else if(match(Rational)) return createNode(RATIONAL_NUMS);
     else if(match(Real)) return createNode(REALS);
     else if(match(Quaternion)) return createNode(QUATERNIONS);
+    else if(match(Boolean)) return createNode(BOOLEANS);
 
     if(token_index >= tokens.size())
         fatalError("Ran out of tokens (Call from parser.cpp " + QString::number(__LINE__) + ")");

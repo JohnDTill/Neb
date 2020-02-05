@@ -25,7 +25,8 @@ void Scanner::fatalError(const QString& msg){
         tokens.front().start = tokens.back().end;
         tokens.front().end = source_index;
     }
-    throw(646); //MEMORY LEAK!
+
+    throw(646); //Do this: MEMORY LEAK!
 }
 
 void Scanner::scan(){
@@ -36,6 +37,7 @@ void Scanner::scan(){
             case '@':   emitToken(At); break;
             case '\\':  emitToken(Backslash); break;
             case '|':   emitToken(Bar); break;
+            case 120121:emitToken(Boolean); break; //Do this: Boolean is outside range of UTF-8
             case 8745:  emitToken(Cap); break;
             case 8746:  emitToken(Cup); break;
             case '^':   emitToken(Caret); break;
