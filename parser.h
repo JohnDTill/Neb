@@ -56,6 +56,7 @@ private:
     Node* escapeRoot();
     Node* escapeSuperscript();
     Node* escapeSubscript();
+    Node* escapeUnderscriptedWord();
     Node* terminal();
 };
 

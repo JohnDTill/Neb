@@ -390,6 +390,7 @@ Node* Parser::escape(){
     else if(match(Subscript)) return escapeSubscript();
     else if(match(Superscript)) return escapeSuperscript();
     else if(match(Root)) return escapeRoot();
+    else if(match(UnderscriptedWord)) return escapeUnderscriptedWord();
     else fatalError("Invalid escape code (Call from parser.cpp " + QString::number(__LINE__) + ")");
 }
 
@@ -497,6 +498,39 @@ Node* Parser::escapeSubscript(){
         //      e.g. u = Kₚ * e
 
         return expr;
+    }
+}
+
+Node* Parser::escapeUnderscriptedWord(){
+    consume(SpecialOpen);
+    if(match(Lim)){
+        Node* n = createNode(LIMIT);
+        consume(SpecialClose);
+        consume(SpecialOpen);
+        n->children.push_back( expression() );
+        consume(RightArrow);
+        n->children.push_back( expression() );
+        consume(SpecialClose);
+        n->children.push_back( expression() );
+
+        return n;
+    }else{
+        Node* n;
+        if(match(Min)) n = createNode(MIN);
+        else if(match(Max)) n = createNode(MAX);
+        else if(match(Infimum)) n = createNode(INFIMUM);
+        else{
+            consume(Supremum);
+            n = createNode(SUPREMUM);
+        }
+
+        consume(SpecialClose);
+        consume(SpecialOpen);
+        n->children.push_back( statement() );
+        consume(SpecialClose);
+        n->children.push_back( expression() );
+
+        return n;
     }
 }
 
