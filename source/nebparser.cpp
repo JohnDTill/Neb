@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "nebparser.h"
 
 namespace Neb {
 

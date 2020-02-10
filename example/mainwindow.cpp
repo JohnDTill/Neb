@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include "parser.h"
+#include <nebparser.h>
 
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
