@@ -29,6 +29,7 @@ void Scanner::scan(){
         switch(source[source_index++].unicode()){
             case ' ':   break;
             case '\t':  break;
+            case 55349: fatalError("UTF-32 characters are not supported"); //could support w/ a string map
             case '@':   emitToken(At); break; //DO THIS: Probably want to codegen
             case '\\':  emitToken(Backslash); break;
             case '|':   emitToken(Bar); break;
