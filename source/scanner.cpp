@@ -25,11 +25,12 @@ void Scanner::fatalError(const QString& msg){
 }
 
 void Scanner::scan(){
+    source.toStdU32String();
     while(source_index < source.size()){
         switch(source[source_index++].unicode()){
             case ' ':   break;
             case '\t':  break;
-            case 55349: fatalError("UTF-32 characters are not supported"); //could support w/ a string map
+            case 55349: scanUTF32(); break;
             case '@':   emitToken(At); break; //DO THIS: Probably want to codegen
             case '\\':  emitToken(Backslash); break;
             case '|':   emitToken(Bar); break;
@@ -143,6 +144,16 @@ void Scanner::scanEscapeCode(){
     default:
         fatalError(QString("Unrecognized Escape Code '") + source[source_index-1] + "'");
     }
+}
+
+void Scanner::scanUTF32(){
+    if(source_index >= source.size()) fatalError("End of file while reading UTF-32 character");
+    QString UTF32_char = source.mid(source_index++ - 1,2);
+
+    auto lookup = UTF32_map.constFind(UTF32_char);
+    if(lookup == UTF32_map.end()) fatalError("Invalid UTF32 char: " + UTF32_char);
+
+    emitToken(lookup.value());
 }
 
 void Scanner::scanNumber(){

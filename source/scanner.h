@@ -25,6 +25,7 @@ private:
     [[noreturn]] void fatalError(const QString& msg);
     void scan();
     void scanEscapeCode();
+    void scanUTF32();
     void scanNumber();
     void scanText();
     bool isIdentifierQChar(const QChar& c) const;

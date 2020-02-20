@@ -16,7 +16,7 @@ void createIncludes(QTextStream& out){
            "\n";
 }
 
-template<bool reject_UTF32 = true>
+template<bool reject_UTF32 = false>
 void createEnum(QFile& table_file, QTextStream& out, const QString& enum_name){
     skipHeader(table_file);
 
@@ -100,6 +100,24 @@ void createColorTable(QFile& table_file, QTextStream& out){
     table_file.reset();
 }
 
+void createUTF32Table(QFile& table_file, QTextStream& out){
+    skipHeader(table_file);
+
+    out << "static const QHash<QString, TokenType> UTF32_map {\n";
+    while(!table_file.atEnd()){
+        QString line_str = table_file.readLine();
+        QList<QString> entries = line_str.split(',');
+
+        QString name = entries.at(0);
+        QString label = entries.at(1);
+        if(!label.contains(QChar(55349))) continue; //Only need entry for UTF-32 symbols
+        out << ("\t{\"" + label + "\", " + name + "},\n");
+    }
+    out << "};\n\n";
+
+    table_file.reset();
+}
+
 int main(int, char**){
     QFile node_table(":/NodeTypes.csv");
     if(!node_table.open(QIODevice::ReadOnly)){
@@ -142,6 +160,7 @@ int main(int, char**){
     createEnum(token_table, out_token, "TokenType");
     createLabels(token_table, out_token, "token_names", "TokenType");
     createKeywords(token_table, out_token);
+    createUTF32Table(token_table, out_token);
     token_type_file.close();
 
     return 0;

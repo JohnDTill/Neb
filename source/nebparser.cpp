@@ -626,6 +626,7 @@ Node* Parser::terminal(){
     else if(match(Quaternion)) return createNode(QUATERNIONS);
     else if(match(Complex)) return createNode(COMPLEX_NUMS);
     else if(match(Infinity)) return createNode(INFTY);
+    else if(match(Boolean)) return createNode(BOOLEANS);
 
     if(token_index >= tokens.size())
         fatalError("Ran out of tokens (Call from parser.cpp " + QString::number(__LINE__) + ")");

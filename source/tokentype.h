@@ -107,6 +107,10 @@ enum TokenType {
 	Times,
 	Transpose,
 	UnderscriptedWord,
+	Boolean,
+	Irrational,
+	Sphere,
+	Whole,
 };
 
 static const QHash<TokenType, QString> token_names {
@@ -221,5 +225,12 @@ static const QHash<QString, TokenType> keywords {
 	{"min", Min},
 	{"sin", Sin},
 	{"sup", Supremum},
+};
+
+static const QHash<QString, TokenType> UTF32_map {
+	{"𝔹", Boolean},
+	{"𝕁", Irrational},
+	{"𝕊", Sphere},
+	{"𝕎", Whole},
 };
 
