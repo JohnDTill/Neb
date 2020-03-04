@@ -13,6 +13,8 @@ Is the symbol `π` a number literal or identifier? How do you handle variables w
 
 Some symbols have a unique interpretation and are immune to overriding, e.g. `∞`. In some cases we may define symbols to fall into this category, e.g. use differentiation `ⅆy/ⅆx` instead of `dy/dx`. But does this impose unnecessary burden to access that special differential symbol?
 
+Set subtraction `A - B` is okay, but `A / B` is a horror because it gives the slash a different precedence than scalar division. You would hate to have the precedence dependent on the type system. However, set expressions typically use parenthesis with every nested binary operation. If you enforce that rule, then `A / B` is okay. But you still end up with trouble detecting sets: `A / B ∪ C` is an error, but you need to look at the LHS of the union operation to see it is invalid.
+
 ## Scripts
 
 Different contexts in which scripts may be used:
