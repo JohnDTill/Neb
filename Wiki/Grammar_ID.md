@@ -4,15 +4,13 @@ The scanner has two modes to define identifiers. There is a standard mode with i
 A short formalization of the ID grammar is given below:
 
 ### Multiple-character identifiers
-
-Letter ⇒ '\_' | 'a-z' | 'A-Z' | 'α-ω' | 'Α-Ω'
-
-Digit ⇒ '0'-'9'
-
+```
 ID ⇒ Letter (Letter | Digit)*
-
+Letter ⇒ '_' | 'a-z' | 'A-Z' | 'α-ω' | 'Α-Ω'
+Digit ⇒ '0'-'9'
+```
 ### Single-character identifiers
-
-Letter ⇒ 'a-z' | 'A-Z' | 'α-ω' | 'Α-Ω'
-
+```
 ID ⇒ Letter
+Letter ⇒ 'a-z' | 'A-Z' | 'α-ω' | 'Α-Ω'
+```
