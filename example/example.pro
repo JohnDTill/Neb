@@ -21,7 +21,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-RC_ICONS += Neb.ico
+RC_ICONS += resources/Neb.ico
 
 win32: LIBS += -L$$PWD/../lib/ -lNeb
 
