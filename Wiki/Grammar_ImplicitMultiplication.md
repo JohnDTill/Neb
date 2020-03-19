@@ -25,3 +25,5 @@ Note: We will peek at the next token to see if it triggers an implicit multiplic
 
 ### Dependence on Type
 Type information may be needed to resolve the difference between a single argument function call and an implicit multiplication, e.g. `f(x+y)` is probably a function, but `a(x+y)` is probably an implicit multiplication. The parsed result depends on the types of `f` and `a`, if they are callable.
+
+Note there is also a possibility for implicit function calls e.g. `sin θ`.
