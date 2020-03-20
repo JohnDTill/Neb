@@ -52,8 +52,10 @@ private:
     Node* grouping();
     Node* callArgs();
     Node* escape();
-    Node* escapeBinary();
+    Node* escapeBigOperator(const NodeType& type);
+    Node* escapeBinomial();
     Node* escapeCases();
+    Node* escapeFraction();
     Node* escapeIntegral();
     Node* escapeMatrix();
     Node* escapeRoot();

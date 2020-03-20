@@ -423,9 +423,11 @@ Node* Parser::escape(){
     if(token_index >= tokens.size()) fatalError("No token after Escape");
 
     switch (tokens[token_index++].type) {
-        case Binomial: return escapeBinary();
+        case BigSum: return escapeBigOperator(SUMMATION);
+        case BigProduct: return escapeBigOperator(PRODUCT);
+        case Binomial: return escapeBinomial();
         case Cases: return escapeCases();
-        case Fraction: return escapeBinary();
+        case Fraction: return escapeFraction();
         case Integral: return escapeIntegral();
         case Matrix: return escapeMatrix();
         case Subscript: return escapeSubscript();
@@ -437,8 +439,28 @@ Node* Parser::escape(){
     }
 }
 
-Node* Parser::escapeBinary(){
-    bool fraction = (tokens[token_index-1].type == Fraction);
+Node* Parser::escapeBigOperator(const NodeType& type){
+    Node* n = createNode(type);
+
+    //Optional underscript
+    if(match(SpecialOpen)){
+        n->children.push_back(statement());
+        consume(SpecialClose);
+
+        //Optional overscript
+        if(match(SpecialOpen)){
+            n->children.push_back(expression());
+            consume(SpecialClose);
+        }
+    }
+
+    //Body
+    n->children.push_back(expression());
+
+    return n;
+}
+
+Node* Parser::escapeBinomial(){
     consume(SpecialOpen);
     Node* num = expression();
     consume(SpecialClose);
@@ -446,7 +468,7 @@ Node* Parser::escapeBinary(){
     Node* den = expression();
     consume(SpecialClose);
 
-    return createNode(fraction ? TYPED_FRACTION : TYPED_BINOMIAL, num, den);
+    return createNode(TYPED_BINOMIAL, num, den);
 }
 
 Node* Parser::escapeCases(){
@@ -462,6 +484,62 @@ Node* Parser::escapeCases(){
     } while(peek(SpecialOpen));
 
     return n;
+}
+
+Node* Parser::escapeFraction(){
+    consume(SpecialOpen);
+
+    if(match(Differential)){
+        Node* expr;
+        Node* wrt;
+
+        if(match(SpecialClose)){
+            consume(SpecialOpen);
+            consume(Differential);
+            wrt = idStart();
+            consume(SpecialClose);
+            expr = grouping();
+        }else{
+            expr = idStart();
+            consume(SpecialClose);
+            consume(SpecialOpen);
+            consume(Differential);
+            wrt = idStart();
+            consume(SpecialClose);
+        }
+
+        return createNode(DERIVATIVE, expr, wrt);
+    }
+
+    if(match(Partial)){
+        Node* expr;
+        Node* wrt;
+
+        if(match(SpecialClose)){
+            consume(SpecialOpen);
+            consume(Partial);
+            wrt = idStart();
+            consume(SpecialClose);
+            expr = grouping();
+        }else{
+            expr = idStart();
+            consume(SpecialClose);
+            consume(SpecialOpen);
+            consume(Partial);
+            wrt = idStart();
+            consume(SpecialClose);
+        }
+
+        return createNode(PARTIAL, expr, wrt);
+    }
+
+    Node* num = expression();
+    consume(SpecialClose);
+    consume(SpecialOpen);
+    Node* den = expression();
+    consume(SpecialClose);
+
+    return createNode(TYPED_FRACTION, num, den);
 }
 
 Node* Parser::escapeIntegral(){

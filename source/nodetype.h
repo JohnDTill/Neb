@@ -19,6 +19,7 @@ enum NodeType {
 	DAGGER,
 	DECREMENT,
 	DEFINE_EQUALS,
+	DERIVATIVE,
 	DIVIDE,
 	DOT,
 	EMPTY_SET,
@@ -57,10 +58,12 @@ enum NodeType {
 	NOT_IN,
 	NUMBER,
 	PAREN_GROUPING,
+	PARTIAL,
 	PLUS_MINUS_UNARY,
 	PLUS_MINUS_BINARY,
 	POSITIVE_REALS,
 	POWER,
+	PRODUCT,
 	QUATERNIONS,
 	RANGE_CLOSE_CLOSE,
 	RANGE_CLOSE_OPEN,
@@ -89,7 +92,7 @@ enum NodeType {
 	WEDGE,
 };
 
-static constexpr int NodeType_Size = 81;
+static constexpr int NodeType_Size = 84;
 
 static const QHash<NodeType, QString> labels {
 	{ABS, "|⋅|"},
@@ -105,6 +108,7 @@ static const QHash<NodeType, QString> labels {
 	{DAGGER, "†"},
 	{DECREMENT, "x⁻"},
 	{DEFINE_EQUALS, "≔"},
+	{DERIVATIVE, "ⅆy/ⅆx"},
 	{DIVIDE, "÷"},
 	{DOT, "⋅"},
 	{EMPTY_SET, "∅"},
@@ -143,10 +147,12 @@ static const QHash<NodeType, QString> labels {
 	{NOT_IN, "∉"},
 	{NUMBER, ""},
 	{PAREN_GROUPING, "group()"},
+	{PARTIAL, "∂y/∂x"},
 	{PLUS_MINUS_UNARY, "±"},
 	{PLUS_MINUS_BINARY, "±"},
 	{POSITIVE_REALS, "ℝ⁺"},
 	{POWER, "^"},
+	{PRODUCT, "∏"},
 	{QUATERNIONS, "ℍ"},
 	{RANGE_CLOSE_CLOSE, "range[]"},
 	{RANGE_CLOSE_OPEN, "range[)"},
