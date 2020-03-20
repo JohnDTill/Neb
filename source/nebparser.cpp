@@ -426,6 +426,7 @@ Node* Parser::escape(){
         case Binomial: return escapeBinary();
         case Cases: return escapeCases();
         case Fraction: return escapeBinary();
+        case Integral: return escapeIntegral();
         case Matrix: return escapeMatrix();
         case Subscript: return escapeSubscript();
         case Superscript: return escapeSuperscript();
@@ -459,6 +460,31 @@ Node* Parser::escapeCases(){
         n->children.push_back(statement());
         consume(SpecialClose);
     } while(peek(SpecialOpen));
+
+    return n;
+}
+
+Node* Parser::escapeIntegral(){
+    Node* n = createNode(INTEGRAL);
+
+    //Optional subscript
+    if(match(SpecialOpen)){
+        n->children.push_back(expression());
+        consume(SpecialClose);
+
+        //Optional superscript
+        if(match(SpecialOpen)){
+            n->children.push_back(expression());
+            consume(SpecialClose);
+        }
+    }
+
+    //Kernel
+    n->children.push_back(expression());
+
+    //Integration variable
+    consume(Differential);
+    n->children.push_back(idStart());
 
     return n;
 }

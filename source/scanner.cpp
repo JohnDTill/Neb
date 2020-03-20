@@ -202,6 +202,8 @@ void Scanner::consume(const QChar& c){
 }
 
 bool Scanner::isIdentifierQChar(const QChar& c) const{
+    if(c > 1000) return false; //Some doublestruck letters such as 'ⅆ' are counted as letters.
+
     if(identifiers_use_multiple_chars)
         return c.isLetter() || c.isNumber() || c == '_' || (c >= 913 && c <= 937) || (c >= 945 && c <= 969);
     else

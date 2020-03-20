@@ -54,6 +54,7 @@ private:
     Node* escape();
     Node* escapeBinary();
     Node* escapeCases();
+    Node* escapeIntegral();
     Node* escapeMatrix();
     Node* escapeRoot();
     Node* escapeSuperscript();
