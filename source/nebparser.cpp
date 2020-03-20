@@ -286,13 +286,13 @@ Node* Parser::multiplication(){
 
 Node* Parser::implicitMultiplication(){
     Node* expr = leftUnary();
-    if(peek({Identifier, LeftParen})){
-        if(peek(LeftParen)) expr = createNode(IMPLICIT_MULTIPLY, expr, grouping());
-        else expr = createNode(IMPLICIT_MULTIPLY, expr, idStart());
+    if(peek({Identifier, Bar, DoubleBar, LeftBracket, LeftParen, SpecialEscape})){
+        if(peek(Identifier)) expr = createNode(IMPLICIT_MULTIPLY, expr, idStart());
+        else expr = createNode(IMPLICIT_MULTIPLY, expr, grouping());
 
-        while(peek({Identifier, LeftParen})){
-            if(peek(LeftParen)) expr->children.push_back(grouping());
-            else expr->children.push_back(idStart());
+        while(peek({Identifier, Bar, DoubleBar, LeftBracket, LeftParen, SpecialEscape})){
+            if(peek(Identifier)) expr->children.push_back(idStart());
+            else expr->children.push_back(grouping());
         }
     }
 
@@ -420,14 +420,20 @@ Node* Parser::callArgs(){
 }
 
 Node* Parser::escape(){
-    if(match({Binomial, Fraction})) return escapeBinary();
-    else if(match(Cases)) return escapeCases();
-    else if(match(Matrix)) return escapeMatrix();
-    else if(match(Subscript)) return escapeSubscript();
-    else if(match(Superscript)) return escapeSuperscript();
-    else if(match(Root)) return escapeRoot();
-    else if(match(UnderscriptedWord)) return escapeUnderscriptedWord();
-    else fatalError("Invalid escape code (Call from parser.cpp " + QString::number(__LINE__) + ")");
+    if(token_index >= tokens.size()) fatalError("No token after Escape");
+
+    switch (tokens[token_index++].type) {
+        case Binomial: return escapeBinary();
+        case Cases: return escapeCases();
+        case Fraction: return escapeBinary();
+        case Matrix: return escapeMatrix();
+        case Subscript: return escapeSubscript();
+        case Superscript: return escapeSuperscript();
+        case Root: return escapeRoot();
+        case UnderscriptedWord: return escapeUnderscriptedWord();
+        default:
+            fatalError("Invalid escape code (Call from parser.cpp " + QString::number(__LINE__) + ")");
+    }
 }
 
 Node* Parser::escapeBinary(){
