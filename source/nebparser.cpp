@@ -21,7 +21,8 @@ std::vector<Node*> Parser::parse(){
     while(token_index < tokens.size()){
         statements.push_back( statement() );
         while(!dangling_nodes.empty()) dangling_nodes.pop();
-        if(token_index < tokens.size()) consume({Newline, Comma});
+        if(!peekBehind(Newline) && token_index < tokens.size())
+            consume({Newline, Comma});
         while(match(Newline));
     }
 
@@ -40,6 +41,9 @@ QString Parser::getErrorMessage(){
 
 void Parser::fatalError(const QString& msg){
     err_msg = "Parser Error:\n" + msg;
+
+    if(token_index >= tokens.size()) err_msg += "\nat end of file";
+    else err_msg += "\nToken: " + token_names[tokens[token_index].type];
 
     //Clean up dynamically allocated memory
     for(Node* n : statements) NodeFunction::deletePostorder(n);
@@ -88,7 +92,8 @@ Node* Parser::createNode(const NodeType& type, std::vector<Node*> children){
 }
 
 void Parser::consume(const TokenType& t){
-    if(token_index >= tokens.size()) fatalError("Reached end of token stream while scanning");
+    if(token_index >= tokens.size())
+        fatalError("Reached end of token stream while scanning for token: " + token_names[t]);
     if(t != tokens[token_index++].type){
         token_index--;
         fatalError(QString("Expected token type '") + token_names[t] + "', got type '"
@@ -97,7 +102,11 @@ void Parser::consume(const TokenType& t){
 }
 
 void Parser::consume(const std::vector<TokenType>& types){
-    if(token_index >= tokens.size()) fatalError("Reached end of token stream while scanning");
+    if(token_index >= tokens.size()){
+        QString tokens;
+        for(TokenType t : types) tokens += '\n' + token_names[t];
+        fatalError("Reached end of token stream while scanning for tokens:" + tokens);
+    }
     TokenType t = tokens[token_index++].type;
     for(TokenType type : types) if(type == t) return;
     token_index--;
@@ -129,6 +138,10 @@ bool Parser::peek(const TokenType& t) const{
     return token_index < tokens.size() && t == tokens[token_index].type;
 }
 
+bool Parser::peekBehind(const TokenType& t) const{
+    return token_index > 0 && t == tokens[token_index-1].type;
+}
+
 bool Parser::peek(const std::vector<TokenType>& types) const{
     if(token_index >= tokens.size()) return false;
     TokenType t = tokens[token_index].type;
@@ -155,13 +168,16 @@ void Parser::skipPastSpecialClose(){
 
 Node* Parser::statement(){
     Node* n = expression();
+    match(Newline);
 
     if(match(Equals)){
         match(Newline);
         n = createNode(EQUAL, n, expression());
+        match(Newline);
         while(match(Equals)){
             match(Newline);
             n->children.push_back(expression());
+            match(Newline);
         }
 
         return n;
@@ -169,10 +185,12 @@ Node* Parser::statement(){
         bool inclusive = tokens[token_index-1].type == LessEqual;
         match(Newline);
         n = createNode(inclusive ? LESS_EQUAL : LESS, n, expression());
+        match(Newline);
         while(match({Less, LessEqual})){
             bool inclusive = tokens[token_index-1].type == LessEqual;
             match(Newline);
             n = createNode(inclusive ? LESS_EQUAL : LESS, n, expression());
+            match(Newline);
         }
 
         return n;
@@ -184,6 +202,7 @@ Node* Parser::statement(){
             bool inclusive = tokens[token_index-1].type == GreaterEqual;
             match(Newline);
             n = createNode(inclusive ? GREATER_EQUAL : GREATER, n, expression());
+            match(Newline);
         }
 
         return n;
@@ -204,12 +223,15 @@ Node* Parser::expression(){
 
 Node* Parser::conjunction(){
     Node* expr = disjunction();
+    match(Newline);
     if(match(Conjunction)){
         match(Newline);
         expr = createNode(LOGICAL_AND, expr, disjunction());
+        match(Newline);
         while(match(Conjunction)){
             match(Newline);
             expr->children.push_back(disjunction());
+            match(Newline);
         }
     }
 
@@ -218,12 +240,15 @@ Node* Parser::conjunction(){
 
 Node* Parser::disjunction(){
     Node* expr = addition();
+    match(Newline);
     if(match(Disjunction)){
         match(Newline);
         expr = createNode(LOGICAL_OR, expr, addition());
+        match(Newline);
         while(match(Disjunction)){
             match(Newline);
             expr->children.push_back(addition());
+            match(Newline);
         }
     }
 
@@ -232,10 +257,12 @@ Node* Parser::disjunction(){
 
 Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
     Node* expr = multiplication();
+    match(Newline);
     while(match({Plus, Minus, Cap, Cup})){
         TokenType t = tokens[token_index-1].type;
         match(Newline);
         Node* rhs = multiplication();
+        match(Newline);
         switch(t){
             case Plus: expr = createNode(ADDITION, expr, rhs); break;
             case Minus: expr = createNode(SUBTRACTION, expr, rhs); break;
@@ -250,10 +277,12 @@ Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
 
 Node* Parser::multiplication(){
     Node* expr = leftUnary();
+    match(Newline);
     while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, Percent, Times})){
         TokenType t = tokens[token_index-1].type;
         match(Newline);
         Node* rhs = leftUnary();
+        match(Newline);
         switch(t){
             case Backslash: expr = createNode(BACKSLASH, expr, rhs); break;
             case Divide: expr = createNode(DIVIDE, expr, rhs); break;
@@ -304,8 +333,11 @@ Node* Parser::rightUnary(){
 
 Node* Parser::exponent(){
     Node* expr = grouping();
-    if(match(Caret))
+    match(Newline);
+    if(match(Caret)){
+        match(Newline);
         expr = createNode(POWER, expr, leftUnary());
+    }
     return expr;
 }
 

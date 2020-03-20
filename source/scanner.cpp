@@ -43,6 +43,7 @@ void Scanner::scan(){
             case 8743:  emitToken(Conjunction); break;
             case 8224:  emitToken(Dagger); break;
             case 8788:  emitToken(DefEquals); break;
+            case 8518:  emitToken(Differential); break;
             case 8744:  emitToken(Disjunction); break;
             case 247:   emitToken(Divide); break;
             case '$':   emitToken(Dollar); break;
@@ -82,7 +83,6 @@ void Scanner::scan(){
             case 8800:  emitToken(NotEqual); break;
             case 8706:  emitToken(Partial); break;
             case '%':   emitToken(Percent); break;
-            case '.':   emitToken(Period); break;
             case 8462:  emitToken(PlanckConst); break;
             case '+':   emitToken(Plus); break;
             case 8473:  emitToken(Prime); break;
@@ -106,6 +106,15 @@ void Scanner::scan(){
             case 215:   emitToken(Times); break;
             case 8868:  emitToken(Transpose); break;
             case 8284:  scanEscapeCode(); break;
+
+            case '.':
+                if(match('.')){
+                    consume('.');
+                    emitToken(SuspensionPoint);
+                }else{
+                    emitToken(Period);
+                }
+                break;
 
             default:
                 QChar c = source[source_index-1];
@@ -178,6 +187,16 @@ void Scanner::scanText(){
     if(keyword_lookup != keywords.end()) emitToken(keyword_lookup.value(), start);
     else if(identifiers_use_multiple_chars) emitToken(Identifier, start);
     else for(int i = start; i < source_index; i++) emitToken(Identifier, i, i+1);
+}
+
+bool Scanner::match(const QChar& c){
+    bool is_match = source_index < source.size() && source[source_index] == c;
+    if(is_match) source_index++;
+    return is_match;
+}
+
+void Scanner::consume(const QChar& c){
+    if(!match(c)) fatalError(QString("Expected char '") + c + '\'');
 }
 
 bool Scanner::isIdentifierQChar(const QChar& c) const{

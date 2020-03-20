@@ -14,3 +14,5 @@ Digit ⇒ '0'-'9'
 ID ⇒ Letter
 Letter ⇒ 'a-z' | 'A-Z' | 'α-ω' | 'Α-Ω'
 ```
+
+One complication of the single-character identifier scheme is that multi-character functions must be explicitly recognized by the parser.

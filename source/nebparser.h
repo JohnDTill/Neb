@@ -35,6 +35,7 @@ private:
     bool match(const TokenType& t);
     bool match(const std::vector<TokenType>& types);
     bool peek(const TokenType& t) const;
+    bool peekBehind(const TokenType& t) const;
     bool peek(const std::vector<TokenType>& types) const;
     void skipPastSpecialClose();
 
