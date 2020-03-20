@@ -45,6 +45,8 @@ enum NodeType {
 	LOGICAL_OR,
 	MAX,
 	MIN,
+	MINUS_PLUS_UNARY,
+	MINUS_PLUS_BINARY,
 	MODULUS,
 	MULTIFACTORIAL,
 	MULTIPLICATION,
@@ -55,6 +57,8 @@ enum NodeType {
 	NOT_IN,
 	NUMBER,
 	PAREN_GROUPING,
+	PLUS_MINUS_UNARY,
+	PLUS_MINUS_BINARY,
 	POSITIVE_REALS,
 	POWER,
 	QUATERNIONS,
@@ -85,7 +89,7 @@ enum NodeType {
 	WEDGE,
 };
 
-static constexpr int NodeType_Size = 77;
+static constexpr int NodeType_Size = 81;
 
 static const QHash<NodeType, QString> labels {
 	{ABS, "|⋅|"},
@@ -94,7 +98,7 @@ static const QHash<NodeType, QString> labels {
 	{BACKSLASH, "\\\\"},
 	{BOOLEANS, "𝔹"},
 	{BRACKET_GROUPING, "group[]"},
-	{CALL, "f()"},
+	{CALL, ""},
 	{COMPLEX_NUMS, "ℂ "},
 	{CONTINUOUS, "ℂⁿ"},
 	{CROSS, "×"},
@@ -127,6 +131,8 @@ static const QHash<NodeType, QString> labels {
 	{LOGICAL_OR, "∨"},
 	{MAX, "max"},
 	{MIN, "min"},
+	{MINUS_PLUS_UNARY, "∓"},
+	{MINUS_PLUS_BINARY, "∓"},
 	{MODULUS, "%"},
 	{MULTIFACTORIAL, "!"},
 	{MULTIPLICATION, "*"},
@@ -137,6 +143,8 @@ static const QHash<NodeType, QString> labels {
 	{NOT_IN, "∉"},
 	{NUMBER, ""},
 	{PAREN_GROUPING, "group()"},
+	{PLUS_MINUS_UNARY, "±"},
+	{PLUS_MINUS_BINARY, "±"},
 	{POSITIVE_REALS, "ℝ⁺"},
 	{POWER, "^"},
 	{QUATERNIONS, "ℍ"},

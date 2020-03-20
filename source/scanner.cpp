@@ -76,6 +76,7 @@ void Scanner::scan(){
             case 8614:  emitToken(MapsTo); break;
             case 8862:  emitToken(Matrix); break;
             case '-':   emitToken(Minus); break;
+            case 8723:  emitToken(MinusPlus); break;
             case '*':   emitToken(Multiply); break;
             case 8469:  emitToken(Natural); break;
             case '\n':  emitToken(Newline); line++; break;
@@ -85,6 +86,7 @@ void Scanner::scan(){
             case '%':   emitToken(Percent); break;
             case 8462:  emitToken(PlanckConst); break;
             case '+':   emitToken(Plus); break;
+            case 177:   emitToken(PlusMinus); break;
             case 8473:  emitToken(Prime); break;
             case 8461:  emitToken(Quaternion); break;
             case 8474:  emitToken(Rational); break;

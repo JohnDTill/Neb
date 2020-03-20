@@ -168,16 +168,13 @@ void Parser::skipPastSpecialClose(){
 
 Node* Parser::statement(){
     Node* n = expression();
-    match(Newline);
 
     if(match(Equals)){
         match(Newline);
         n = createNode(EQUAL, n, expression());
-        match(Newline);
         while(match(Equals)){
             match(Newline);
             n->children.push_back(expression());
-            match(Newline);
         }
 
         return n;
@@ -185,12 +182,10 @@ Node* Parser::statement(){
         bool inclusive = tokens[token_index-1].type == LessEqual;
         match(Newline);
         n = createNode(inclusive ? LESS_EQUAL : LESS, n, expression());
-        match(Newline);
         while(match({Less, LessEqual})){
             bool inclusive = tokens[token_index-1].type == LessEqual;
             match(Newline);
             n = createNode(inclusive ? LESS_EQUAL : LESS, n, expression());
-            match(Newline);
         }
 
         return n;
@@ -202,7 +197,6 @@ Node* Parser::statement(){
             bool inclusive = tokens[token_index-1].type == GreaterEqual;
             match(Newline);
             n = createNode(inclusive ? GREATER_EQUAL : GREATER, n, expression());
-            match(Newline);
         }
 
         return n;
@@ -223,15 +217,12 @@ Node* Parser::expression(){
 
 Node* Parser::conjunction(){
     Node* expr = disjunction();
-    match(Newline);
     if(match(Conjunction)){
         match(Newline);
         expr = createNode(LOGICAL_AND, expr, disjunction());
-        match(Newline);
         while(match(Conjunction)){
             match(Newline);
             expr->children.push_back(disjunction());
-            match(Newline);
         }
     }
 
@@ -240,15 +231,12 @@ Node* Parser::conjunction(){
 
 Node* Parser::disjunction(){
     Node* expr = addition();
-    match(Newline);
     if(match(Disjunction)){
         match(Newline);
         expr = createNode(LOGICAL_OR, expr, addition());
-        match(Newline);
         while(match(Disjunction)){
             match(Newline);
             expr->children.push_back(addition());
-            match(Newline);
         }
     }
 
@@ -257,12 +245,10 @@ Node* Parser::disjunction(){
 
 Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
     Node* expr = multiplication();
-    match(Newline);
     while(match({Plus, Minus, Cap, Cup})){
         TokenType t = tokens[token_index-1].type;
         match(Newline);
         Node* rhs = multiplication();
-        match(Newline);
         switch(t){
             case Plus: expr = createNode(ADDITION, expr, rhs); break;
             case Minus: expr = createNode(SUBTRACTION, expr, rhs); break;
@@ -276,22 +262,37 @@ Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
 }
 
 Node* Parser::multiplication(){
-    Node* expr = leftUnary();
-    match(Newline);
-    while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, Percent, Times})){
+    Node* expr = implicitMultiplication();
+    while(match({Backslash, Divide, DotProduct, Forwardslash, MinusPlus, Multiply, Percent, PlusMinus, Times})){
         TokenType t = tokens[token_index-1].type;
         match(Newline);
-        Node* rhs = leftUnary();
-        match(Newline);
+        Node* rhs = implicitMultiplication();
         switch(t){
             case Backslash: expr = createNode(BACKSLASH, expr, rhs); break;
             case Divide: expr = createNode(DIVIDE, expr, rhs); break;
             case DotProduct: expr = createNode(DOT, expr, rhs); break;
             case Forwardslash: expr = createNode(FORWARDSLASH, expr, rhs); break;
+            case MinusPlus: expr = createNode(MINUS_PLUS_BINARY, expr, rhs); break;
             case Multiply: expr = createNode(MULTIPLICATION, expr, rhs); break;
             case Percent: expr = createNode(MODULUS, expr, rhs); break;
+            case PlusMinus: expr = createNode(PLUS_MINUS_BINARY, expr, rhs); break;
             case Times: expr = createNode(CROSS, expr, rhs); break;
             default: break;
+        }
+    }
+
+    return expr;
+}
+
+Node* Parser::implicitMultiplication(){
+    Node* expr = leftUnary();
+    if(peek({Identifier, LeftParen})){
+        if(peek(LeftParen)) expr = createNode(IMPLICIT_MULTIPLY, expr, grouping());
+        else expr = createNode(IMPLICIT_MULTIPLY, expr, idStart());
+
+        while(peek({Identifier, LeftParen})){
+            if(peek(LeftParen)) expr->children.push_back(grouping());
+            else expr->children.push_back(idStart());
         }
     }
 
@@ -303,6 +304,10 @@ Node* Parser::leftUnary(){
         return createNode(UNARY_MINUS, rightUnary());
     }else if(match(Not)){
         return createNode(LOGICAL_NOT, rightUnary());
+    }else if(match(PlusMinus)){
+        return createNode(PLUS_MINUS_UNARY, rightUnary());
+    }else if(match(MinusPlus)){
+        return createNode(MINUS_PLUS_UNARY, rightUnary());
     }else{
         return rightUnary();
     }
@@ -333,7 +338,6 @@ Node* Parser::rightUnary(){
 
 Node* Parser::exponent(){
     Node* expr = grouping();
-    match(Newline);
     if(match(Caret)){
         match(Newline);
         expr = createNode(POWER, expr, leftUnary());
@@ -671,30 +675,28 @@ Node* Parser::terminal(){
         Node* n = createNode(NUMBER);
         n->subtext = source_text;
 
-        if(match(LeftParen)){
-            n = createNode(IMPLICIT_MULTIPLY, n, expression());
-            consume(RightParen);
-        }else if(peek(Identifier)){
-            n = createNode(IMPLICIT_MULTIPLY, n, terminal());
-        }
-
         return n;
-    }else if(match(Identifier)){
-        Node* n = createNode(IDENTIFIER);
-        n->subtext = source_text;
-
-        if(match(LeftParen)){
-            n->type = CALL;
-            n->children.push_back( callArgs() );
-        }else if(peek(Identifier)){
-            //This implicit multiplication requires a space unless we limit identifiers to 1 char
-            n = createNode(IMPLICIT_MULTIPLY, n, terminal());
-        }
-
-        return n;
+    }else if(peek(Identifier)){
+        return idStart();
     }else{
         fatalError("Invalid token (Call from parser.cpp " + QString::number(__LINE__) + ")");
     }
+}
+
+Node* Parser::idStart(){
+    Node* n = createNode(IDENTIFIER);
+    QString::size_type start = tokens[token_index].start;
+    QString::size_type end = tokens[token_index].end;
+    n->subtext = source.mid(start, end-start);
+    consume(Identifier);
+
+    if(match(LeftParen)){
+        n->type = CALL;
+        n->subtext += "()";
+        n->children.push_back( callArgs() );
+    }
+
+    return n;
 }
 
 }

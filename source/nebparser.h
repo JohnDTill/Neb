@@ -45,6 +45,7 @@ private:
     Node* disjunction();
     Node* addition();
     Node* multiplication();
+    Node* implicitMultiplication();
     Node* leftUnary();
     Node* rightUnary();
     Node* exponent();
@@ -59,6 +60,7 @@ private:
     Node* escapeSubscript();
     Node* escapeUnderscriptedWord();
     Node* terminal();
+    Node* idStart();
 };
 
 }
