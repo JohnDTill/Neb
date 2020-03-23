@@ -71,7 +71,8 @@ enum NodeType {
 	RANGE_OPEN_OPEN,
 	RATIONAL_NUMS,
 	REALS,
-	SET_LITERAL,
+	SET_BUILDER,
+	SET_ENUMERATED,
 	SUBSCRIPT_ACCESS,
 	SUBSCRIPT_PARTIAL,
 	SUBTRACTION,
@@ -92,7 +93,7 @@ enum NodeType {
 	WEDGE,
 };
 
-static constexpr int NodeType_Size = 84;
+static constexpr int NodeType_Size = 85;
 
 static const QHash<NodeType, QString> labels {
 	{ABS, "|⋅|"},
@@ -160,7 +161,8 @@ static const QHash<NodeType, QString> labels {
 	{RANGE_OPEN_OPEN, "range()"},
 	{RATIONAL_NUMS, "ℚ"},
 	{REALS, "ℝ"},
-	{SET_LITERAL, "{}"},
+	{SET_BUILDER, "{|}"},
+	{SET_ENUMERATED, "{}"},
 	{SUBSCRIPT_ACCESS, "xᵢ"},
 	{SUBSCRIPT_PARTIAL, "∂"},
 	{SUBTRACTION, "-"},

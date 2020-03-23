@@ -379,11 +379,32 @@ Node* Parser::grouping(){
             return createNode(BRACKET_GROUPING, expr);
         }
     }else if(match(LeftBrace)){
-        Node* expr = createNode(SET_LITERAL, expression());
-        while(match(Comma)){
-            match(Newline);
-            expr->children.push_back( expression() );
+        if(match(RightBrace)) return createNode(SET_ENUMERATED); //Empty set
+
+        Node* expr = expression();
+        if(match(RightBrace)) return createNode(SET_ENUMERATED, expr); //1 member set
+
+        //n-member enumerated set
+        if(peek(Comma)){
+            expr = createNode(SET_ENUMERATED, expr);
+            while(match(Comma)){
+                match(Newline);
+                expr->children.push_back( expression() );
+            }
+            consume(RightBrace);
+
+            return expr;
         }
+
+        //Set selector
+        expr = match(In) ?
+               createNode(SET_BUILDER, createNode(IN, expr, expression())) : // {x ∈ ℝ : ...}
+               createNode(SET_BUILDER, expr); // {x : ...}
+
+        consume(Colon); //Does not work with Bar currently due to complicated ambiguity
+
+        expr->children.push_back(statement());
+        while(match(Comma)) expr->children.push_back(statement());
         consume(RightBrace);
 
         return expr;
