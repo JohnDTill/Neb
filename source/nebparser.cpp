@@ -21,22 +21,26 @@ std::vector<Node*> Parser::parse(){
     while(token_index < tokens.size()){
         statements.push_back( statement() );
         while(!dangling_nodes.empty()) dangling_nodes.pop();
-        if(!peekBehind(Newline) && token_index < tokens.size())
-            consume({Newline, Comma});
+        if(token_index < tokens.size()) consume({Newline, Comma});
         while(match(Newline));
     }
 
     return statements;
 }
 
-Token Parser::lastExaminedToken(){
-    if(token_index < tokens.size()) return tokens[token_index];
-    else return tokens.back();
-}
-
 QString Parser::getErrorMessage(){
     Q_ASSERT(!err_msg.isEmpty());
     return err_msg;
+}
+
+QString::size_type Parser::errorStart(){
+    Token t = (token_index < tokens.size()) ? tokens[token_index] : tokens.back();
+    return t.start;
+}
+
+QString::size_type Parser::errorEnd(){
+    Token t = (token_index < tokens.size()) ? tokens[token_index] : tokens.back();
+    return t.end;
 }
 
 void Parser::fatalError(const QString& msg){
@@ -77,15 +81,6 @@ Node* Parser::createNode(const NodeType& type, Node* lhs, Node* rhs){
     n->type = type;
     n->children.push_back(lhs);
     n->children.push_back(rhs);
-    dangling_nodes.push(n);
-
-    return n;
-}
-
-Node* Parser::createNode(const NodeType& type, std::vector<Node*> children){
-    Node* n = new Node;
-    n->type = type;
-    n->children = children;
     dangling_nodes.push(n);
 
     return n;
@@ -142,32 +137,11 @@ bool Parser::peek(const TokenType& t) const{
     return token_index < tokens.size() && t == tokens[token_index].type;
 }
 
-bool Parser::peekBehind(const TokenType& t) const{
-    return token_index > 0 && t == tokens[token_index-1].type;
-}
-
 bool Parser::peek(const std::vector<TokenType>& types) const{
     if(token_index >= tokens.size()) return false;
     TokenType t = tokens[token_index].type;
     for(TokenType type : types) if(type == t) return true;
     return false;
-}
-
-void Parser::skipPastSpecialClose(){
-    uint8_t level = 0;
-    for(;;){
-        if(match(SpecialClose)){
-            if(level == 0) return;
-            else level--;
-        }else if(match(SpecialOpen)){
-            level++;
-        }else if(token_index < tokens.size()){
-            token_index++;
-        }else{
-            fatalError("Reached end of file scanning for SpecialClose "
-                       "(Call from parser.cpp " + QString::number(__LINE__) + ")");
-        }
-    }
 }
 
 Node* Parser::statement(){
@@ -609,53 +583,79 @@ uint Parser::escapeDimension(){
 
 Node* Parser::escapeSubscript(){
     consume(SpecialOpen);
-    std::vector<Token>::size_type marker = token_index;
-    skipPastSpecialClose();
+    Node* expr = leftUnary();
+    consume(SpecialClose);
     consume(SpecialOpen);
 
-    if(match(Multiply)){
-        consume(SpecialClose);
-        std::vector<Token>::size_type end_marker = token_index;
+    if(token_index >= tokens.size())
+        fatalError("Ran out of tokens (Call from parser.cpp " + QString::number(__LINE__) + ")");
 
-        token_index = marker;
-        consume(Identifier);
-        consume(SpecialClose);
-        token_index -= 2;
-        Node* id = terminal();
-        id->subtext += "_*";
-        token_index = end_marker;
+    switch (tokens[token_index++].type) {
+        case Multiply:
+            if(expr->type != IDENTIFIER) fatalError("Asterisk superscript on non-identifier");
+            expr->subtext += "_*";
+            break;
+        case Comma:
+            expr = createNode(SUBSCRIPT_PARTIAL, expr, idOnly());
+            break;
+        case Minus:
+            if(expr->type == IDENTIFIER) expr = createNode(DECREMENT, expr);
+            else if(expr->type == REALS) expr->type = NEGATIVE_REALS;
+            else fatalError("Unexpected '-' superscript");
+            break;
+        default:
+            token_index--;
+            expr = createNode(SUBSCRIPT_ACCESS, expr, expression());
+            while(match(Comma)) expr->children.push_back(expression());
 
-        return id;
-    }else if(match(Comma)){
-        //Subscript partial derivative
-        consume(Identifier);
-        token_index--;
-        Node* wrt = terminal();
-        consume(SpecialClose);
-        std::vector<Token>::size_type end_marker = token_index;
-
-        token_index = marker;
-        Node* expr = createNode(SUBSCRIPT_PARTIAL, rightUnary(), wrt);
-        consume(SpecialClose);
-        token_index = end_marker;
-
-        return expr;
-    }else{
-        //Subscript access
-        token_index = marker;
-        Node* lhs = leftUnary();
-        consume(SpecialClose);
-        consume(SpecialOpen);
-        Node* expr = createNode(SUBSCRIPT_ACCESS, lhs, expression());
-        while(match(Comma))
-            expr->children.push_back(expression());
-        consume(SpecialClose);
-
-        //Note: this could be part of identifier if lhs is id and subscript is single id,
-        //      e.g. u = Kₚ * e
-
-        return expr;
+            //Note: this could be part of identifier if lhs is id and subscript is single id,
+            //      e.g. u = Kₚ * e
     }
+
+    consume(SpecialClose);
+
+    return expr;
+}
+
+Node* Parser::escapeSuperscript(){
+    consume(SpecialOpen);
+    Node* expr = leftUnary();
+    consume(SpecialClose);
+    consume(SpecialOpen);
+
+    if(token_index >= tokens.size())
+        fatalError("Ran out of tokens (Call from parser.cpp " + QString::number(__LINE__) + ")");
+
+    switch (tokens[token_index++].type) {
+        case Multiply:
+            if(expr->type != IDENTIFIER) fatalError("Asterisk superscript on non-identifier");
+            expr->subtext += "^*";
+            break;
+        case Transpose:
+            expr = createNode(TRANSPOSE, expr);
+            break;
+        case Dagger:
+            expr = createNode(DAGGER, expr);
+            break;
+        case Plus:
+            if(expr->type == IDENTIFIER) expr = createNode(INCREMENT, expr);
+            else if(expr->type == REALS) expr->type = POSITIVE_REALS;
+            else fatalError("Unexpected '+' superscript");
+            break;
+        case Minus:
+            if(expr->type == IDENTIFIER) expr = createNode(DECREMENT, expr);
+            else if(expr->type == REALS) expr->type = NEGATIVE_REALS;
+            else fatalError("Unexpected '-' superscript");
+            break;
+        default:
+            token_index--;
+            if(expr->type == COMPLEX_NUMS) expr = createNode(CONTINUOUS, expression());
+            else expr = createNode(TYPED_POWER, expr, expression());
+    }
+
+    consume(SpecialClose);
+
+    return expr;
 }
 
 Node* Parser::escapeUnderscriptedWord(){
@@ -688,76 +688,6 @@ Node* Parser::escapeUnderscriptedWord(){
         n->children.push_back( expression() );
 
         return n;
-    }
-}
-
-Node* Parser::escapeSuperscript(){
-    consume(SpecialOpen);
-    std::vector<Token>::size_type marker = token_index;
-    skipPastSpecialClose();
-    consume(SpecialOpen);
-
-    if(match(Multiply)){
-        consume(SpecialClose);
-        std::vector<Token>::size_type end_marker = token_index;
-
-        token_index = marker;
-        consume(Identifier);
-        consume(SpecialClose);
-        token_index -= 2;
-        Node* id = terminal();
-        id->subtext += "^*";
-        token_index = end_marker;
-
-        return id;
-    }else if(match( {Transpose, Dagger} )){
-        bool transpose = tokens[token_index-1].type == Transpose;
-        consume(SpecialClose);
-        std::vector<Token>::size_type end_marker = token_index;
-
-        token_index = marker;
-        Node* expr = createNode(transpose ? TRANSPOSE : DAGGER, rightUnary());
-        consume(SpecialClose);
-        token_index = end_marker;
-
-        return expr;
-    }else if(match( {Plus, Minus} )){
-        bool plus = tokens[token_index-1].type == Plus;
-
-        consume(SpecialClose);
-        std::vector<Token>::size_type end_marker = token_index;
-
-        token_index = marker;
-
-        Node* expr;
-        if(match(Real)){
-            expr = createNode(plus ? POSITIVE_REALS : NEGATIVE_REALS);
-            consume(SpecialClose);
-        }else{
-            expr = createNode(plus ? INCREMENT : DECREMENT, rightUnary());
-            consume(SpecialClose);
-        }
-        token_index = end_marker;
-
-        return expr;
-    }else{
-        token_index = marker;
-        if(match(Complex)){
-            consume(SpecialClose);
-            consume(SpecialOpen);
-            Node* expr = createNode(CONTINUOUS, expression());
-            consume(SpecialClose);
-
-            return expr;
-        }else{
-            Node* lhs = leftUnary();
-            consume(SpecialClose);
-            consume(SpecialOpen);
-            Node* expr = createNode(TYPED_POWER, lhs, expression());
-            consume(SpecialClose);
-
-            return expr;
-        }
     }
 }
 

@@ -20,24 +20,22 @@ private:
 public:
     Parser(const QString& source);
     std::vector<Node*> parse();
-    Token lastExaminedToken();
     QString getErrorMessage();
+    QString::size_type errorStart();
+    QString::size_type errorEnd();
 
 private:
     [[noreturn]] void fatalError(const QString& msg);
     Node* createNode(const NodeType& type);
     Node* createNode(const NodeType& type, Node* child);
     Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
-    Node* createNode(const NodeType& type, std::vector<Node*> children);
 
     void consume(const TokenType& t);
     void consume(const std::vector<TokenType>& types);
     bool match(const TokenType& t);
     bool match(const std::vector<TokenType>& types);
     bool peek(const TokenType& t) const;
-    bool peekBehind(const TokenType& t) const;
     bool peek(const std::vector<TokenType>& types) const;
-    void skipPastSpecialClose();
 
     Node* statement();
     Node* equality(Node* n);
@@ -68,8 +66,8 @@ private:
     Node* escapeMatrix();
     uint escapeDimension();
     Node* escapeRoot();
-    Node* escapeSuperscript();
     Node* escapeSubscript();
+    Node* escapeSuperscript();
     Node* escapeUnderscriptedWord();
     Node* terminal();
     Node* idStart(const QString& text);

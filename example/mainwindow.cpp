@@ -27,10 +27,9 @@ void MainWindow::on_exec_button_clicked(){
     }catch(int code){
         if(code == 646){
             ui->dot_view->setPlainText(parser.getErrorMessage());
-            Neb::Token t = parser.lastExaminedToken();
             QTextCursor c = ui->code_edit->textCursor();
-            c.setPosition(t.start);
-            c.setPosition(t.end, QTextCursor::KeepAnchor);
+            c.setPosition(parser.errorStart());
+            c.setPosition(parser.errorEnd(), QTextCursor::KeepAnchor);
             ui->code_edit->setTextCursor(c);
             ui->code_edit->setFocus();
         }else throw code;
