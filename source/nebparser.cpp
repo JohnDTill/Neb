@@ -519,49 +519,8 @@ Node* Parser::escapeCases(){
 Node* Parser::escapeFraction(){
     consume(SpecialOpen);
 
-    if(match(Differential)){
-        Node* expr;
-        Node* wrt;
-
-        if(match(SpecialClose)){
-            consume(SpecialOpen);
-            consume(Differential);
-            wrt = idOnly();
-            consume(SpecialClose);
-            expr = grouping();
-        }else{
-            expr = idOnly();
-            consume(SpecialClose);
-            consume(SpecialOpen);
-            consume(Differential);
-            wrt = idOnly();
-            consume(SpecialClose);
-        }
-
-        return createNode(DERIVATIVE, expr, wrt);
-    }
-
-    if(match(Partial)){
-        Node* expr;
-        Node* wrt;
-
-        if(match(SpecialClose)){
-            consume(SpecialOpen);
-            consume(Partial);
-            wrt = idOnly();
-            consume(SpecialClose);
-            expr = grouping();
-        }else{
-            expr = idOnly();
-            consume(SpecialClose);
-            consume(SpecialOpen);
-            consume(Partial);
-            wrt = idOnly();
-            consume(SpecialClose);
-        }
-
-        return createNode(PARTIAL, expr, wrt);
-    }
+    if(match(Differential)) return fractionDerivative(DERIVATIVE, Differential);
+    else if(match(Partial)) return fractionDerivative(PARTIAL, Partial);
 
     Node* num = expression();
     consume(SpecialClose);
@@ -570,6 +529,28 @@ Node* Parser::escapeFraction(){
     consume(SpecialClose);
 
     return createNode(TYPED_FRACTION, num, den);
+}
+
+Node* Parser::fractionDerivative(const NodeType& type, const TokenType& deriv_token){
+    Node* expr;
+    Node* wrt;
+
+    if(match(SpecialClose)){ //Derivative comes after fraction: (d/dx) y
+        consume(SpecialOpen);
+        consume(deriv_token);
+        wrt = idOnly();
+        consume(SpecialClose);
+        expr = grouping();
+    }else{ //Derivative is part of fraction: (dy/dx)
+        expr = idOnly();
+        consume(SpecialClose);
+        consume(SpecialOpen);
+        consume(deriv_token);
+        wrt = idOnly();
+        consume(SpecialClose);
+    }
+
+    return createNode(type, expr, wrt);
 }
 
 Node* Parser::escapeIntegral(const NodeType& type){

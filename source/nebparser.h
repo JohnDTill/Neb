@@ -63,6 +63,7 @@ private:
     Node* escapeBinomial();
     Node* escapeCases();
     Node* escapeFraction();
+    Node* fractionDerivative(const NodeType& type, const TokenType& deriv_token);
     Node* escapeIntegral(const NodeType& type);
     Node* escapeMatrix();
     uint escapeDimension();
