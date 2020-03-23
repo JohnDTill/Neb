@@ -40,6 +40,9 @@ private:
     void skipPastSpecialClose();
 
     Node* statement();
+    Node* equality(Node* n);
+    Node* less(Node* n);
+    Node* greater(Node* n);
     Node* expression();
     Node* conjunction();
     Node* disjunction();
@@ -50,20 +53,26 @@ private:
     Node* rightUnary();
     Node* exponent();
     Node* grouping();
+    Node* parenGrouping();
+    Node* bracketGrouping();
+    Node* setGrouping();
+    Node* generalGrouping(const NodeType& node_type, const TokenType& close_token);
     Node* callArgs();
     Node* escape();
     Node* escapeBigOperator(const NodeType& type);
     Node* escapeBinomial();
     Node* escapeCases();
     Node* escapeFraction();
-    Node* escapeIntegral();
+    Node* escapeIntegral(const NodeType& type);
     Node* escapeMatrix();
+    uint escapeDimension();
     Node* escapeRoot();
     Node* escapeSuperscript();
     Node* escapeSubscript();
     Node* escapeUnderscriptedWord();
     Node* terminal();
-    Node* idStart();
+    Node* idStart(const QString& text);
+    Node* idOnly();
 };
 
 }
