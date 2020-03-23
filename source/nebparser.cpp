@@ -294,10 +294,10 @@ Node* Parser::multiplication(){
 
 Node* Parser::implicitMultiplication(){
     Node* expr = leftUnary();
-    if(peek({Identifier, Bar, DoubleBar, LeftBracket, LeftParen, SpecialEscape})){
+    if(peek({Identifier, LeftBracket, LeftParen, SpecialEscape})){ //Bar, DoubleBar,
         expr = createNode(IMPLICIT_MULTIPLY, expr, grouping());
 
-        while(peek({Identifier, Bar, DoubleBar, LeftBracket, LeftParen, SpecialEscape}))
+        while(peek({Identifier, LeftBracket, LeftParen, SpecialEscape})) //Bar, DoubleBar,
             expr->children.push_back(grouping());
     }
 
@@ -415,7 +415,7 @@ Node* Parser::setGrouping(){
                createNode(SET_BUILDER, createNode(IN, expr, expression())) : // {x ∈ ℝ : ...}
                createNode(SET_BUILDER, expr); // {x : ...}
 
-        consume(Colon); //Does not work with Bar currently due to complicated ambiguity
+        consume({Colon, Bar});
 
         expr->children.push_back(statement());
         while(match(Comma)) expr->children.push_back(statement());
