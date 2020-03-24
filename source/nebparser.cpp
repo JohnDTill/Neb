@@ -158,7 +158,7 @@ Node* Parser::statement(){
         case In: return createNode(IN, n, expression());
         case DefEquals: return createNode(DEFINE_EQUALS, n, expression());
         case NotEqual: return createNode(NOT_EQUAL, n, expression());
-        default: return createNode(EXPR_STMT, n);
+        default: token_index--; return createNode(EXPR_STMT, n);
     }
 }
 
@@ -247,7 +247,7 @@ Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
 
 Node* Parser::multiplication(){
     Node* expr = implicitMultiplication();
-    while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, Percent, Times})){
+    while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, OuterProduct, Percent, Times})){
         TokenType t = tokens[token_index-1].type;
         match(Newline);
         Node* rhs = implicitMultiplication();
@@ -257,6 +257,7 @@ Node* Parser::multiplication(){
             case DotProduct: expr = createNode(DOT, expr, rhs); break;
             case Forwardslash: expr = createNode(FORWARDSLASH, expr, rhs); break;
             case Multiply: expr = createNode(MULTIPLICATION, expr, rhs); break;
+            case OuterProduct: expr = createNode(OUTER_PRODUCT, expr, rhs); break;
             case Percent: expr = createNode(MODULUS, expr, rhs); break;
             case Times: expr = createNode(CROSS, expr, rhs); break;
             default: break;
@@ -268,10 +269,11 @@ Node* Parser::multiplication(){
 
 Node* Parser::implicitMultiplication(){
     Node* expr = leftUnary();
-    if(peek({Identifier, LeftBracket, LeftParen, SpecialEscape})){ //Bar, DoubleBar,
+    if(peek({Identifier, IntegralUnicode, LeftAngle, LeftBracket, LeftCeil, LeftFloor,
+            LeftParen, SpecialEscape})){ //Bar, DoubleBar have identical close, so are disallowed
         expr = createNode(IMPLICIT_MULTIPLY, expr, grouping());
 
-        while(peek({Identifier, LeftBracket, LeftParen, SpecialEscape})) //Bar, DoubleBar,
+        while(peek({Identifier, LeftBracket, LeftParen, SpecialEscape}))
             expr->children.push_back(grouping());
     }
 
@@ -280,21 +282,28 @@ Node* Parser::implicitMultiplication(){
 
 Node* Parser::leftUnary(){
     if(match(Minus)){
-        return createNode(UNARY_MINUS, rightUnary());
+        return createNode(UNARY_MINUS, leftUnaryNext());
     }else if(match(Not)){
         return createNode(LOGICAL_NOT, rightUnary());
     }else if(match(PlusMinus)){
-        return createNode(PLUS_MINUS_UNARY, rightUnary());
+        return createNode(PLUS_MINUS_UNARY, leftUnaryNext());
     }else if(match(MinusPlus)){
-        return createNode(MINUS_PLUS_UNARY, rightUnary());
+        return createNode(MINUS_PLUS_UNARY, leftUnaryNext());
     }else{
-        return rightUnary();
+        return leftUnaryNext();
     }
+}
+
+Node* Parser::leftUnaryNext(){
+    if(match(Dollar)) return createNode(CURRENCY_DOLLARS, grouping());
+    else if(match(Euro)) return createNode(CURRENCY_EUROS, grouping());
+    else if(match(PoundSterling)) return createNode(CURRENCY_POUNDS, grouping());
+    else return rightUnary();
 }
 
 Node* Parser::rightUnary(){
     Node* expr = exponent();
-    while(peek( {Exclam, DoubleExclam, Tick} )){
+    while(peek( {Exclam, Tick} )){
         if(match(Exclam)){
             if(peek(Exclam)){
                 int degree = 1;
@@ -308,7 +317,16 @@ Node* Parser::rightUnary(){
             }
         }else{
             consume(Tick);
-            return createNode(TICK_DERIVATIVE, expr);
+            if(peek(Tick)){
+                int degree = 1;
+                while(match(Tick)) degree++;
+                Node* n = createNode(TICK_DERIVATIVE, expr);
+                n->subtext = QString::number(degree);
+
+                return n;
+            }else{
+                return createNode(TICK_DERIVATIVE, expr);
+            }
         }
     }
 
@@ -328,8 +346,12 @@ Node* Parser::grouping(){
     if(match(LeftParen)) return parenGrouping();
     else if(match(LeftBracket)) return bracketGrouping();
     else if(match(LeftBrace)) return setGrouping();
+    else if(match(LeftAngle)) return innerProduct();
     else if(match(Bar)) return generalGrouping(ABS, Bar);
     else if(match(DoubleBar)) return generalGrouping(NORM, DoubleBar);
+    else if(match(LeftCeil)) return generalGrouping(CEILING, RightCeil);
+    else if(match(LeftFloor)) return generalGrouping(FLOOR, RightFloor);
+    else if(match(IntegralUnicode)) return integralUnicode(INTEGRAL);
     else if(match(SpecialEscape)) return escape();
     else return terminal();
 }
@@ -399,6 +421,19 @@ Node* Parser::setGrouping(){
     }
 }
 
+Node* Parser::innerProduct(){
+    Node* expr = expression();
+    if(match(Comma)){
+        expr = createNode(INNER_PRODUCT, expr, expression());
+    }else{
+        consume(Bar);
+        expr = createNode(INNER_PRODUCT, expression(), expr);
+    }
+    consume(RightAngle);
+
+    return expr;
+}
+
 Node* Parser::generalGrouping(const NodeType& node_type, const TokenType& close_token){
     Node* expr = expression();
     consume(close_token);
@@ -427,6 +462,20 @@ Node* Parser::escape(){
     if(token_index >= tokens.size()) fatalError("No token after Escape");
 
     switch (tokens[token_index++].type) {
+        case AccentArrow: return escapeAccent(ACCENT_ARROW);
+        case AccentBar: return escapeAccent(ACCENT_BAR);
+        case AccentBreve: return escapeAccent(ACCENT_BREVE);
+        case AccentDot: return escapeAccent(ACCENT_DOT);
+        case AccentDdot: return escapeAccent(ACCENT_DDOT);
+        case AccentDddot: return escapeAccent(ACCENT_DDDOT);
+        case AccentHat: return escapeAccent(ACCENT_HAT);
+        case AccentTilde: return escapeAccent(ACCENT_TILDE);
+        case Bar: return escapeAccent(ABS);
+        case DoubleBar: return escapeAccent(NORM);
+        case LeftCeil: return escapeAccent(CEILING);
+        case LeftFloor: return escapeAccent(FLOOR);
+        case LeftParen: return escapeAccent(PAREN_GROUPING);
+        case LeftBracket: return escapeAccent(BRACKET_GROUPING);
         case BigSum: return escapeBigOperator(SUMMATION);
         case BigProduct: return escapeBigOperator(PRODUCT);
         case Binomial: return escapeBinomial();
@@ -441,6 +490,14 @@ Node* Parser::escape(){
         default:
             fatalError("Invalid escape code (Call from parser.cpp " + QString::number(__LINE__) + ")");
     }
+}
+
+Node* Parser::escapeAccent(const NodeType& type){
+    consume(SpecialOpen);
+    Node* expr = createNode(type, expression());
+    consume(SpecialClose);
+
+    return expr;
 }
 
 Node* Parser::escapeBigOperator(const NodeType& type){
@@ -552,6 +609,14 @@ Node* Parser::escapeIntegral(const NodeType& type){
     return n;
 }
 
+Node* Parser::integralUnicode(const NodeType& type){
+    Node* n = createNode(type, expression()); //Unicode integral must be indefinite integral
+    consume(Differential);
+    n->children.push_back(idOnly());
+
+    return n;
+}
+
 Node* Parser::escapeMatrix(){
     Node* expr = createNode(TYPED_MATRIX);
 
@@ -636,6 +701,12 @@ Node* Parser::escapeSuperscript(){
             break;
         case Dagger:
             expr = createNode(DAGGER, expr);
+            break;
+        case Conjunction:
+            expr = createNode(WEDGE, expr);
+            break;
+        case Disjunction:
+            expr = createNode(VEE, expr);
             break;
         case Plus:
             if(expr->type == IDENTIFIER) expr = createNode(INCREMENT, expr);

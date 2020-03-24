@@ -53,6 +53,7 @@ void Scanner::scan(){
             case 8252:  emitToken(DoubleExclam); break;
             case 8709:  emitToken(EmptySet); break;
             case '=':   emitToken(Equals); break;
+            case 8364:  emitToken(Euro); break;
             case '!':   emitToken(Exclam); break;
             case 8707:  emitToken(Exists); break;
             case 8704:  emitToken(ForAll); break;
@@ -62,6 +63,7 @@ void Scanner::scan(){
             case 8712:  emitToken(In); break;
             case 8734:  emitToken(Infinity); break;
             case 8484:  emitToken(Integer); break;
+            case 8747:  emitToken(IntegralUnicode); break;
             case '#':   emitToken(Hash); break;
             case 10216: emitToken(LeftAngle); break;
             case 8592:  emitToken(LeftArrow); break;
@@ -82,11 +84,13 @@ void Scanner::scan(){
             case '\n':  emitToken(Newline); line++; break;
             case 172:   emitToken(Not); break;
             case 8800:  emitToken(NotEqual); break;
+            case 8855:  emitToken(OuterProduct); break;
             case 8706:  emitToken(Partial); break;
             case '%':   emitToken(Percent); break;
             case 8462:  emitToken(PlanckConst); break;
             case '+':   emitToken(Plus); break;
             case 177:   emitToken(PlusMinus); break;
+            case 163:   emitToken(PoundSterling); break;
             case 8473:  emitToken(Prime); break;
             case 8461:  emitToken(Quaternion); break;
             case 8474:  emitToken(Rational); break;
@@ -132,25 +136,32 @@ void Scanner::scanEscapeCode(){
     if(source_index >= source.size()) fatalError("Reached end of file while looking for Escape Code.");
 
     switch(source[source_index++].unicode()){
-        case 8594:  emitToken(ArrowAccent); break;
-        case 257:   emitToken(BarAccent); break;
+        case 8594:  emitToken(AccentArrow); break;
+        case 257:   emitToken(AccentBar); break;
+        case 259:   emitToken(AccentBreve); break;
+        case 551:   emitToken(AccentDot); break;
+        case 228:   emitToken(AccentDdot); break;
+        case 8943:  emitToken(AccentDddot); break;
+        case 226:   emitToken(AccentHat); break;
+        case 227:   emitToken(AccentTilde); break;
         case 8719:  emitToken(BigProduct); break;
         case 8721:  emitToken(BigSum); break;
         case 'b':   emitToken(Binomial); break;
         case 'c':   emitToken(Cases); break;
-        case 551:   emitToken(DotAccent); break;
-        case 228:   emitToken(DotAccentDouble); break;
-        case 8943:  emitToken(DotAccentTriple); break;
         case 916:   emitToken(Dualscript); break;
         case 'f':   emitToken(Fraction); break;
-        case 226:   emitToken(Hat); break;
         case 8747:  emitToken(Integral); break;
         case 8862:  emitToken(Matrix); break;
         case 8730:  emitToken(Root); break;
         case '_':   emitToken(Subscript); break;
         case '^':   emitToken(Superscript); break;
-        case 227:   emitToken(TildeAccent); break;
         case 'w':   emitToken(UnderscriptedWord); break;
+        case '|':   consume('|'); emitToken(Bar); break;
+        case 8214:  consume(8214); emitToken(DoubleBar); break;
+        case 8968:  consume(8969); emitToken(LeftCeil); break;
+        case 8970:  consume(8971); emitToken(LeftFloor); break;
+        case '(':   consume(')'); emitToken(LeftParen); break;
+        case '[':   consume(']'); emitToken(LeftBracket); break;
 
     default:
         fatalError(QString("Unrecognized Escape Code '") + source[source_index-1] + "'");
