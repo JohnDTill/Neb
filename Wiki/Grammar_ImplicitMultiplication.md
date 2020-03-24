@@ -17,9 +17,7 @@ x = (a + b + c + d + e)
 ```
 
 ### Difficulty Grouping
-One difficulty of implicit multiplication is that identical grouping symbols become much harder to parse. If you read `|x|` from left to right, you can't immediately tell that the right bar closes the expression. It could start another nesting, e.g. `|x |y||`. Combine that with the potential for bars in other places, e.g. `{x | |x| > 3}`, and you have a real hairball.
-
-The simplest solution is to disallow implicit multiplication for groupings with identical open and close symbols. Hopefully this assumption can be dropped eventually, but it is the simplest solution for the time being, and totally future proof.
+Implicit multiplication is disallowed for groupings with identical open and close symbols, e.g. absolute value. See [the page on ambiguities](./GrammarAmbiguities) for the rationale behind this decision.
 
 ### Grammar
 ImplicitMult ⇒ LeftUnary ImplicitMultArg*

@@ -6,13 +6,6 @@ Unfortunately, conventional mathematical syntax contains ambiguities which are d
 
 A sequence is typically written as a list of members enclosed in parenthesis, e.g. `(3,2,1)`. For 1 member sequences, this conflicts with the grouping rule `(3)`, and for 2 member sequences, this may conflict with the range rule `(2,3)`. Groupings and open ranges are more commonly encountered, but sequences are fundamental to programming tasks.
 
-[comment]: <> (The following is irrelevant under the current rule that implicit multiplication by a grouping with identical open and close symbols is disallowed.)
-[comment]: <> (#### Set Builder Bar)
+#### Implicit Multiplication by Absolute Value
 
-[comment]: <> (It is difficult to use a bar in set builder notation, e.g. `ℝ⁺ ≔ {x | x > 0}`. The parser sees the bar then wants to do an implicit multiplication, e.g. expecting `{x |x|}`. The easy solution is to use a colon: `ℝ⁺ ≔ {x : x > 0}` parses easily and is valid mathematical syntax.)
-
-[comment]: <> (We hate to omit any valid mathematical syntax such as the bar, and with sufficient lookahead the ambiguity can be resolved. Eventually we may want a process to determine set builder versus set enumerator notation. This needs to work even in the most insidious cases such as:)
-[comment]: <> (* `{x | |x| > 3}` - Set builder w/ absolute value in condition)
-[comment]: <> (* `{x ∈ ℝ | |x| > 3}` - Same with member statement)
-[comment]: <> (* `{x |x| |x| |x|, |x|}` - Set enumeration with implicit multiplication by abs val)
-[comment]: <> (* `{x | x ∈ {y | |y| > 3}}` - Nested set builder)
+Groupings with identical open and close symbols can introduce ambiguities. For example, consider the expression `|a|b|c|`. This could correctly be parsed as `abs(a*abs(b)*c)` or `abs(a)*b*abs(c)`, which are not mathematically equivalent. One solution is to disallow implicit multiplication for grouping with identical open and close symbols. Then one would have to write `|a*|b|*c|` or `|a|*b*|c|`, which have clear meanings.
