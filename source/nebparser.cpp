@@ -269,8 +269,12 @@ Node* Parser::multiplication(){
 
 Node* Parser::implicitMultiplication(){
     Node* expr = leftUnary();
+
+    //Bar, DoubleBar have identical open and close symbols, so are disallowed for implicit mult
+    if(expr->type == ABS || expr->type == NORM) return expr;
+
     if(peek({Identifier, IntegralUnicode, LeftAngle, LeftBracket, LeftCeil, LeftFloor,
-            LeftParen, SpecialEscape})){ //Bar, DoubleBar have identical close, so are disallowed
+            LeftParen, SpecialEscape})){
         expr = createNode(IMPLICIT_MULTIPLY, expr, grouping());
 
         while(peek({Identifier, LeftBracket, LeftParen, SpecialEscape}))
