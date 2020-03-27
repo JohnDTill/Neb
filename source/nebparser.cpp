@@ -681,11 +681,6 @@ Node* Parser::escapeSubscript(){
         case Comma:
             expr = createNode(SUBSCRIPT_PARTIAL, expr, idOnly());
             break;
-        case Minus:
-            if(expr->type == IDENTIFIER) expr = createNode(DECREMENT, expr);
-            else if(expr->type == REALS) expr->type = NEGATIVE_REALS;
-            else fatalError("Unexpected '-' superscript");
-            break;
         default:
             token_index--;
             expr = createNode(SUBSCRIPT_ACCESS, expr, expression());
@@ -696,6 +691,8 @@ Node* Parser::escapeSubscript(){
     }
 
     consume(SpecialClose);
+
+    if(match(LeftParen)) expr = createNode(CALL, expr, callArgs());
 
     return expr;
 }
@@ -826,11 +823,7 @@ Node* Parser::idStart(const QString& text){
     Node* n = createNode(IDENTIFIER);
     n->subtext = text;
 
-    if(match(LeftParen)){
-        n->type = CALL;
-        n->subtext += "()";
-        n->children.push_back( callArgs() );
-    }
+    if(match(LeftParen)) n = createNode(CALL, n, callArgs());
 
     return n;
 }

@@ -129,7 +129,7 @@ static const QHash<NodeType, QString> labels {
 	{BACKSLASH, "\\\\"},
 	{BOOLEANS, "𝔹"},
 	{BRACKET_GROUPING, "group[]"},
-	{CALL, ""},
+	{CALL, "f()"},
 	{CEILING, "⌈⋅⌉"},
 	{COMPLEX_NUMS, "ℂ "},
 	{CONTINUOUS, "ℂⁿ"},
