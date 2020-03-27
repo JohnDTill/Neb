@@ -5,6 +5,8 @@
 #include "scanner.h"
 #include <stack>
 
+#include <QDebug>
+
 namespace Neb {
 
 class Parser{
@@ -48,6 +50,7 @@ private:
     Node* multiplication();
     Node* implicitMultiplication();
     Node* leftUnary();
+    Node* nablaStart();
     Node* leftUnaryNext();
     Node* rightUnary();
     Node* exponent();

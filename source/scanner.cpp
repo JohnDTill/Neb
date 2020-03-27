@@ -80,10 +80,12 @@ void Scanner::scan(){
             case '-':   emitToken(Minus); break;
             case 8723:  emitToken(MinusPlus); break;
             case '*':   emitToken(Multiply); break;
+            case 8711:  emitToken(Nabla); break;
             case 8469:  emitToken(Natural); break;
             case '\n':  emitToken(Newline); line++; break;
             case 172:   emitToken(Not); break;
             case 8800:  emitToken(NotEqual); break;
+            case 10752: emitToken(ODot); break;
             case 8855:  emitToken(OuterProduct); break;
             case 8706:  emitToken(Partial); break;
             case '%':   emitToken(Percent); break;

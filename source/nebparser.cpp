@@ -247,7 +247,7 @@ Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
 
 Node* Parser::multiplication(){
     Node* expr = implicitMultiplication();
-    while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, OuterProduct, Percent, Times})){
+    while(match({Backslash, Divide, DotProduct, Forwardslash, Multiply, ODot, OuterProduct, Percent, Times})){
         TokenType t = tokens[token_index-1].type;
         match(Newline);
         Node* rhs = implicitMultiplication();
@@ -257,6 +257,7 @@ Node* Parser::multiplication(){
             case DotProduct: expr = createNode(DOT, expr, rhs); break;
             case Forwardslash: expr = createNode(FORWARDSLASH, expr, rhs); break;
             case Multiply: expr = createNode(MULTIPLICATION, expr, rhs); break;
+            case ODot: expr = createNode(ODOT, expr, rhs); break;
             case OuterProduct: expr = createNode(OUTER_PRODUCT, expr, rhs); break;
             case Percent: expr = createNode(MODULUS, expr, rhs); break;
             case Times: expr = createNode(CROSS, expr, rhs); break;
@@ -274,11 +275,12 @@ Node* Parser::implicitMultiplication(){
     if(expr->type == ABS || expr->type == NORM) return expr;
 
     if(peek({Identifier, IntegralUnicode, LeftAngle, LeftBracket, LeftCeil, LeftFloor,
-            LeftParen, SpecialEscape})){
-        expr = createNode(IMPLICIT_MULTIPLY, expr, grouping());
+            LeftParen, Nabla, SpecialEscape})){
+        expr = createNode(IMPLICIT_MULTIPLY, expr, leftUnary());
 
-        while(peek({Identifier, LeftBracket, LeftParen, SpecialEscape}))
-            expr->children.push_back(grouping());
+        while(peek({Identifier, IntegralUnicode, LeftAngle, LeftBracket, LeftCeil, LeftFloor,
+                   LeftParen, Nabla, SpecialEscape}))
+            expr->children.push_back(leftUnary());
     }
 
     return expr;
@@ -286,15 +288,27 @@ Node* Parser::implicitMultiplication(){
 
 Node* Parser::leftUnary(){
     if(match(Minus)){
-        return createNode(UNARY_MINUS, leftUnaryNext());
+        return createNode(UNARY_MINUS, leftUnary());
     }else if(match(Not)){
         return createNode(LOGICAL_NOT, rightUnary());
     }else if(match(PlusMinus)){
         return createNode(PLUS_MINUS_UNARY, leftUnaryNext());
     }else if(match(MinusPlus)){
         return createNode(MINUS_PLUS_UNARY, leftUnaryNext());
+    }else if(match(Nabla)){
+        return nablaStart();
     }else{
         return leftUnaryNext();
+    }
+}
+
+Node* Parser::nablaStart(){
+    if(match(DotProduct)){
+        return createNode(DIVERGENCE, leftUnaryNext());
+    }else if(match(Times)){
+        return createNode(CURL, leftUnaryNext());
+    }else{
+        return createNode(GRADIENT, leftUnaryNext());
     }
 }
 
@@ -577,7 +591,7 @@ Node* Parser::fractionDerivative(const NodeType& type, const TokenType& deriv_to
         consume(SpecialClose);
         expr = grouping();
     }else{ //Derivative is part of fraction: (dy/dx)
-        expr = idOnly();
+        expr = grouping();
         consume(SpecialClose);
         consume(SpecialOpen);
         consume(deriv_token);
@@ -822,19 +836,22 @@ Node* Parser::idStart(const QString& text){
 }
 
 Node* Parser::idOnly(){
-    if(token_index >= tokens.size())
-        fatalError("Ran out of tokens (Call from parser.cpp " + QString::number(__LINE__) + ")");
+    if(match(Identifier)){
+        QString::size_type start = tokens[token_index-1].start;
+        QString::size_type end = tokens[token_index-1].end;
+        QString source_text = source.mid(start, end-start);
 
-    QString::size_type start = tokens[token_index].start;
-    QString::size_type end = tokens[token_index].end;
-    QString source_text = source.mid(start, end-start);
+        Node* id = createNode(IDENTIFIER);
+        id->subtext = source_text;
 
-    consume(Identifier);
+        return id;
+    }else{
+        if(match(SpecialEscape)){
+            if(match(Subscript)) return escapeSubscript();
+        }
 
-    Node* id = createNode(IDENTIFIER);
-    id->subtext = source_text;
-
-    return id;
+        fatalError("Invalid identifier");
+    }
 }
 
 }

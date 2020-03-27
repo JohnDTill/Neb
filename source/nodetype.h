@@ -25,6 +25,7 @@ enum NodeType {
 	COMPLEX_NUMS,
 	CONTINUOUS,
 	CROSS,
+	CURL,
 	CURRENCY_DOLLARS,
 	CURRENCY_EUROS,
 	CURRENCY_POUNDS,
@@ -32,6 +33,7 @@ enum NodeType {
 	DECREMENT,
 	DEFINE_EQUALS,
 	DERIVATIVE,
+	DIVERGENCE,
 	DIVIDE,
 	DOT,
 	EMPTY_SET,
@@ -40,6 +42,7 @@ enum NodeType {
 	FACTORIAL,
 	FLOOR,
 	FORWARDSLASH,
+	GRADIENT,
 	GREATER,
 	GREATER_EQUAL,
 	IDENTIFIER,
@@ -71,6 +74,7 @@ enum NodeType {
 	NOT_EQUAL,
 	NOT_IN,
 	NUMBER,
+	ODOT,
 	OUTER_PRODUCT,
 	PAREN_GROUPING,
 	PARTIAL,
@@ -108,7 +112,7 @@ enum NodeType {
 	WEDGE,
 };
 
-static constexpr int NodeType_Size = 100;
+static constexpr int NodeType_Size = 104;
 
 static const QHash<NodeType, QString> labels {
 	{ABS, "|⋅|"},
@@ -130,6 +134,7 @@ static const QHash<NodeType, QString> labels {
 	{COMPLEX_NUMS, "ℂ "},
 	{CONTINUOUS, "ℂⁿ"},
 	{CROSS, "×"},
+	{CURL, "∇×"},
 	{CURRENCY_DOLLARS, "$"},
 	{CURRENCY_EUROS, "€"},
 	{CURRENCY_POUNDS, "£"},
@@ -137,6 +142,7 @@ static const QHash<NodeType, QString> labels {
 	{DECREMENT, "x⁻"},
 	{DEFINE_EQUALS, "≔"},
 	{DERIVATIVE, "ⅆy/ⅆx"},
+	{DIVERGENCE, "∇⋅"},
 	{DIVIDE, "÷"},
 	{DOT, "⋅"},
 	{EMPTY_SET, "∅"},
@@ -145,6 +151,7 @@ static const QHash<NodeType, QString> labels {
 	{FACTORIAL, "!"},
 	{FLOOR, "⌊⋅⌋"},
 	{FORWARDSLASH, "/"},
+	{GRADIENT, "∇ "},
 	{GREATER, ">"},
 	{GREATER_EQUAL, "≥"},
 	{IDENTIFIER, "id: "},
@@ -176,6 +183,7 @@ static const QHash<NodeType, QString> labels {
 	{NOT_EQUAL, "≠"},
 	{NOT_IN, "∉"},
 	{NUMBER, ""},
+	{ODOT, "⨀"},
 	{OUTER_PRODUCT, "⊗"},
 	{PAREN_GROUPING, "group()"},
 	{PARTIAL, "∂y/∂x"},
