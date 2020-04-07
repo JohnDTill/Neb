@@ -6,6 +6,9 @@ Unfortunately, conventional mathematical syntax contains ambiguities which are d
 
 A sequence is typically written as a list of members enclosed in parenthesis, e.g. `(3,2,1)`. For 1 member sequences, this conflicts with the grouping rule `(3)`, and for 2 member sequences, this may conflict with the range rule `(2,3)`. Groupings and open ranges are more commonly encountered, but sequences are fundamental to programming tasks.
 
+#### Horizontal Vector in Plain Text
+In plain text we might imagine writing a horizontal vector in the style `x = ⁜⊞⏴1⏵⏴3⏵⏴a⏵⏴b⏵⏴c⏵` as `x = [a b c]`. Neb would parse this as an implicit multiplication in a bracket grouping. Neb leans on YAWYSIWYGEE syntax to avoid ambiguity with matrices, but one consequence is that simple ASCII vectors are unusable.
+
 #### Implicit Multiplication by Absolute Value
 
 Groupings with identical open and close symbols can introduce ambiguities. For example, consider the expression `|a|b|c|`. This could correctly be parsed as `abs(a*abs(b)*c)` or `abs(a)*b*abs(c)`, which are not mathematically equivalent. One solution is to disallow implicit multiplication for grouping with identical open and close symbols. Then one would have to write `|a*|b|*c|` or `|a|*b*|c|`, which have clear meanings.
