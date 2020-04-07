@@ -94,6 +94,7 @@ void Scanner::scan(){
             case 177:   emitToken(PlusMinus); break;
             case 163:   emitToken(PoundSterling); break;
             case 8473:  emitToken(Prime); break;
+            case 8733:  emitToken(Proportional); break;
             case 8461:  emitToken(Quaternion); break;
             case 8474:  emitToken(Rational); break;
             case 8477:  emitToken(Real); break;

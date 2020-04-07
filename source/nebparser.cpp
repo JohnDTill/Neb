@@ -86,6 +86,15 @@ Node* Parser::createNode(const NodeType& type, Node* lhs, Node* rhs){
     return n;
 }
 
+Node* Parser::createNode(const NodeType& type, const std::vector<Node*>& args){
+    Node* n = new Node;
+    n->type = type;
+    n->children = args;
+    dangling_nodes.push(n);
+
+    return n;
+}
+
 void Parser::consume(const TokenType& t){
     if(token_index >= tokens.size())
         fatalError("Reached end of token stream while scanning for token: " + token_names[t]);
@@ -158,6 +167,7 @@ Node* Parser::statement(){
         case In: return createNode(IN, n, expression());
         case DefEquals: return createNode(DEFINE_EQUALS, n, expression());
         case NotEqual: return createNode(NOT_EQUAL, n, expression());
+        case Proportional: return createNode(PROPORTIONAL, n, expression());
         default: token_index--; return createNode(EXPR_STMT, n);
     }
 }
@@ -459,21 +469,31 @@ Node* Parser::generalGrouping(const NodeType& node_type, const TokenType& close_
     return createNode(node_type, expr);
 }
 
-Node* Parser::callArgs(){
-    Node* n = createNode(ARGS);
+Node* Parser::call(Node* callee){
+    if(match(RightParen)) return createNode(CALL, callee, createNode(ARGS));
 
-    if(!match(RightParen)){
-        match(Newline);
-        n->children.push_back( expression() );
+    match(Newline);
+    Node* first = expression();
 
-        while(!match(RightParen)){
-            consume(Comma);
-            match(Newline);
-            n->children.push_back( expression() );
-        }
+    if(match(Bar)){
+        Node* condition = expression();
+        consume(RightParen);
+
+        if(callee->type != IDENTIFIER || callee->subtext != "P")
+            fatalError("Probablity function can only be represented by P");
+
+        return createNode(CONDITIONAL_PROBABLITY, first, condition);
     }
 
-    return n;
+    Node* args = createNode(ARGS, first);
+
+    while(!match(RightParen)){
+        consume(Comma);
+        match(Newline);
+        args->children.push_back( expression() );
+    }
+
+    return createNode(CALL, callee, args);
 }
 
 Node* Parser::escape(){
@@ -692,7 +712,7 @@ Node* Parser::escapeSubscript(){
 
     consume(SpecialClose);
 
-    if(match(LeftParen)) expr = createNode(CALL, expr, callArgs());
+    if(match(LeftParen)) return call(expr);
 
     return expr;
 }
@@ -823,7 +843,7 @@ Node* Parser::idStart(const QString& text){
     Node* n = createNode(IDENTIFIER);
     n->subtext = text;
 
-    if(match(LeftParen)) n = createNode(CALL, n, callArgs());
+    if(match(LeftParen)) return call(n);
 
     return n;
 }

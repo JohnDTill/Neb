@@ -31,6 +31,7 @@ private:
     Node* createNode(const NodeType& type);
     Node* createNode(const NodeType& type, Node* child);
     Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
+    Node* createNode(const NodeType& type, const std::vector<Node*>& args);
 
     void consume(const TokenType& t);
     void consume(const std::vector<TokenType>& types);
@@ -60,7 +61,7 @@ private:
     Node* setGrouping();
     Node* innerProduct();
     Node* generalGrouping(const NodeType& node_type, const TokenType& close_token);
-    Node* callArgs();
+    Node* call(Node* callee);
     Node* escape();
     Node* escapeAccent(const NodeType& type);
     Node* escapeBigOperator(const NodeType& type);

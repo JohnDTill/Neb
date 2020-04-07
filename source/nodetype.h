@@ -23,6 +23,7 @@ enum NodeType {
 	CALL,
 	CEILING,
 	COMPLEX_NUMS,
+	CONDITIONAL_PROBABLITY,
 	CONTINUOUS,
 	CROSS,
 	CURL,
@@ -83,6 +84,7 @@ enum NodeType {
 	POSITIVE_REALS,
 	POWER,
 	PRODUCT,
+	PROPORTIONAL,
 	QUATERNIONS,
 	RANGE_CLOSE_CLOSE,
 	RANGE_CLOSE_OPEN,
@@ -112,7 +114,7 @@ enum NodeType {
 	WEDGE,
 };
 
-static constexpr int NodeType_Size = 104;
+static constexpr int NodeType_Size = 106;
 
 static const QHash<NodeType, QString> labels {
 	{ABS, "|⋅|"},
@@ -132,6 +134,7 @@ static const QHash<NodeType, QString> labels {
 	{CALL, "f()"},
 	{CEILING, "⌈⋅⌉"},
 	{COMPLEX_NUMS, "ℂ "},
+	{CONDITIONAL_PROBABLITY, "P(|)"},
 	{CONTINUOUS, "ℂⁿ"},
 	{CROSS, "×"},
 	{CURL, "∇×"},
@@ -192,6 +195,7 @@ static const QHash<NodeType, QString> labels {
 	{POSITIVE_REALS, "ℝ⁺"},
 	{POWER, "^"},
 	{PRODUCT, "∏"},
+	{PROPORTIONAL, "∝"},
 	{QUATERNIONS, "ℍ"},
 	{RANGE_CLOSE_CLOSE, "range[]"},
 	{RANGE_CLOSE_OPEN, "range[)"},
