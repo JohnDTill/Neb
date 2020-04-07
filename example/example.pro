@@ -23,7 +23,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RC_ICONS += resources/Neb.ico
 
-win32: LIBS += -L$$PWD/../lib/ -lNeb
+LIBS += -L$$PWD/../lib/ -lNeb
 
 INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
