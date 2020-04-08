@@ -19,3 +19,8 @@ As per a [discussion with Reddit user "raiph"](https://www.reddit.com/r/Programm
 * {x | |x| > 3}
 
 and recognize ambiguities where they exist, such as the `|a|b|c|` example above. One approach might be to separate the expression into a list of statements delineated by `|` (including null statements), then analyze the possible meanings.
+
+#### Language Level Interpretation
+Some parsing decisions should be relegated to whatever language is using Neb's parse tree output. For instance, Neb can easily parse `⁜^⏴A⏵⏴⊤⏵` as a matrix transpose due to the unicode `⊤` symbol. `⁜^⏴A⏵⏴T⏵` with the letter 'T' is unclear since 'T' is a valid identifier, so this could be exponentiation, but using the letter 'T' to indicate a transpose is quite common. The language might want to always implement this as a transpose. Alternatively, the language could interpret this as a transpose if 'T' is not defined as a variable, an exponent if it is defined, and even issue a warning that raising to the power of 'T' is bad practice. The point is that some ambiguities are best handled at the language level.
+
+Another example is identifier subscripts: Is `⁜_⏴r⏵⏴c⏵` a single unified identifier, or do we want to access element 'c' of vector 'r'? That kind of interpretation is best left to the language.
