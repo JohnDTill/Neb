@@ -28,6 +28,8 @@ private:
     void scanUTF32();
     void scanNumber();
     void scanText();
+    void skipComment();
+    void skipBlockComment();
     bool match(const QChar& c);
     void consume(const QChar& c);
     bool isIdentifierQChar(const QChar& c) const;

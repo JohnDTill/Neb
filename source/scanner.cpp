@@ -57,7 +57,10 @@ void Scanner::scan(){
             case '!':   emitToken(Exclam); break;
             case 8707:  emitToken(Exists); break;
             case 8704:  emitToken(ForAll); break;
-            case '/':   emitToken(Forwardslash); break;
+            case '/':   if(match('/')) skipComment();
+                        else if(match('*')) skipBlockComment();
+                        else emitToken(Forwardslash);
+                        break;
             case '>':   emitToken(Greater); break;
             case 8805:  emitToken(GreaterEqual); break;
             case 8712:  emitToken(In); break;
@@ -203,6 +206,27 @@ void Scanner::scanText(){
     if(keyword_lookup != keywords.end()) emitToken(keyword_lookup.value(), start);
     else if(identifiers_use_multiple_chars) emitToken(Identifier, start);
     else for(int i = start; i < source_index; i++) emitToken(Identifier, i, i+1);
+}
+
+void Scanner::skipComment(){
+    while(source_index < source.size()){
+        if(source[source_index] == '\n') return;
+        source_index++;
+    }
+}
+
+void Scanner::skipBlockComment(){
+    for(;;){
+        if(source_index >= source.size()){
+            fatalError("Unterminated block comment");
+        }
+
+        if(match('*')){
+            if(match('/')) return;
+        }else{
+            source_index++;
+        }
+    }
 }
 
 bool Scanner::match(const QChar& c){
