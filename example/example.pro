@@ -29,5 +29,5 @@ INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
 
 win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../lib/Neb.lib
-else:win32-g++: PRE_TARGETDEPS += $$PWD/../lib/Neb.a
+else:win32-g++: PRE_TARGETDEPS += $$PWD/../lib/libNeb.a
 

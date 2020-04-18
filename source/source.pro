@@ -10,17 +10,17 @@ CONFIG += staticlib
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
-    nebparser.h \
-    node.h \
-    nodetype.h \
-    scanner.h \
-    tokens.h \
-    tokentype.h
+    neb_node.h \
+    neb_nodetype.h \
+    neb_parser.h \
+    neb_scanner.h \
+    neb_token.h \
+    neb_tokentype.h
 
 SOURCES += \
-        nebparser.cpp \
-        node.cpp \
-        scanner.cpp
+    neb_node.cpp \
+    neb_parser.cpp \
+    neb_scanner.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

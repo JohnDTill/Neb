@@ -1,6 +1,4 @@
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += core
 
 TARGET = LatexSymbols
 TEMPLATE = app
@@ -11,16 +9,15 @@ CONFIG += c++11
 
 SOURCES += main.cpp
 
-HEADERS += ../nodetype.h \
-           ../tokentype.h
+HEADERS += ../neb_tokentype.h \
+           ../neb_nodetype.h \
+    script_nodes.h \
+    script_tokens.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += NodeTypes.csv \
-             TokenTypes.csv
-
-RESOURCES += NodeTypes.csv \
-             TokenTypes.csv
+DISTFILES += TokenTable.csv NodeTable.csv
+RESOURCES += TokenTable.csv NodeTable.csv
