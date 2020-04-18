@@ -32,6 +32,7 @@ private:
     Node* createNode(const NodeType& type, Node* child);
     Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
     template<int a> Node* createNode(const NodeType& type, const std::array<Node*,a>& args);
+    Node* createNode(uint number);
     void scanToRecoveryPoint();
     [[noreturn]] void error(const QString& message);
     [[noreturn]] void error(const QString& message, const Token& t);

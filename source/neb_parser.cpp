@@ -57,10 +57,17 @@ Node* Parser::createNode(const NodeType& type, Node* lhs, Node* rhs){
     return n;
 }
 
+Node* Parser::createNode(uint number){
+    Node* n = createNode(NUMBER);
+    n->data = QString::number(number);
+
+    return n;
+}
+
 template<int a>
 Node* Parser::createNode(const NodeType& type, const std::array<Node*,a>& args){
     Node* n = createNode(type);
-    n->children = args;
+    n->children.insert(std::begin(n->children), std::begin(args), std::end(args));
 
     return n;
 }
@@ -296,16 +303,12 @@ Node* Parser::implicitMultiplication(){
 }
 
 Node* Parser::leftUnary(){
-    if(match(Minus)){
-        return createNode(UNARY_MINUS, leftUnary());
-    }else if(match(Not)){
-        return createNode(LOGICAL_NOT, rightUnary());
-    }else if(match(PlusMinus)){
-        return createNode(PLUS_MINUS_UNARY, rightUnary());
-    }else if(match(MinusPlus)){
-        return createNode(MINUS_PLUS_UNARY, rightUnary());
-    }else{
-        return rightUnary();
+    switch (current.type) {
+        case Minus: advance(); checkGap(); return createNode(UNARY_MINUS, rightUnary());
+        case Not: advance(); checkGap(); return createNode(LOGICAL_NOT, rightUnary());
+        case PlusMinus: advance(); checkGap(); return createNode(PLUS_MINUS_UNARY, rightUnary());
+        case MinusPlus: advance(); checkGap(); return createNode(MINUS_PLUS_UNARY, rightUnary());
+        default: return rightUnary();
     }
 }
 
@@ -444,7 +447,8 @@ Node* Parser::primary(){
         case MB_AccentBar: return mathBranUnary(ACCENT_BAR);
 
         default:
-            error("Unrecognized primary token: " + source.mid(previous.start, previous.length), previous);
+            error("Expected a primary expression, got \"" +
+                  source.mid(previous.start, previous.length) + '"', previous);
     }
 }
 
@@ -698,7 +702,6 @@ Node* Parser::parenStart(){
         if(match(RightParen)){
             return createNode(INTERVAL_OPEN_OPEN, expr, range_end);
         }else if(match(RightBrace)){
-            consume(RightBrace, "Expect ]");
             return createNode(INTERVAL_OPEN_CLOSE, expr, range_end);
         }else{
             consume(Comma, "Invalid interval or sequence");
@@ -725,10 +728,9 @@ Node* Parser::braceStart(){
         if(match(RightParen)){
             return createNode(INTERVAL_CLOSE_OPEN, expr, range_end);
         }else if(match(RightBrace)){
-            consume(RightBrace, "Expect ]");
             return createNode(INTERVAL_CLOSE_CLOSE, expr, range_end);
         }else if(match(Semicolon) || match(Newline)){
-            return braceMatrix(createNode(MATRIX, expr, range_end), 2, previous.type); //DO THIS - col count
+            return braceMatrix(createNode<3>(MATRIX, {createNode(2), expr, range_end}), 2, previous.type);
         }else{
             consume(Comma, "Expect end of interval or matrix delimiter");
             Node* n = createNode(MATRIX, expr, range_end);
@@ -738,6 +740,7 @@ Node* Parser::braceStart(){
                 cols++;
             } while(match(Comma));
 
+            n->children.insert(n->children.begin(), createNode(cols));
             if(match(Semicolon) || match(Newline)){
                 return braceMatrix(n, cols, previous.type);
             }else{
@@ -746,7 +749,7 @@ Node* Parser::braceStart(){
             }
         }
     }else if(match(Semicolon) || match(Newline)){
-        return braceMatrix(createNode(MATRIX, expr), 1, previous.type); //DO THIS - need to store col count
+        return braceMatrix(createNode(MATRIX, createNode(1), expr), 1, previous.type);
     }else{
         consume(RightBrace, "Expect ]");
         return createNode(GROUP_BRACKET, expr);
