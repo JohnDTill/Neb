@@ -15,20 +15,20 @@ Node* Parser::parseStatement(){
 
     try{
         Node* body = statementBody();
-        qDebug() << "PARSED STMT BODY";
         consume<3>({Newline, Comma, EndOfFile}, "Expect statement terminator");
-        qDebug() << "TERMINATED STMT";
         while(!dangling_nodes.empty()) dangling_nodes.pop();
 
         return body;
     }catch(int e){
         if(e == 646){
+            Node* n = dangling_nodes.top();
+            dangling_nodes.pop();
+
             while(!dangling_nodes.empty()){
                 delete dangling_nodes.top();
                 dangling_nodes.pop();
             }
 
-            Node* n = createNode(ERROR);
             scanToRecoveryPoint();
             return n;
         }else throw;
@@ -36,7 +36,7 @@ Node* Parser::parseStatement(){
 }
 
 Node* Parser::createNode(const NodeType& type){
-    Node* n = new Node(type, previous.start, previous.length);
+    Node* n = new Node(type, source.mid(previous.start, previous.length));
     dangling_nodes.push(n);
 
     return n;
@@ -78,24 +78,22 @@ void Parser::scanToRecoveryPoint(){
     }
 }
 
-void Parser::errorAt(Token* token, const QString& message){
-    err_msg = message + " at index " + QString::number(token->start);
-    throw 646;
-}
-
 void Parser::error(const QString& message){
-    errorAt(&previous, message);
+    error(message, current);
 }
 
-void Parser::errorAtCurrent(const QString& message){
-    errorAt(&current, message);
+void Parser::error(const QString& message, const Token& t){
+    err_msg = message;
+
+    Node* n = createNode(ERROR);
+    n->data = static_cast<char>(t.start);
+
+    throw 646;
 }
 
 void Parser::advance(){
     previous = current;
     current = scanner.scanToken();
-
-    qDebug() << "Scanned token " << token_labels[current.type];
 
     if(current.type == Error) throw 646;
 }
@@ -110,7 +108,7 @@ void Parser::consume(TokenType type, const QString& message){
         return;
     }
 
-    errorAtCurrent(message);
+    error(message);
 }
 
 template<int n>
@@ -122,7 +120,7 @@ void Parser::consume(const std::array<TokenType,n>& types, const QString& messag
         }
     }
 
-    errorAtCurrent(message);
+    error(message);
 }
 
 bool Parser::match(TokenType type){
@@ -316,14 +314,23 @@ Node* Parser::rightUnary(){
     while(peek<2>( {Exclam, Tick} )){
         if(match(Exclam)){
             Node* n = createNode(FACTORIAL);
-            while(match(Exclam));
-            n->length = current.start - n->start;
+            while(peek(Exclam)){
+                checkGap();
+                advance();
+                n->data += '!';
+            }
+
             return n;
         }else{
             consume(Tick, "Expect '");
             Node* n = createNode(TICK_DERIVATIVE);
             while(match(Tick));
-            n->length = current.start - n->start;
+            while(peek(Tick)){
+                checkGap();
+                advance();
+                n->data += '\'';
+            }
+
             return n;
         }
     }
@@ -370,6 +377,7 @@ Node* Parser::primary(){
         case Identifier: return idStart();
         case LeftParen: return parenStart();
         case LeftBrace: return braceStart();
+        case LeftDoubleBrace: return doubleBraceStart();
         case LeftBracket: return setStart();
 
         //Value literal
@@ -436,7 +444,7 @@ Node* Parser::primary(){
         case MB_AccentBar: return mathBranUnary(ACCENT_BAR);
 
         default:
-            error("Unrecognized primary token");
+            error("Unrecognized primary token: " + source.mid(previous.start, previous.length), previous);
     }
 }
 
@@ -458,7 +466,7 @@ Node* Parser::idStart(bool id_only){
     else if(match(MB_Superscript)){
         consume(MB_Open, "Expect open symbol");
         if(match(Multiply)){
-            n->length += 5;
+            n->data += "^*";
             consume(MB_Close, "Expect close symbol");
         }else if(id_only){
             error("Superscript not allowed in this context");
@@ -468,7 +476,7 @@ Node* Parser::idStart(bool id_only){
     }else if(match(MB_Subscript)){
         consume(MB_Open, "Expect open symbol");
         if(match(Multiply)){
-            n->length += 5;
+            n->data += "_*";
             consume(MB_Close, "Expect close symbol");
         }else if(id_only){
             error("Superscript not allowed in this context");
@@ -487,7 +495,7 @@ Node* Parser::call(Node* id){
     Node* first_arg = expression();
 
     if(match(Bar)){
-        if(id->type != IDENTIFIER || source.mid(id->start, id->length) != "P")
+        if(id->type != IDENTIFIER || id->data != "P")
             error("Probablity function can only be represented by P");
 
         id->type = CONDITIONAL_PROBABLITY;
@@ -688,10 +696,19 @@ Node* Parser::parenStart(){
         Node* range_end = expression();
 
         if(match(RightParen)){
-            return createNode(RANGE_OPEN_OPEN, expr, range_end);
-        }else{
+            return createNode(INTERVAL_OPEN_OPEN, expr, range_end);
+        }else if(match(RightBrace)){
             consume(RightBrace, "Expect ]");
-            return createNode(RANGE_OPEN_CLOSE, expr, range_end);
+            return createNode(INTERVAL_OPEN_CLOSE, expr, range_end);
+        }else{
+            consume(Comma, "Invalid interval or sequence");
+            Node* n = createNode(SEQUENCE_ENUMERATED, expr, range_end);
+            do{
+                n->children.push_back(expression());
+            } while(match(Comma));
+            consume(RightParen, "Expect ')' at end of sequence");
+
+            return n;
         }
     }else{
         consume(RightParen, "Expect )");
@@ -706,15 +723,57 @@ Node* Parser::braceStart(){
         Node* range_end = expression();
 
         if(match(RightParen)){
-            return createNode(RANGE_CLOSE_OPEN, expr, range_end);
-        }else{
+            return createNode(INTERVAL_CLOSE_OPEN, expr, range_end);
+        }else if(match(RightBrace)){
             consume(RightBrace, "Expect ]");
-            return createNode(RANGE_CLOSE_CLOSE, expr, range_end);
+            return createNode(INTERVAL_CLOSE_CLOSE, expr, range_end);
+        }else if(match(Semicolon) || match(Newline)){
+            return braceMatrix(createNode(MATRIX, expr, range_end), 2, previous.type); //DO THIS - col count
+        }else{
+            consume(Comma, "Expect end of interval or matrix delimiter");
+            Node* n = createNode(MATRIX, expr, range_end);
+            uint cols = 2;
+            do{
+                n->children.push_back(expression());
+                cols++;
+            } while(match(Comma));
+
+            if(match(Semicolon) || match(Newline)){
+                return braceMatrix(n, cols, previous.type);
+            }else{
+                consume(RightBrace, "Expect ']' at end of matrix");
+                return n;
+            }
         }
+    }else if(match(Semicolon) || match(Newline)){
+        return braceMatrix(createNode(MATRIX, expr), 1, previous.type); //DO THIS - need to store col count
     }else{
         consume(RightBrace, "Expect ]");
         return createNode(GROUP_BRACKET, expr);
     }
+}
+
+Node* Parser::braceMatrix(Node* n, uint col_count, TokenType row_delimiter){
+    do{
+        if(row_delimiter == Semicolon) match(Newline);
+        n->children.push_back(expression());
+        for(uint i = col_count-1; i > 0; i--){
+            consume(Comma, "Expect ',' between matrix elements");
+            n->children.push_back(expression());
+        }
+    } while(match(row_delimiter));
+    consume(RightBrace, "Expect ']' at end of matrix");
+
+    return n;
+}
+
+Node* Parser::doubleBraceStart(){
+    Node* start = expression();
+    consume(Comma, "Expect interval delimiter");
+    Node* end = expression();
+    consume(RightDoubleBrace, "Expect '⟧' to close integer interval");
+
+    return createNode(INTERVAL_INTEGER, start, end);
 }
 
 Node* Parser::setStart(){
@@ -855,6 +914,7 @@ Node* Parser::mathBranMatrix(){
     bool success;
     uint cols = source.midRef(previous.start, previous.length).toUInt(&success);
     if(!success || cols==0) error("Matrix column count must be positive");
+    n->children.push_back(createNode(NUMBER));
 
     do{
         for(uint i = cols; i > 0; i--){
@@ -922,35 +982,23 @@ Node* Parser::mathBranSuperscript(Node* body, bool consume_on_start){
     if(consume_on_start) consume(MB_Open, "Expect open symbol");
 
     switch (current.type) {
-        case Transpose:
-            advance();
-            consume(MB_Close, "Expect close symbol");
-            return createNode(TRANSPOSE, body);
-        case Dagger:
-            advance();
-            consume(MB_Close, "Expect close symbol");
-            return createNode(DAGGER, body);
-        case Conjunction:
-            advance();
-            consume(MB_Close, "Expect close symbol");
-            return createNode(WEDGE, body);
-        case Disjunction:
-            advance();
-            consume(MB_Close, "Expect close symbol");
-            return createNode(VEE, body);
-        case Plus:
-            advance();
-            consume(MB_Close, "Expect close symbol");
-            return createNode(INCREMENT, body);
-        case Minus:
-            advance();
-            consume(MB_Close, "Expect close symbol");
-            return createNode(DECREMENT, body);
+        case Transpose: return mathBranExponentOp(body, TRANSPOSE);
+        case Dagger: return mathBranExponentOp(body, DAGGER);
+        case Conjunction: return mathBranExponentOp(body, WEDGE);
+        case Disjunction: return mathBranExponentOp(body, VEE);
+        case Plus: return mathBranExponentOp(body, INCREMENT);
+        case Minus: return mathBranExponentOp(body, DECREMENT);
         default:
             Node* n = createNode(POWER, body, expression());
             consume(MB_Close, "Expect close symbol");
             return n;
     }
+}
+
+Node* Parser::mathBranExponentOp(Node* body, NodeType op){
+    advance();
+    consume(MB_Close, "Expect close symbol");
+    return createNode(op, body);
 }
 
 Node* Parser::mathBranSubscript(Node* body, bool consume_on_start){
@@ -972,6 +1020,7 @@ Node* Parser::mathBranSubscript(Node* body, bool consume_on_start){
 
 Node* Parser::mathBranDualscript(Node* body){
     return mathBranSuperscript(mathBranSubscript(body));
+    //Only bad case is sup-* ad ID: x_i^* should parse as x^*_i
 }
 
 Node* Parser::mathBranAccent(const NodeType& t){

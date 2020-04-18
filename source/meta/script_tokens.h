@@ -32,6 +32,11 @@ static ushort u(QString s){
 }
 
 int processTokens(){
+    //Settings
+    const QString interval_delimiter = "Comma";
+    const QString element_delimiter = "Bar";
+    Q_ASSERT(interval_delimiter != element_delimiter);
+
     //Open table file
     QFile table(":/TokenTable.csv");
     if(!table.open(QIODevice::ReadOnly)){

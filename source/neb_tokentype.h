@@ -68,6 +68,7 @@ enum TokenType{
 	LeftAngle,
 	LeftArrow,
 	LeftBrace,
+	LeftDoubleBrace,
 	LeftBracket,
 	LeftCeil,
 	LeftDoubleAngle,
@@ -159,6 +160,7 @@ enum TokenType{
 	RightArrow,
 	RightArrowDouble,
 	RightBrace,
+	RightDoubleBrace,
 	RightBracket,
 	RightCeil,
 	RightDoubleAngle,
@@ -258,6 +260,7 @@ static const QHash<TokenType, QString> token_labels {
 	{LeftAngle, "⟨"},
 	{LeftArrow, "←"},
 	{LeftBrace, "["},
+	{LeftDoubleBrace, "⟦"},
 	{LeftBracket, "{"},
 	{LeftCeil, "⌈"},
 	{LeftDoubleAngle, "⟪"},
@@ -349,6 +352,7 @@ static const QHash<TokenType, QString> token_labels {
 	{RightArrow, "→"},
 	{RightArrowDouble, "⇒"},
 	{RightBrace, "]"},
+	{RightDoubleBrace, "⟧"},
 	{RightBracket, "}"},
 	{RightCeil, "⌉"},
 	{RightDoubleAngle, "⟫"},
@@ -450,6 +454,7 @@ static const QHash<QString, TokenType> keywords {
 	 case 10216: return createToken(LeftAngle);\
 	 case 8592: return createToken(LeftArrow);\
 	 case 91: return createToken(LeftBrace);\
+	 case 10214: return createToken(LeftDoubleBrace);\
 	 case 123: return createToken(LeftBracket);\
 	 case 8968: return createToken(LeftCeil);\
 	 case 10218: return createToken(LeftDoubleAngle);\
@@ -493,6 +498,7 @@ static const QHash<QString, TokenType> keywords {
 	 case 8594: return createToken(RightArrow);\
 	 case 8658: return createToken(RightArrowDouble);\
 	 case 93: return createToken(RightBrace);\
+	 case 10215: return createToken(RightDoubleBrace);\
 	 case 125: return createToken(RightBracket);\
 	 case 8969: return createToken(RightCeil);\
 	 case 10219: return createToken(RightDoubleAngle);\
@@ -609,7 +615,7 @@ static const QHash<QString, TokenType> keywords {
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 186
+#define NEB_NUM_TOKENTYPES 188
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ConvolutionIntegral,\

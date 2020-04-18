@@ -33,9 +33,8 @@ private:
     Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
     template<int a> Node* createNode(const NodeType& type, const std::array<Node*,a>& args);
     void scanToRecoveryPoint();
-    [[noreturn]] void errorAt(Token* token, const QString& message);
     [[noreturn]] void error(const QString& message);
-    [[noreturn]] void errorAtCurrent(const QString& message);
+    [[noreturn]] void error(const QString& message, const Token& t);
     void advance();
     void checkGap();
     void consume(TokenType type, const QString& message);
@@ -85,6 +84,8 @@ private:
     Node* nablaStart();
     Node* parenStart();
     Node* braceStart();
+    Node* braceMatrix(Node* n, uint col_count, TokenType row_delimiter);
+    Node* doubleBraceStart();
     Node* setStart();
     Node* innerProduct();
     Node* integral(const NodeType& type);
@@ -101,6 +102,7 @@ private:
     Node* mathBranUnderscriptedFunction(const NodeType& t);
     Node* mathBranLimit();
     Node* mathBranSuperscript(Node* body, bool consume_on_start = true);
+    Node* mathBranExponentOp(Node* body, NodeType op);
     Node* mathBranSubscript(Node* body, bool consume_on_start = true);
     Node* mathBranDualscript(Node* body);
     Node* mathBranAccent(const NodeType& t);

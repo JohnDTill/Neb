@@ -58,6 +58,7 @@ Laplace¦ℒ¦y¦¦¦¦¦
 LeftAngle¦⟨¦y¦¦¦y¦¦
 LeftArrow¦←¦y¦¦¦¦¦
 LeftBrace¦[¦y¦¦¦y¦¦
+LeftDoubleBrace¦⟦¦y¦¦¦¦¦
 LeftBracket¦{¦y¦¦¦¦¦
 LeftCeil¦⌈¦y¦¦¦y¦¦
 LeftDoubleAngle¦⟪¦y¦¦¦¦¦
@@ -149,6 +150,7 @@ RightAngle¦⟩¦y¦¦¦¦¦
 RightArrow¦→¦y¦¦¦¦¦
 RightArrowDouble¦⇒¦y¦¦¦¦¦
 RightBrace¦]¦y¦¦¦¦¦
+RightDoubleBrace¦⟧¦y¦¦¦¦¦
 RightBracket¦}¦y¦¦¦¦¦
 RightCeil¦⌉¦y¦¦¦¦¦
 RightDoubleAngle¦⟫¦y¦¦¦¦¦

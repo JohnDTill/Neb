@@ -10,19 +10,19 @@ namespace Neb {
 
 struct Node {
     NodeType type;
-    QString::size_type start;
-    QString::size_type length;
+    QString data; //Copying all the data is not ideal, but okay in early stage
     std::vector<Node*> children;
 
     Node(){}
-    Node(NodeType type, QString::size_type start, QString::size_type length)
-        : type(type), start(start), length(length) {}
+    Node(NodeType type) : type(type) {}
+    Node(NodeType type, QString data)
+        : type(type), data(data) {}
 };
 
 class NodeFunction{
 public:
-    static QString toDOT(const Node* n, const QString& source);
-    static QString toDOT(const std::vector<Node*>& nodes, const QString& source);
+    static QString toDOT(const Node* n);
+    static QString toDOT(const std::vector<Node*>& nodes);
     static void deletePostorder(Node* n);
 };
 
