@@ -925,19 +925,26 @@ Node* Parser::mathBranBigOperator(const NodeType& t){
 Node* Parser::mathBranMatrix(){
     Node* n = createNode(MATRIX);
 
-    consume(Number, "Expect matrix column count");
+    consume(MB_Open, "Expect open symbol for matrix row count");
+    consume(Number, "Expect matrix row count");
     bool success;
-    uint cols = source.midRef(previous.start, previous.length).toUInt(&success);
-    if(!success || cols==0) error("Matrix column count must be positive");
+    ushort rows = source.midRef(previous.start, previous.length).toUShort(&success);
+    if(!success || rows==0 || rows> 255) error("Matrix column count must be positive");
     n->children.push_back(createNode(NUMBER));
+    consume(MB_Close, "Expect close symbol for matrix row count");
 
-    do{
-        for(uint i = cols; i > 0; i--){
-            consume(MB_Open, "Expect open symbol");
-            n->children.push_back(expression());
-            consume(MB_Close, "Expect close symbol");
-        }
-    } while(current.type == MB_Open);
+    consume(MB_Open, "Expect open symbol for matrix col count");
+    consume(Number, "Expect matrix col count");
+    ushort cols = source.midRef(previous.start, previous.length).toUShort(&success);
+    if(!success || cols==0 || cols > 255) error("Matrix column count must be positive");
+    n->children.push_back(createNode(NUMBER));
+    consume(MB_Close, "Expect close symbol for matrix col count");
+
+    for(ushort i = 0; i < rows*cols; i++){
+        consume(MB_Open, "Expect open symbol for matrix arg " + QString::number(i+1));
+        n->children.push_back(expression());
+        consume(MB_Close, "Expect close symbol for matrix arg " + QString::number(i+1));
+    }
 
     return n;
 }
