@@ -416,8 +416,7 @@ Node* Parser::primary(){
 
         //MathBran
         case MB_Binomial: return mathBranBinary(BINOMIAL);
-        case MB_Root: return mathBranUnary(SQRT);
-        case MB_ScriptedRoot: return mathBranBinary(ROOT);
+        case MB_Root: return mathBranRoot();
         case MB_Integral: return mathBranIntegral(INTEGRAL);
         case MB_ConvolutionIntegral: return mathBranIntegral(CONVOLUTION_INTEGRAL);
         case MB_DoubleIntegral: return mathBranIntegral(DOUBLE_INTEGRAL);
@@ -840,13 +839,26 @@ Node* Parser::mathBranUnary(const NodeType& t){
 
 Node* Parser::mathBranBinary(const NodeType& t){
     consume(MB_Open, "Expect MB open symbol");
-    Node* lhs = parseStatement();
+    Node* lhs = expression();
     consume(MB_Close, "Expect MB close symbol");
     consume(MB_Open, "Expect MB open symbol");
-    Node* rhs = parseStatement();
+    Node* rhs = expression();
     consume(MB_Close, "Expect MB close symbol");
 
     return createNode(t, lhs, rhs);
+}
+
+Node* Parser::mathBranRoot(){
+    consume(MB_Open, "Expect MB open symbol");
+    Node* body = expression();
+    consume(MB_Close, "Expect MB close symbol");
+    if(match(MB_Open)){
+        Node* script = expression();
+        consume(MB_Close, "Expect MB close symbol");
+        return createNode(ROOT, body, script);
+    }else{
+        return createNode(SQRT, body);
+    }
 }
 
 Node* Parser::mathBranIntegral(const NodeType& type){

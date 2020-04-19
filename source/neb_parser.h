@@ -94,6 +94,7 @@ private:
     //MathBran
     Node* mathBranUnary(const NodeType& t);
     Node* mathBranBinary(const NodeType& t);
+    Node* mathBranRoot();
     Node* mathBranIntegral(const NodeType& type);
     Node* mathBranCases();
     Node* mathBranBigOperator(const NodeType& t);
