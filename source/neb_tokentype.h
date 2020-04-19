@@ -116,7 +116,6 @@ enum TokenType{
 	MB_Open,
 	MB_Product,
 	MB_Root,
-	MB_ScriptedRoot,
 	MB_Subscript,
 	MB_Sum,
 	MB_Superscript,
@@ -308,7 +307,6 @@ static const QHash<TokenType, QString> token_labels {
 	{MB_Open, "⏴"},
 	{MB_Product, "⁜∏"},
 	{MB_Root, "⁜√"},
-	{MB_ScriptedRoot, "⁜∛"},
 	{MB_Subscript, "⁜_"},
 	{MB_Sum, "⁜∑"},
 	{MB_Superscript, "⁜^"},
@@ -571,7 +569,6 @@ static const QHash<QString, TokenType> keywords {
 	 case 8595: return createToken(MB_Min);\
 	 case 8719: return createToken(MB_Product);\
 	 case 8730: return createToken(MB_Root);\
-	 case 8731: return createToken(MB_ScriptedRoot);\
 	 case 95: return createToken(MB_Subscript);\
 	 case 8721: return createToken(MB_Sum);\
 	 case 94: return createToken(MB_Superscript);\
@@ -615,7 +612,7 @@ static const QHash<QString, TokenType> keywords {
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 188
+#define NEB_NUM_TOKENTYPES 187
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ConvolutionIntegral,\
@@ -661,7 +658,6 @@ static const QHash<QString, TokenType> keywords {
 	MB_Min,\
 	MB_Product,\
 	MB_Root,\
-	MB_ScriptedRoot,\
 	MB_Subscript,\
 	MB_Sum,\
 	MB_Superscript,\
@@ -675,6 +671,6 @@ static const QHash<QString, TokenType> keywords {
 	Tangent,\
 }
 
-#define NEB_NUM_IMPLICIT_MULT 55
+#define NEB_NUM_IMPLICIT_MULT 54
 
 #endif

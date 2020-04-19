@@ -1033,8 +1033,15 @@ Node* Parser::mathBranSubscript(Node* body, bool consume_on_start){
             consume(MB_Close, "Expect close symbol");
             return n;
         }
+        case Bar:{
+            advance();
+            Node* n = createNode(EVAL, body, statementBody());
+            consume(MB_Close, "Expect close symbol");
+            return n;
+        }
         default:
             Node* n = createNode(SUBSCRIPT_ACCESS, body, expression());
+            while(match(Comma)) n->children.push_back(expression());
             consume(MB_Close, "Expect close symbol");
             return n;
     }

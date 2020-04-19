@@ -46,6 +46,7 @@ enum NodeType{
 	EMPTY_SET,
 	EQUAL,
 	ERROR,
+	EVAL,
 	EXPR_STMT,
 	FACTORIAL,
 	FLOOR,
@@ -167,6 +168,7 @@ static const QHash<NodeType, QString> labels {
 	{EMPTY_SET, "∅"},
 	{EQUAL, "="},
 	{ERROR, "err"},
+	{EVAL, "⁜_|"},
 	{EXPR_STMT, "expr\\nstmt"},
 	{FACTORIAL, "!"},
 	{FLOOR, "⌊ ⌋"},
@@ -250,6 +252,6 @@ static const QHash<NodeType, QString> labels {
 };
 #endif
 
-#define NEB_NUM_NODETYPES 117
+#define NEB_NUM_NODETYPES 118
 
 #endif

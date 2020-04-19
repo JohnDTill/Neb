@@ -36,6 +36,7 @@ DOUBLE_INTEGRAL¦∬¦
 EMPTY_SET¦∅¦
 EQUAL¦=¦
 ERROR¦err¦
+EVAL¦⁜_|¦
 EXPR_STMT¦expr\\nstmt¦
 FACTORIAL¦!¦
 FLOOR¦⌊ ⌋¦
