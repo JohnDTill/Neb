@@ -412,17 +412,17 @@ Node* Parser::primary(){
         case Nabla: return nablaStart();
         case LeftAngle: return innerProduct();
         case Integral: return integral(INTEGRAL);
-        case ConvolutionIntegral: return integral(CONVOLUTION_INTEGRAL);
+        case ContourIntegral: return integral(CONTOUR_INTEGRAL);
 
         //MathBran
         case MB_Binomial: return mathBranBinary(BINOMIAL);
         case MB_Root: return mathBranRoot();
         case MB_Integral: return mathBranIntegral(INTEGRAL);
-        case MB_ConvolutionIntegral: return mathBranIntegral(CONVOLUTION_INTEGRAL);
+        case MB_ContourIntegral: return mathBranIntegral(CONTOUR_INTEGRAL);
         case MB_DoubleIntegral: return mathBranIntegral(DOUBLE_INTEGRAL);
-        case MB_DoubleConvolutionIntegral: return mathBranIntegral(DOUBLE_CONVOLUTION_INTEGRAL);
+        case MB_ClosedSurfaceIntegral: return mathBranIntegral(CLOSED_SURFACE_INTEGRAL);
         case MB_TripleIntegral: return mathBranIntegral(TRIPLE_INTEGRAL);
-        case MB_TripleConvolutionIntegral: return mathBranIntegral(TRIPLE_CONVOLUTION_INTEGRAL);
+        case MB_ClosedVolumeIntegral: return mathBranIntegral(CLOSED_VOLUME_INTEGRAL);
         case MB_Cases: return mathBranCases();
         case MB_Sum: return mathBranBigOperator(SUMMATION);
         case MB_Product: return mathBranBigOperator(PRODUCT);
@@ -870,7 +870,7 @@ Node* Parser::mathBranIntegral(const NodeType& type){
         consume(MB_Close, "Expect close symbol");
 
         //Optional superscript
-        if((type == INTEGRAL || type == CONVOLUTION_INTEGRAL) && match(MB_Open)){
+        if((type == INTEGRAL || type == CONTOUR_INTEGRAL) && match(MB_Open)){
             tf = expression();
             consume(MB_Close, "Expect close symbol");
         }

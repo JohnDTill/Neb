@@ -18,7 +18,7 @@ enum TokenType{
 	Colon,
 	Comma,
 	Conjunction,
-	ConvolutionIntegral,
+	ContourIntegral,
 	Cos,
 	Cup,
 	Dagger,
@@ -68,10 +68,10 @@ enum TokenType{
 	LeftAngle,
 	LeftArrow,
 	LeftBrace,
-	LeftDoubleBrace,
 	LeftBracket,
 	LeftCeil,
 	LeftDoubleAngle,
+	LeftDoubleBrace,
 	LeftFloor,
 	LeftParen,
 	Less,
@@ -89,21 +89,18 @@ enum TokenType{
 	MB_Binomial,
 	MB_Cases,
 	MB_Close,
-	MB_ConvolutionIntegral,
+	MB_ClosedSurfaceIntegral,
+	MB_ClosedVolumeIntegral,
+	MB_ContourIntegral,
 	MB_Coproduct,
-	MB_DoubleConvolutionIntegral,
 	MB_DoubleIntegral,
 	MB_Dualscript,
+	MB_EvalBar,
 	MB_Fraction,
-	MB_GroupingAngle,
 	MB_GroupingBar,
-	MB_GroupingBrace,
 	MB_GroupingBracket,
 	MB_GroupingCeil,
-	MB_GroupingDoubleAngle,
 	MB_GroupingDoubleBars,
-	MB_GroupingDoubleBracket,
-	MB_GroupingEvalBar,
 	MB_GroupingFloor,
 	MB_GroupingParen,
 	MB_Infimum,
@@ -120,7 +117,6 @@ enum TokenType{
 	MB_Sum,
 	MB_Superscript,
 	MB_Supremum,
-	MB_TripleConvolutionIntegral,
 	MB_TripleIntegral,
 	MB_Union,
 	MB_UnionPlus,
@@ -159,10 +155,10 @@ enum TokenType{
 	RightArrow,
 	RightArrowDouble,
 	RightBrace,
-	RightDoubleBrace,
 	RightBracket,
 	RightCeil,
 	RightDoubleAngle,
+	RightDoubleBrace,
 	RightFloor,
 	RightParen,
 	Semicolon,
@@ -209,7 +205,7 @@ static const QHash<TokenType, QString> token_labels {
 	{Colon, ":"},
 	{Comma, ","},
 	{Conjunction, "∧"},
-	{ConvolutionIntegral, "∮"},
+	{ContourIntegral, "∮"},
 	{Cos, "cos"},
 	{Cup, "∪"},
 	{Dagger, "†"},
@@ -259,10 +255,10 @@ static const QHash<TokenType, QString> token_labels {
 	{LeftAngle, "⟨"},
 	{LeftArrow, "←"},
 	{LeftBrace, "["},
-	{LeftDoubleBrace, "⟦"},
 	{LeftBracket, "{"},
 	{LeftCeil, "⌈"},
 	{LeftDoubleAngle, "⟪"},
+	{LeftDoubleBrace, "⟦"},
 	{LeftFloor, "⌊"},
 	{LeftParen, "("},
 	{Less, "<"},
@@ -280,21 +276,18 @@ static const QHash<TokenType, QString> token_labels {
 	{MB_Binomial, "⁜b"},
 	{MB_Cases, "⁜c"},
 	{MB_Close, "⏵"},
-	{MB_ConvolutionIntegral, "⁜∮"},
+	{MB_ClosedSurfaceIntegral, "⁜∯"},
+	{MB_ClosedVolumeIntegral, "⁜∰"},
+	{MB_ContourIntegral, "⁜∮"},
 	{MB_Coproduct, "⁜∐"},
-	{MB_DoubleConvolutionIntegral, "⁜∯"},
 	{MB_DoubleIntegral, "⁜∬"},
 	{MB_Dualscript, "⁜Δ"},
+	{MB_EvalBar, "⁜┊"},
 	{MB_Fraction, "⁜f"},
-	{MB_GroupingAngle, "⁜⟨"},
 	{MB_GroupingBar, "⁜|"},
-	{MB_GroupingBrace, "⁜{"},
 	{MB_GroupingBracket, "⁜["},
 	{MB_GroupingCeil, "⁜⌈"},
-	{MB_GroupingDoubleAngle, "⁜⟪"},
 	{MB_GroupingDoubleBars, "⁜‖"},
-	{MB_GroupingDoubleBracket, "⁜⟦"},
-	{MB_GroupingEvalBar, "⁜┊"},
 	{MB_GroupingFloor, "⁜⌊"},
 	{MB_GroupingParen, "⁜("},
 	{MB_Infimum, "⁜↘"},
@@ -311,7 +304,6 @@ static const QHash<TokenType, QString> token_labels {
 	{MB_Sum, "⁜∑"},
 	{MB_Superscript, "⁜^"},
 	{MB_Supremum, "⁜↗"},
-	{MB_TripleConvolutionIntegral, "⁜∰"},
 	{MB_TripleIntegral, "⁜∭"},
 	{MB_Union, "⁜⋃"},
 	{MB_UnionPlus, "⁜⨄"},
@@ -350,10 +342,10 @@ static const QHash<TokenType, QString> token_labels {
 	{RightArrow, "→"},
 	{RightArrowDouble, "⇒"},
 	{RightBrace, "]"},
-	{RightDoubleBrace, "⟧"},
 	{RightBracket, "}"},
 	{RightCeil, "⌉"},
 	{RightDoubleAngle, "⟫"},
+	{RightDoubleBrace, "⟧"},
 	{RightFloor, "⌋"},
 	{RightParen, ")"},
 	{Semicolon, ";"},
@@ -411,7 +403,7 @@ static const QHash<QString, TokenType> keywords {
 	 case 58: return createToken(Colon);\
 	 case 44: return createToken(Comma);\
 	 case 8743: return createToken(Conjunction);\
-	 case 8750: return createToken(ConvolutionIntegral);\
+	 case 8750: return createToken(ContourIntegral);\
 	 case 8746: return createToken(Cup);\
 	 case 8224: return createToken(Dagger);\
 	 case 8788: return createToken(DefEquals);\
@@ -452,10 +444,10 @@ static const QHash<QString, TokenType> keywords {
 	 case 10216: return createToken(LeftAngle);\
 	 case 8592: return createToken(LeftArrow);\
 	 case 91: return createToken(LeftBrace);\
-	 case 10214: return createToken(LeftDoubleBrace);\
 	 case 123: return createToken(LeftBracket);\
 	 case 8968: return createToken(LeftCeil);\
 	 case 10218: return createToken(LeftDoubleAngle);\
+	 case 10214: return createToken(LeftDoubleBrace);\
 	 case 8970: return createToken(LeftFloor);\
 	 case 40: return createToken(LeftParen);\
 	 case 60: return createToken(Less);\
@@ -496,10 +488,10 @@ static const QHash<QString, TokenType> keywords {
 	 case 8594: return createToken(RightArrow);\
 	 case 8658: return createToken(RightArrowDouble);\
 	 case 93: return createToken(RightBrace);\
-	 case 10215: return createToken(RightDoubleBrace);\
 	 case 125: return createToken(RightBracket);\
 	 case 8969: return createToken(RightCeil);\
 	 case 10219: return createToken(RightDoubleAngle);\
+	 case 10215: return createToken(RightDoubleBrace);\
 	 case 8971: return createToken(RightFloor);\
 	 case 41: return createToken(RightParen);\
 	 case 59: return createToken(Semicolon);\
@@ -543,21 +535,18 @@ static const QHash<QString, TokenType> keywords {
 	 case 227: return createToken(MB_AccentTilde);\
 	 case 98: return createToken(MB_Binomial);\
 	 case 99: return createToken(MB_Cases);\
-	 case 8750: return createToken(MB_ConvolutionIntegral);\
+	 case 8751: return createToken(MB_ClosedSurfaceIntegral);\
+	 case 8752: return createToken(MB_ClosedVolumeIntegral);\
+	 case 8750: return createToken(MB_ContourIntegral);\
 	 case 8720: return createToken(MB_Coproduct);\
-	 case 8751: return createToken(MB_DoubleConvolutionIntegral);\
 	 case 8748: return createToken(MB_DoubleIntegral);\
 	 case 916: return createToken(MB_Dualscript);\
+	 case 9482: return createToken(MB_EvalBar);\
 	 case 102: return createToken(MB_Fraction);\
-	 case 10216: return createToken(MB_GroupingAngle);\
 	 case 124: return createToken(MB_GroupingBar);\
-	 case 123: return createToken(MB_GroupingBrace);\
 	 case 91: return createToken(MB_GroupingBracket);\
 	 case 8968: return createToken(MB_GroupingCeil);\
-	 case 10218: return createToken(MB_GroupingDoubleAngle);\
 	 case 8214: return createToken(MB_GroupingDoubleBars);\
-	 case 10214: return createToken(MB_GroupingDoubleBracket);\
-	 case 9482: return createToken(MB_GroupingEvalBar);\
 	 case 8970: return createToken(MB_GroupingFloor);\
 	 case 40: return createToken(MB_GroupingParen);\
 	 case 8600: return createToken(MB_Infimum);\
@@ -573,7 +562,6 @@ static const QHash<QString, TokenType> keywords {
 	 case 8721: return createToken(MB_Sum);\
 	 case 94: return createToken(MB_Superscript);\
 	 case 8599: return createToken(MB_Supremum);\
-	 case 8752: return createToken(MB_TripleConvolutionIntegral);\
 	 case 8749: return createToken(MB_TripleIntegral);\
 	 case 8899: return createToken(MB_Union);\
 	 case 10756: return createToken(MB_UnionPlus);
@@ -612,10 +600,10 @@ static const QHash<QString, TokenType> keywords {
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 187
+#define NEB_NUM_TOKENTYPES 183
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
-	ConvolutionIntegral,\
+	ContourIntegral,\
 	Cos,\
 	Identifier,\
 	Integral,\
@@ -635,15 +623,14 @@ static const QHash<QString, TokenType> keywords {
 	MB_AccentTilde,\
 	MB_Binomial,\
 	MB_Cases,\
-	MB_ConvolutionIntegral,\
+	MB_ClosedSurfaceIntegral,\
+	MB_ClosedVolumeIntegral,\
+	MB_ContourIntegral,\
 	MB_Coproduct,\
-	MB_DoubleConvolutionIntegral,\
 	MB_DoubleIntegral,\
 	MB_Dualscript,\
 	MB_Fraction,\
-	MB_GroupingAngle,\
 	MB_GroupingBar,\
-	MB_GroupingBrace,\
 	MB_GroupingBracket,\
 	MB_GroupingCeil,\
 	MB_GroupingDoubleBars,\
@@ -662,7 +649,6 @@ static const QHash<QString, TokenType> keywords {
 	MB_Sum,\
 	MB_Superscript,\
 	MB_Supremum,\
-	MB_TripleConvolutionIntegral,\
 	MB_TripleIntegral,\
 	Nabla,\
 	NaturalLog,\
@@ -671,6 +657,6 @@ static const QHash<QString, TokenType> keywords {
 	Tangent,\
 }
 
-#define NEB_NUM_IMPLICIT_MULT 54
+#define NEB_NUM_IMPLICIT_MULT 52
 
 #endif
