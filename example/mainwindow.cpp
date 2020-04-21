@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui(new Ui::MainWindow){
     ui->setupUi(this);
 
-    ui->code_edit->setPlainText("x⁜^⏴*⏵ ∈ ℝ\ny = x⁜^⏴2⏵");
+    ui->code_edit->setPlainText("⁜f⏴∂φ(r,t)⏵⏴∂t⏵ = ∇⋅ [D(φ, r) ∇φ(r, t)]");
 }
 
 MainWindow::~MainWindow(){

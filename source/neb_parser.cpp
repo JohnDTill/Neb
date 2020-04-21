@@ -506,7 +506,7 @@ Node* Parser::call(Node* id){
         while(!match(RightParen)){
             consume(Comma, "Expect ',' between call args");
             match(Newline);
-            n->children.push_back(parseStatement());
+            n->children.push_back(expression());
         }
 
         return n;
