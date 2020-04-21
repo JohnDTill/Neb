@@ -38,7 +38,6 @@ void MainWindow::on_exec_button_clicked(){
 
             int line = 1 + code.leftRef(index).count('\n');
             errors.append( "Line " + QString::number(line) + " | " + parser.err_msg);
-            parser.err_msg.clear();
         }
     }
 

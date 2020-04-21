@@ -12,7 +12,7 @@ namespace Neb {
 
 class Parser{
 public:
-    QString err_msg;
+    QString err_msg = "";
 
 private:
     const QString& source;
@@ -20,7 +20,6 @@ private:
     Token current;
     Token previous;
     bool parsing_dimensions = false;
-    std::stack<Node*> dangling_nodes;
 
 public:
     Parser(const QString& source);
@@ -34,8 +33,8 @@ private:
     template<int a> Node* createNode(const NodeType& type, const std::array<Node*,a>& args);
     Node* createNode(uint number);
     void scanToRecoveryPoint();
-    [[noreturn]] void error(const QString& message);
-    [[noreturn]] void error(const QString& message, const Token& t);
+    void error(const QString& message);
+    void error(const QString& message, const Token& t);
     void advance();
     void checkGap();
     void consume(TokenType type, const QString& message);

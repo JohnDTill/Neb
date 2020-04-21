@@ -9,37 +9,27 @@ Parser::Parser(const QString& source)
 }
 
 Node* Parser::parseStatement(){
-    if(previous.type == EndOfFile) return nullptr;
+    if(current.type == Error){
+        scanToRecoveryPoint();
+        err_msg.clear();
+    }
 
     while(match(Newline));
+    if(match(EndOfFile)) return nullptr;
 
-    try{
-        Node* body = statementBody();
-        consume<3>({Newline, Comma, EndOfFile}, "Expect statement terminator");
-        while(!dangling_nodes.empty()) dangling_nodes.pop();
+    Node* body = statementBody();
+    consume<3>({Newline, Comma, EndOfFile}, "Expect statement terminator");
 
+    if(current.type == Error){
+        NodeFunction::deletePostorder(body);
+        return new Node(ERROR, QString(current.start));
+    }else{
         return body;
-    }catch(int e){
-        if(e == 646){
-            Node* n = dangling_nodes.top();
-            dangling_nodes.pop();
-
-            while(!dangling_nodes.empty()){
-                delete dangling_nodes.top();
-                dangling_nodes.pop();
-            }
-
-            scanToRecoveryPoint();
-            return n;
-        }else throw;
     }
 }
 
 Node* Parser::createNode(const NodeType& type){
-    Node* n = new Node(type, source.mid(previous.start, previous.length));
-    dangling_nodes.push(n);
-
-    return n;
+    return new Node(type, source.mid(previous.start, previous.length));
 }
 
 Node* Parser::createNode(const NodeType& type, Node* child){
@@ -80,7 +70,8 @@ void Parser::scanToRecoveryPoint(){
             line_continuation = true;
         }else{
             line_continuation = false;
-            advance();
+            previous = current;
+            current = scanner.scanToken();
         }
     }
 }
@@ -90,19 +81,20 @@ void Parser::error(const QString& message){
 }
 
 void Parser::error(const QString& message, const Token& t){
+    if(!err_msg.isEmpty()) return;
+
     err_msg = message;
 
-    Node* n = createNode(ERROR);
-    n->data = static_cast<char>(t.start);
-
-    throw 646;
+    current.type = Error;
+    current.start = t.start;
+    current.length = t.length;
 }
 
 void Parser::advance(){
+    if(current.type == Error) return;
+
     previous = current;
     current = scanner.scanToken();
-
-    if(current.type == Error) throw 646;
 }
 
 void Parser::checkGap(){
@@ -448,6 +440,7 @@ Node* Parser::primary(){
         default:
             error("Expected a primary expression, got \"" +
                   source.mid(previous.start, previous.length) + '"', previous);
+            return createNode(ERROR);
     }
 }
 
@@ -533,7 +526,7 @@ Node* Parser::setLiteral(){
                 return createNode(POSITIVE_RATIONALS);
             }else{
                 error("Set does not support positive script");
-                return createNode(t);
+                return createNode(ERROR);
             }
         case SuperscriptMinus:
             checkGap();
@@ -544,7 +537,7 @@ Node* Parser::setLiteral(){
                 return createNode(NEGATIVE_RATIONALS);
             }else{
                 error("Set does not support negative script");
-                return createNode(t);
+                return createNode(ERROR);
             }
         case SuperscriptIdentifier:
         case SuperscriptLeftParen:
@@ -568,6 +561,7 @@ Node* Parser::setLiteralMathBranScript(const NodeType& t){
                 return createNode(POSITIVE_REALS);
             }else{
                 error("Set does not support positive script");
+                return createNode(ERROR);
             }
         case Minus:
             advance();
@@ -576,6 +570,7 @@ Node* Parser::setLiteralMathBranScript(const NodeType& t){
                 return createNode(NEGATIVE_REALS);
             }else{
                 error("Set does not support negative script");
+                return createNode(ERROR);
             }
         default:
             parsing_dimensions = true;
