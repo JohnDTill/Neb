@@ -167,6 +167,7 @@ Node* Parser::statementBody(){
         case DefEquals: advance(); return createNode(DEFINE_EQUALS, n, expression());
         case NotEqual: advance(); return createNode(NOT_EQUAL, n, expression());
         case Proportional: advance(); return createNode(PROPORTIONAL, n, expression());
+        case Colon: advance(); return functionDefinition(n);
         default: return createNode(EXPR_STMT, n);
     }
 }
@@ -200,6 +201,54 @@ Node* Parser::greater(Node* n){
     } while(match<2>({Greater, GreaterEqual}));
 
     return n;
+}
+
+Node* Parser::functionDefinition(Node* n){
+    if(n->type != IDENTIFIER){
+        error("Expected identifier in function definition");
+        NodeFunction::deletePostorder(n);
+        return createNode(Error);
+    }
+
+    if(match(LeftParen)){
+        //example - p : (x,y) ↦ x^y
+        n = createNode(FUN_DEF, n);
+
+        consume(Identifier, "Pure function must have an input");
+        n->children.push_back(createNode(IDENTIFIER));
+
+        while(!match(RightParen)){
+            consume(Comma, "Expect ',' between function parameters");
+            consume(Identifier, "Expect identifier");
+            n->children.push_back(createNode(IDENTIFIER));
+        }
+
+        consume(MapsTo, "Expect '↦' after parameter list");
+        n->children.push_back(expression());
+        return n;
+    }else{
+        //example - f : ℝ × ℤ → ℝ
+        n = createNode(FUN_SIGNATURE, n);
+
+        parsing_dimensions = true;
+        Node* input_type = expression();
+        //DO THIS - validate that input_type has type "set"
+        n->children.push_back(input_type);
+
+        while(!match(RightArrow)){
+            consume(Times, "Expect input type delimiter '×'");
+            Node* param = expression();
+            //DO THIS - validate that input_type has type "set"
+            n->children.push_back(param);
+        }
+        parsing_dimensions = false;
+
+        Node* output_type = expression();
+        //DO THIS - validate that output_type has type "set"
+        n->children.push_back(output_type);
+
+        return n;
+    }
 }
 
 Node* Parser::expression(){

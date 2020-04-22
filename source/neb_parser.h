@@ -49,6 +49,7 @@ private:
     Node* equality(Node* n);
     Node* less(Node* n);
     Node* greater(Node* n);
+    Node* functionDefinition(Node* n);
 
     //Expression descent
     Node* expression();

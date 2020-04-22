@@ -52,6 +52,8 @@ enum NodeType{
 	FLOOR,
 	FORWARDSLASH,
 	FRACTION,
+	FUN_DEF,
+	FUN_SIGNATURE,
 	GRADIENT,
 	GREATER,
 	GREATER_EQUAL,
@@ -174,7 +176,9 @@ static const QHash<NodeType, QString> labels {
 	{FLOOR, "⌊ ⌋"},
 	{FORWARDSLASH, "/"},
 	{FRACTION, "⁜f"},
-	{GRADIENT, "∇ "},
+	{FUN_DEF, "f:()↦"},
+	{FUN_SIGNATURE, "f:×→"},
+	{GRADIENT, "∇"},
 	{GREATER, ">"},
 	{GREATER_EQUAL, "≥"},
 	{GROUP_BRACKET, "[ ]"},
@@ -252,6 +256,6 @@ static const QHash<NodeType, QString> labels {
 };
 #endif
 
-#define NEB_NUM_NODETYPES 118
+#define NEB_NUM_NODETYPES 120
 
 #endif
