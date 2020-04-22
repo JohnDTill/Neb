@@ -8,7 +8,8 @@ MainWindow::MainWindow(QWidget* parent) :
     ui(new Ui::MainWindow){
     ui->setupUi(this);
 
-    ui->code_edit->setPlainText("⁜f⏴∂φ(r,t)⏵⏴∂t⏵ = ∇⋅ [D(φ, r) ∇φ(r, t)]");
+    ui->code_edit->setPlainText("//The diffusion equation is:\n"
+                                "⁜f⏴∂φ(r,t)⏵⏴∂t⏵ = ∇⋅ [D(φ, r) ∇φ(r, t)]");
 }
 
 MainWindow::~MainWindow(){

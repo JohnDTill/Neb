@@ -96,15 +96,21 @@ Token Scanner::createToken(TokenType t){
 void Scanner::skipWhitespace(){
     while(curr < source.size()){
         switch (source[curr].unicode()) {
-            //This would be the place to ignore comments
             case ' ':
             case '\t':
                 curr++;
                 break;
+            case '/':
+                if(curr+1 < source.size() && source[curr+1] == '/') skipLineComment();
+                return;
             default:
                 return;
         }
     }
+}
+
+void Scanner::skipLineComment(){
+    while(curr < source.size() && source[curr] != '\n') curr++;
 }
 
 Token Scanner::scanBigToken(){

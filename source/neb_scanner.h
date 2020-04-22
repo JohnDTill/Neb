@@ -21,6 +21,7 @@ public:
 private:
     Token createToken(TokenType t);
     void skipWhitespace();
+    void skipLineComment();
     Token scanBigToken();
     Token scanMathBranToken();
     Token scanIdentifier();
