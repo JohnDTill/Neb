@@ -349,6 +349,7 @@ Node* Parser::leftUnary(){
         case Not: advance(); checkGap(); return createNode(LOGICAL_NOT, rightUnary());
         case PlusMinus: advance(); checkGap(); return createNode(PLUS_MINUS_UNARY, rightUnary());
         case MinusPlus: advance(); checkGap(); return createNode(MINUS_PLUS_UNARY, rightUnary());
+        case Pound: advance(); return createNode(CARDINALITY, script());
         default: return rightUnary();
     }
 }
@@ -423,6 +424,8 @@ Node* Parser::primary(){
         case LeftBrace: return braceStart();
         case LeftDoubleBrace: return doubleBraceStart();
         case LeftBracket: return setStart();
+        case Aleph: return cardinalNumber(ALEPH);
+        case Beth: return cardinalNumber(BETH);
 
         //Value literal
         case EmptySet: return createNode(EMPTY_SET);
@@ -874,6 +877,19 @@ Node* Parser::integral(const NodeType& type){
     n->children.push_back(idOnly());
 
     return n;
+}
+
+Node* Parser::cardinalNumber(NodeType type){
+    if(peek<3>({SubscriptNumber, SubscriptLeftParen, SubscriptIdentifier}))
+        return createNode(type, unicodeSubscriptExpression());
+
+    checkGap();
+    consume(MB_Subscript, "Expect cardinal number to have a subscript");
+    consume(MB_Open, "Expect open");
+    Node* degree = expression();
+    consume(MB_Close, "Expect close");
+
+    return createNode(type, degree);
 }
 
 Node* Parser::mathBranUnary(const NodeType& t){

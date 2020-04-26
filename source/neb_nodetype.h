@@ -19,8 +19,10 @@ enum NodeType{
 	ACCENT_HAT,
 	ACCENT_TILDE,
 	ADDITION,
+	ALEPH,
 	ARGS,
 	BACKSLASH,
+	BETH,
 	BINOMIAL,
 	BOOLEANS,
 	CALL,
@@ -41,6 +43,7 @@ enum NodeType{
 	DIVERGENCE,
 	DIVIDE,
 	DOT,
+	CARDINALITY,
 	CLOSED_SURFACE_INTEGRAL,
 	DOUBLE_INTEGRAL,
 	EMPTY_SET,
@@ -143,8 +146,10 @@ static const QHash<NodeType, QString> labels {
 	{ACCENT_HAT, "⁜â"},
 	{ACCENT_TILDE, "⁜ã"},
 	{ADDITION, "+"},
+	{ALEPH, "ℵ"},
 	{ARGS, "args"},
 	{BACKSLASH, "\\\\"},
+	{BETH, "ℶ"},
 	{BINOMIAL, "⁜b"},
 	{BOOLEANS, "𝔹"},
 	{CALL, "f( )"},
@@ -165,6 +170,7 @@ static const QHash<NodeType, QString> labels {
 	{DIVERGENCE, "∇⋅"},
 	{DIVIDE, "÷"},
 	{DOT, "⋅"},
+	{CARDINALITY, "#"},
 	{CLOSED_SURFACE_INTEGRAL, "∯"},
 	{DOUBLE_INTEGRAL, "∬"},
 	{EMPTY_SET, "∅"},
@@ -256,6 +262,6 @@ static const QHash<NodeType, QString> labels {
 };
 #endif
 
-#define NEB_NUM_NODETYPES 120
+#define NEB_NUM_NODETYPES 123
 
 #endif

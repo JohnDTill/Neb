@@ -90,6 +90,7 @@ private:
     Node* setStart();
     Node* innerProduct();
     Node* integral(const NodeType& type);
+    Node* cardinalNumber(NodeType type);
 
     //MathBran
     Node* mathBranUnary(const NodeType& t);

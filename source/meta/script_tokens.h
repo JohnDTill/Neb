@@ -131,14 +131,14 @@ int processTokens(){
     out << "#define NEB_BIG_ONE_TO_ONE_CASES_MACRO_EXPANSION";
     for(Entry e : rows)
         if(e.is_one_to_one && e.label.front() == USHORT_MAX)
-            out << "\\\n\t case " << e.label.back().unicode() << ": return createToken(" << e.name << ");";
+            out << "\\\n\t case " << e.label.back().unicode() << ": return Token(" << e.name << ", curr-2, 2);";
     out << "\n\n";
 
     //MathBran
     out << "#define NEB_MATHBRAN_CASES_MACRO_EXPANSION";
     for(Entry e : rows)
         if(e.is_mathbran)
-            out << "\\\n\t case " << e.label.front().unicode() << ": return createToken(" << e.name << ");";
+            out << "\\\n\t case " << e.label.front().unicode() << ": return Token(" << e.name << ", curr-2, 2);";
     out << "\n\n";
 
     //Numbers

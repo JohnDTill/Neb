@@ -9,10 +9,12 @@
 #include <QHash>
 
 enum TokenType{
+	Aleph,
 	At,
 	Backslash,
 	Bar,
 	Because,
+	Beth,
 	Cap,
 	Caret,
 	Colon,
@@ -196,10 +198,12 @@ enum TokenType{
 
 #ifndef Neb_NDebug
 static const QHash<TokenType, QString> token_labels {
+	{Aleph, "ℵ"},
 	{At, "@"},
 	{Backslash, "\\"},
 	{Bar, "|"},
 	{Because, "∵"},
+	{Beth, "ℶ"},
 	{Cap, "∩"},
 	{Caret, "^"},
 	{Colon, ":"},
@@ -394,10 +398,12 @@ static const QHash<QString, TokenType> keywords {
 };
 
 #define NEB_ONE_TO_ONE_CASES_MACRO_EXPANSION\
+	 case 8501: return createToken(Aleph);\
 	 case 64: return createToken(At);\
 	 case 92: return createToken(Backslash);\
 	 case 124: return createToken(Bar);\
 	 case 8757: return createToken(Because);\
+	 case 8502: return createToken(Beth);\
 	 case 8745: return createToken(Cap);\
 	 case 94: return createToken(Caret);\
 	 case 58: return createToken(Colon);\
@@ -519,52 +525,52 @@ static const QHash<QString, TokenType> keywords {
 	 case 8920: return createToken(TripleLess);
 
 #define NEB_BIG_ONE_TO_ONE_CASES_MACRO_EXPANSION\
-	 case 56633: return createToken(Doublestruck_B);\
-	 case 56641: return createToken(Doublestruck_J);\
-	 case 56650: return createToken(Doublestruck_S);\
-	 case 56654: return createToken(Doublestruck_W);
+	 case 56633: return Token(Doublestruck_B, curr-2, 2);\
+	 case 56641: return Token(Doublestruck_J, curr-2, 2);\
+	 case 56650: return Token(Doublestruck_S, curr-2, 2);\
+	 case 56654: return Token(Doublestruck_W, curr-2, 2);
 
 #define NEB_MATHBRAN_CASES_MACRO_EXPANSION\
-	 case 8594: return createToken(MB_AccentArrow);\
-	 case 257: return createToken(MB_AccentBar);\
-	 case 259: return createToken(MB_AccentBreve);\
-	 case 8943: return createToken(MB_AccentDddot);\
-	 case 228: return createToken(MB_AccentDdot);\
-	 case 551: return createToken(MB_AccentDot);\
-	 case 226: return createToken(MB_AccentHat);\
-	 case 227: return createToken(MB_AccentTilde);\
-	 case 98: return createToken(MB_Binomial);\
-	 case 99: return createToken(MB_Cases);\
-	 case 8751: return createToken(MB_ClosedSurfaceIntegral);\
-	 case 8752: return createToken(MB_ClosedVolumeIntegral);\
-	 case 8750: return createToken(MB_ContourIntegral);\
-	 case 8720: return createToken(MB_Coproduct);\
-	 case 8748: return createToken(MB_DoubleIntegral);\
-	 case 916: return createToken(MB_Dualscript);\
-	 case 9482: return createToken(MB_EvalBar);\
-	 case 102: return createToken(MB_Fraction);\
-	 case 124: return createToken(MB_GroupingBar);\
-	 case 91: return createToken(MB_GroupingBracket);\
-	 case 8968: return createToken(MB_GroupingCeil);\
-	 case 8214: return createToken(MB_GroupingDoubleBars);\
-	 case 8970: return createToken(MB_GroupingFloor);\
-	 case 40: return createToken(MB_GroupingParen);\
-	 case 8600: return createToken(MB_Infimum);\
-	 case 8747: return createToken(MB_Integral);\
-	 case 8898: return createToken(MB_Intersection);\
-	 case 108: return createToken(MB_Lim);\
-	 case 8862: return createToken(MB_Matrix);\
-	 case 8593: return createToken(MB_Max);\
-	 case 8595: return createToken(MB_Min);\
-	 case 8719: return createToken(MB_Product);\
-	 case 8730: return createToken(MB_Root);\
-	 case 95: return createToken(MB_Subscript);\
-	 case 8721: return createToken(MB_Sum);\
-	 case 94: return createToken(MB_Superscript);\
-	 case 8599: return createToken(MB_Supremum);\
-	 case 8749: return createToken(MB_TripleIntegral);\
-	 case 8899: return createToken(MB_Union);\
-	 case 10756: return createToken(MB_UnionPlus);
+	 case 8594: return Token(MB_AccentArrow, curr-2, 2);\
+	 case 257: return Token(MB_AccentBar, curr-2, 2);\
+	 case 259: return Token(MB_AccentBreve, curr-2, 2);\
+	 case 8943: return Token(MB_AccentDddot, curr-2, 2);\
+	 case 228: return Token(MB_AccentDdot, curr-2, 2);\
+	 case 551: return Token(MB_AccentDot, curr-2, 2);\
+	 case 226: return Token(MB_AccentHat, curr-2, 2);\
+	 case 227: return Token(MB_AccentTilde, curr-2, 2);\
+	 case 98: return Token(MB_Binomial, curr-2, 2);\
+	 case 99: return Token(MB_Cases, curr-2, 2);\
+	 case 8751: return Token(MB_ClosedSurfaceIntegral, curr-2, 2);\
+	 case 8752: return Token(MB_ClosedVolumeIntegral, curr-2, 2);\
+	 case 8750: return Token(MB_ContourIntegral, curr-2, 2);\
+	 case 8720: return Token(MB_Coproduct, curr-2, 2);\
+	 case 8748: return Token(MB_DoubleIntegral, curr-2, 2);\
+	 case 916: return Token(MB_Dualscript, curr-2, 2);\
+	 case 9482: return Token(MB_EvalBar, curr-2, 2);\
+	 case 102: return Token(MB_Fraction, curr-2, 2);\
+	 case 124: return Token(MB_GroupingBar, curr-2, 2);\
+	 case 91: return Token(MB_GroupingBracket, curr-2, 2);\
+	 case 8968: return Token(MB_GroupingCeil, curr-2, 2);\
+	 case 8214: return Token(MB_GroupingDoubleBars, curr-2, 2);\
+	 case 8970: return Token(MB_GroupingFloor, curr-2, 2);\
+	 case 40: return Token(MB_GroupingParen, curr-2, 2);\
+	 case 8600: return Token(MB_Infimum, curr-2, 2);\
+	 case 8747: return Token(MB_Integral, curr-2, 2);\
+	 case 8898: return Token(MB_Intersection, curr-2, 2);\
+	 case 108: return Token(MB_Lim, curr-2, 2);\
+	 case 8862: return Token(MB_Matrix, curr-2, 2);\
+	 case 8593: return Token(MB_Max, curr-2, 2);\
+	 case 8595: return Token(MB_Min, curr-2, 2);\
+	 case 8719: return Token(MB_Product, curr-2, 2);\
+	 case 8730: return Token(MB_Root, curr-2, 2);\
+	 case 95: return Token(MB_Subscript, curr-2, 2);\
+	 case 8721: return Token(MB_Sum, curr-2, 2);\
+	 case 94: return Token(MB_Superscript, curr-2, 2);\
+	 case 8599: return Token(MB_Supremum, curr-2, 2);\
+	 case 8749: return Token(MB_TripleIntegral, curr-2, 2);\
+	 case 8899: return Token(MB_Union, curr-2, 2);\
+	 case 10756: return Token(MB_UnionPlus, curr-2, 2);
 
 #define NEB_NUMBER_CASES_MACRO_EXPANSION\
 	 case '0': return scanZeroNumber();\
@@ -600,7 +606,7 @@ static const QHash<QString, TokenType> keywords {
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 183
+#define NEB_NUM_TOKENTYPES 185
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ContourIntegral,\
