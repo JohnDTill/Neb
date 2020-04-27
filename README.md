@@ -1,12 +1,9 @@
 # Neb
 
-## WORK IN PROGRESS
-The project is in a planning state. Design decisions are being considered and grammar rules developed. The parser implementation is likely not updated to match the design docs.
-
 ## Parser with a nebulous purpose
 
 _"What is my purpose? What am I? Where am I going? Who can I serve along the way?"_
 
-Our parser does not know the answers to any of these questions. It's just going to focus on what it knows how to do: parsing. Neb aims to define a grammar of mathematical syntax and implement a parser. There is an [OpenDocumentSpreadsheet file](https://github.com/JohnDTill/Neb/blob/master/Wiki/Grammar.ods) in which the grammar is being defined, and design decisions are discussed in the [project wiki](https://github.com/JohnDTill/Neb/wiki).
+Our parser does not know the answers to any of these questions. It's just going to focus on what it knows how to do: parsing. Neb aims to parse any valid mathematical syntax in unicode strings or the MathBran serialized format. It aims to mimic conventional mathematical syntax, despite some ambiguity in the source language of mathematical notation. Neb has the nebulous philosophy of parsing as much valid mathematical syntax as possible, regardless of how practical it is to interpret or process the parse tree in a later stage. This division between parsing and interpretation should ultimately be helpful to develop a robust technology stack.
 
-Neb is a sister project of [YAWYSIWYGEE](https://github.com/johndtill/yawysiwygee), an interactive typesetting editor which gives easy access to mathematical notation and defines a serialized representation for notations which cannot be covered by unicode. Neb also works on plain unicode strings.
+Neb has an [online demo](https://johndtill.github.io/Neb_WASM/).

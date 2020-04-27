@@ -8,8 +8,6 @@ There is a question of what precedence implicit multiplication should have compa
 ### Restrictions
 There are a few restrictions which improve readability and align with conventional math notation. There can be only one number, and if present it must be the leading element. The expression `5a` is acceptable, but `a5`, `5 10`, and `(a+b)5` are examples of invalid implicit multiplications.
 
-Mixing implicit and explicit multiplication should be either a warning or forbidden. It is poor form to write `xy*z`.
-
 Implicit multiplications cannot span newlines. The following source would parse as an equality statement followed on the next line by an expression statement:
 ```
 x = (a + b + c + d + e)
