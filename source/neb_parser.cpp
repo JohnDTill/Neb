@@ -1,11 +1,19 @@
 #include "neb_parser.h"
 
+#include "neb_scanner.h"
+#include <array>
+#include <QDebug>
+
 namespace Neb {
 
 Parser::Parser(const QString& source)
     : source(source),
-      scanner(source, err_msg) {
+      scanner(*new Scanner(source, err_msg)) {
     advance();
+}
+
+Parser::~Parser(){
+    delete &scanner;
 }
 
 Node* Parser::parseStatement(){

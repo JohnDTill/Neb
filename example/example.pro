@@ -3,7 +3,7 @@ QT += core gui widgets
 TARGET = NebExample
 TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
-INCLUDEPATH += ../source
+INCLUDEPATH += ../include
 
 CONFIG += c++11
 
@@ -11,8 +11,8 @@ HEADERS += \
     mainwindow.h
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp
+    main.cpp \
+    mainwindow.cpp
 
 FORMS += mainwindow.ui
 

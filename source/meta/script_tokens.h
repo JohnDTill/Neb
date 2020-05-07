@@ -87,8 +87,11 @@ int processTokens(){
            "#ifndef NEB_TOKENTYPE_H\n"
            "#define NEB_TOKENTYPE_H\n"
            "\n"
-           "#include <QString>\n"
+           "#ifndef Neb_NDebug\n"
            "#include <QHash>\n"
+           "#endif\n"
+           "\n"
+           "namespace Neb{\n"
            "\n";
 
     //Enum definition
@@ -98,7 +101,7 @@ int processTokens(){
 
     //Labels
     out << "#ifndef Neb_NDebug\n"
-            "static const QHash<TokenType, QString> token_labels {\n";
+           "static const QHash<TokenType, QString> token_labels {\n";
     for(Entry e : rows){
         out << "\t{" << e.name << ", \"";
         if(e.is_mathbran) out << QChar(8284);
@@ -107,12 +110,12 @@ int processTokens(){
     }
     out << "};\n#endif\n\n";
 
-    //Keywords - Hash may not be best data structure
-    out << "static const QHash<QString, TokenType> keywords {\n";
+    //Keywords
+    out << "#define NEB_KEYWORD_TOKEN_PAIRS {\\\n";
     for(Entry e : rows)
         if(e.is_keyword)
-            out << "\t{\"" << e.label << "\", " << e.name << "},\n";
-    out << "};\n\n";
+            out << "\t{\"" << e.label << "\", " << e.name << "},\\\n";
+    out << "}\n\n";
 
     //One-to-one tokens
     constexpr ushort USHORT_MAX = 55349;
@@ -174,6 +177,7 @@ int processTokens(){
         }
     out << "\\\n}\n\n";
     out << "#define NEB_NUM_IMPLICIT_MULT " << num_implicit_mult << "\n\n";
+    out << "}\n\n";
 
     //Cleanup
     out << "#endif\n";

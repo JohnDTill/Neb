@@ -55,8 +55,11 @@ int processNodes(){
            "#ifndef NEB_NODETYPE_H\n"
            "#define NEB_NODETYPE_H\n"
            "\n"
-           "#include <QString>\n"
+           "#ifndef Neb_NDebug\n"
            "#include <QHash>\n"
+           "#endif\n"
+           "\n"
+           "namespace Neb{\n"
            "\n";
 
     //Enum definition
@@ -77,7 +80,7 @@ int processNodes(){
     out << "#define NEB_NUM_NODETYPES " << rows.size() << "\n\n";
 
     //Cleanup
-    out << "#endif\n";
+    out << "}\n\n#endif\n";
     file.close();
 
     return 0;

@@ -1,6 +1,6 @@
 QT += core
 
-TARGET = LatexSymbols
+TARGET = meta
 TEMPLATE = app
 
 DEFINES += QT_DEPRECATED_WARNINGS

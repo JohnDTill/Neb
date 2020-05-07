@@ -1,11 +1,12 @@
 #include "neb_scanner.h"
 
-#include <QDebug>
+#include <QHash>
 
 namespace Neb {
 
 static constexpr ushort USHORT_MAX = 55349;
 static constexpr ushort MB_USHORT_CONSTRUCT_SYMBOL = 8284;
+static const QHash<QString, TokenType> keywords = NEB_KEYWORD_TOKEN_PAIRS;
 
 static bool isLetter(ushort c){
     return (c >= 'a' && c <= 'z') ||
