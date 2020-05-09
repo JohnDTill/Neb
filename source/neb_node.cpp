@@ -43,10 +43,7 @@ QString NodeFunction::toDOT(const std::vector<Node*>& nodes, bool LR){
     QString str;
     QTextStream out(&str);
 
-    out << "digraph{\n"
-           "\trank1 [style=invis]\n"
-           "\trank2 [style=invis]\n"
-           "\trank1 -> rank2 [style=invis]\n";
+    out << "digraph{\n";
     if(LR) out << "\trankdir=\"LR\"\n";
     uint64_t curr = 0;
     if(LR) for(auto it = nodes.rbegin(); it != nodes.rend(); it++) writeDOT(out, **it, curr);
