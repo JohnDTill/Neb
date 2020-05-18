@@ -55,10 +55,6 @@ int processNodes(){
            "#ifndef NEB_NODETYPE_H\n"
            "#define NEB_NODETYPE_H\n"
            "\n"
-           "#ifndef Neb_NDebug\n"
-           "#include <QHash>\n"
-           "#endif\n"
-           "\n"
            "namespace Neb{\n"
            "\n";
 
@@ -68,13 +64,10 @@ int processNodes(){
     out << "};\n\n";
 
     //Labels
-    out << "#ifndef Neb_NDebug\n"
-            "static const QHash<NodeType, QString> labels {\n";
-    for(NodeEntry e : rows){
-        out << "\t{" << e.name << ", \"";
-        out << e.label << "\"},\n";
-    }
-    out << "};\n#endif\n\n";
+    out << "#define NEB_DECLARE_NODE_LABELS \\\n"
+            "static const QString labels[" << rows.size() << "] { \\\n";
+    for(NodeEntry e : rows) out << "\t\"" << e.label << "\", \\\n";
+    out << "};\n\n";
 
     //Size of enum
     out << "#define NEB_NUM_NODETYPES " << rows.size() << "\n\n";

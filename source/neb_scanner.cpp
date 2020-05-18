@@ -1,12 +1,11 @@
 #include "neb_scanner.h"
 
-#include <QHash>
+#include <QString>
 
 namespace Neb {
 
 static constexpr ushort USHORT_MAX = 55349;
 static constexpr ushort MB_USHORT_CONSTRUCT_SYMBOL = 8284;
-static const QHash<QString, TokenType> keywords = NEB_KEYWORD_TOKEN_PAIRS;
 
 static bool isLetter(ushort c){
     return (c >= 'a' && c <= 'z') ||
@@ -142,6 +141,8 @@ Token Scanner::scanMathBranToken(){
     }
 }
 
+NEB_DECLARE_KEYWORD_SEARCH
+
 Token Scanner::scanIdentifier(){
     QString::size_type start = curr-1;
 
@@ -154,21 +155,19 @@ Token Scanner::scanIdentifier(){
     #endif
 
     QString::size_type len = curr - start;
-    auto keyword_lookup = keywords.constFind(source.mid(start, len));
+    TokenType t = getTextLexemeType(source.midRef(start, len));
 
     #ifdef NEB_IDENTIFIERS_USE_MULTIPLE_CHARS
-    return Token(keyword_lookup == keywords.end() ? Identifier : keyword_lookup.value(),
-                 start,
-                 len);
+    return Token(t, start, len);
     #else
-    if(keyword_lookup == keywords.end()){
+    if(t == Identifier){
         if(len==1) return Token(Identifier, start, len);
 
         id_stop = curr-1;
         curr = start+1;
         return createToken(Identifier);
     }else{
-        return Token(keyword_lookup.value(), start, len);
+        return Token(t, start, len);
     }
     #endif
 }

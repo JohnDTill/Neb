@@ -5,10 +5,6 @@
 #ifndef NEB_TOKENTYPE_H
 #define NEB_TOKENTYPE_H
 
-#ifndef Neb_NDebug
-#include <QHash>
-#endif
-
 namespace Neb{
 
 enum TokenType{
@@ -199,205 +195,231 @@ enum TokenType{
 	While,
 };
 
-#ifndef Neb_NDebug
-static const QHash<TokenType, QString> token_labels {
-	{Aleph, "ℵ"},
-	{At, "@"},
-	{Backslash, "\\"},
-	{Bar, "|"},
-	{Because, "∵"},
-	{Beth, "ℶ"},
-	{Cap, "∩"},
-	{Caret, "^"},
-	{Colon, ":"},
-	{Comma, ","},
-	{Conjunction, "∧"},
-	{ContourIntegral, "∮"},
-	{Cos, "cos"},
-	{Cup, "∪"},
-	{Dagger, "†"},
-	{DefEquals, "≔"},
-	{Degree, "°"},
-	{Disjunction, "∨"},
-	{Divide, "÷"},
-	{Dollar, "$"},
-	{DotProduct, "⋅"},
-	{DoubleBar, "‖"},
-	{DoubleDagger, "‡"},
-	{DoubleExclam, "‼️"},
-	{DoubleGreater, "≫"},
-	{DoubleLess, "≪"},
-	{Doublestruck_B, "𝔹"},
-	{Doublestruck_C, "ℂ"},
-	{Doublestruck_d, "ⅆ"},
-	{Doublestruck_H, "ℍ"},
-	{Doublestruck_i, "ⅈ"},
-	{Doublestruck_J, "𝕁"},
-	{Doublestruck_N, "ℕ"},
-	{Doublestruck_P, "ℙ"},
-	{Doublestruck_Q, "ℚ"},
-	{Doublestruck_R, "ℝ"},
-	{Doublestruck_S, "𝕊"},
-	{Doublestruck_W, "𝕎"},
-	{Doublestruck_Z, "ℤ"},
-	{EmptySet, "∅"},
-	{EndOfFile, "EndOfFile"},
-	{Equals, "="},
-	{Equivalent, "≡"},
-	{Error, "ERR"},
-	{Euro, "€"},
-	{Exclam, "!"},
-	{Exists, "∃"},
-	{For, "for"},
-	{ForAll, "∀"},
-	{Forwardslash, "/"},
-	{Greater, ">"},
-	{GreaterEqual, "≥"},
-	{Hamiltonian, "ℋ"},
-	{Identifier, "ID"},
-	{In, "∈"},
-	{Infinity, "∞"},
-	{Integral, "∫"},
-	{Laplace, "ℒ"},
-	{LeftAngle, "⟨"},
-	{LeftArrow, "←"},
-	{LeftBrace, "["},
-	{LeftBracket, "{"},
-	{LeftCeil, "⌈"},
-	{LeftDoubleAngle, "⟪"},
-	{LeftDoubleBrace, "⟦"},
-	{LeftFloor, "⌊"},
-	{LeftParen, "("},
-	{Less, "<"},
-	{LessEqual, "≤"},
-	{Log, "log"},
-	{MapsTo, "↦"},
-	{MB_AccentArrow, "⁜→"},
-	{MB_AccentBar, "⁜ā"},
-	{MB_AccentBreve, "⁜ă"},
-	{MB_AccentDddot, "⁜⋯"},
-	{MB_AccentDdot, "⁜ä"},
-	{MB_AccentDot, "⁜ȧ"},
-	{MB_AccentHat, "⁜â"},
-	{MB_AccentTilde, "⁜ã"},
-	{MB_Binomial, "⁜b"},
-	{MB_Cases, "⁜c"},
-	{MB_Close, "⏵"},
-	{MB_ClosedSurfaceIntegral, "⁜∯"},
-	{MB_ClosedVolumeIntegral, "⁜∰"},
-	{MB_ContourIntegral, "⁜∮"},
-	{MB_Coproduct, "⁜∐"},
-	{MB_DoubleIntegral, "⁜∬"},
-	{MB_Dualscript, "⁜Δ"},
-	{MB_EvalBar, "⁜┊"},
-	{MB_Fraction, "⁜f"},
-	{MB_GroupingBar, "⁜|"},
-	{MB_GroupingBracket, "⁜["},
-	{MB_GroupingCeil, "⁜⌈"},
-	{MB_GroupingDoubleBars, "⁜‖"},
-	{MB_GroupingFloor, "⁜⌊"},
-	{MB_GroupingParen, "⁜("},
-	{MB_Infimum, "⁜↘"},
-	{MB_Integral, "⁜∫"},
-	{MB_Intersection, "⁜⋂"},
-	{MB_Lim, "⁜l"},
-	{MB_Matrix, "⁜⊞"},
-	{MB_Max, "⁜↑"},
-	{MB_Min, "⁜↓"},
-	{MB_Open, "⏴"},
-	{MB_Product, "⁜∏"},
-	{MB_Root, "⁜√"},
-	{MB_Subscript, "⁜_"},
-	{MB_Sum, "⁜∑"},
-	{MB_Superscript, "⁜^"},
-	{MB_Supremum, "⁜↗"},
-	{MB_TripleIntegral, "⁜∭"},
-	{MB_Union, "⁜⋃"},
-	{MB_UnionPlus, "⁜⨄"},
-	{Minus, "-"},
-	{MinusPlus, "∓"},
-	{Multiply, "*"},
-	{Nabla, "∇"},
-	{NaturalLog, "ln"},
-	{Newline, "\n"},
-	{Ni, "∋"},
-	{Not, "¬"},
-	{NotEqual, "≠"},
-	{NotExist, "∄"},
-	{NotGreater, "≯"},
-	{NotIn, "∉"},
-	{NotLess, "≮"},
-	{NotNi, "∌"},
-	{NotSubset, "⊄"},
-	{NotSubsetEq, "⊈"},
-	{Number, ""},
-	{ODot, "⨀"},
-	{OuterProduct, "⊗"},
-	{Partial, "∂"},
-	{Percent, "%"},
-	{Period, "."},
-	{Perp, "⊥"},
-	{PlanckConst, "ℎ"},
-	{Plus, "+"},
-	{PlusMinus, "±"},
-	{Pound, "#"},
-	{PoundSterling, "£"},
-	{Prec, "≺"},
-	{Proportional, "∝"},
-	{Qed, "■"},
-	{RightAngle, "⟩"},
-	{RightArrow, "→"},
-	{RightArrowDouble, "⇒"},
-	{RightBrace, "]"},
-	{RightBracket, "}"},
-	{RightCeil, "⌉"},
-	{RightDoubleAngle, "⟫"},
-	{RightDoubleBrace, "⟧"},
-	{RightFloor, "⌋"},
-	{RightParen, ")"},
-	{Semicolon, ";"},
-	{Sin, "sin"},
-	{SubscriptIdentifier, "sub-"},
-	{SubscriptLeftParen, "₍"},
-	{SubscriptMinus, "₋"},
-	{SubscriptNumber, "sub-"},
-	{SubscriptPlus, "₊"},
-	{SubscriptRightParen, "₎"},
-	{Subset, "⊂"},
-	{SubsetEq, "⊆"},
-	{Succ, "≻"},
-	{SuperscriptIdentifier, "sup-"},
-	{SuperscriptLeftParen, "⁽"},
-	{SuperscriptMinus, "⁻"},
-	{SuperscriptNumber, "sup-"},
-	{SuperscriptPlus, "⁺"},
-	{SuperscriptRightParen, "⁾"},
-	{SuperscriptVee, "ⱽ"},
-	{SuperscriptWedge, "ᶺ"},
-	{SuspensionPoint, "…"},
-	{Tangent, "tan"},
-	{Therefore, "∴"},
-	{Thermod, "⧧"},
-	{Tick, "'"},
-	{Tilde, "~"},
-	{Times, "×"},
-	{Transpose, "⊤"},
-	{TripleGreater, "⋙"},
-	{TripleLess, "⋘"},
-	{Where, "where"},
-	{While, "while"},
+#define NEB_DECLARE_TOKEN_LABELS \
+static const QString token_labels[185] { \
+	"ℵ", \
+	"@", \
+	"\\", \
+	"|", \
+	"∵", \
+	"ℶ", \
+	"∩", \
+	"^", \
+	":", \
+	",", \
+	"∧", \
+	"∮", \
+	"cos", \
+	"∪", \
+	"†", \
+	"≔", \
+	"°", \
+	"∨", \
+	"÷", \
+	"$", \
+	"⋅", \
+	"‖", \
+	"‡", \
+	"‼️", \
+	"≫", \
+	"≪", \
+	"𝔹", \
+	"ℂ", \
+	"ⅆ", \
+	"ℍ", \
+	"ⅈ", \
+	"𝕁", \
+	"ℕ", \
+	"ℙ", \
+	"ℚ", \
+	"ℝ", \
+	"𝕊", \
+	"𝕎", \
+	"ℤ", \
+	"∅", \
+	"EndOfFile", \
+	"=", \
+	"≡", \
+	"ERR", \
+	"€", \
+	"!", \
+	"∃", \
+	"for", \
+	"∀", \
+	"/", \
+	">", \
+	"≥", \
+	"ℋ", \
+	"ID", \
+	"∈", \
+	"∞", \
+	"∫", \
+	"ℒ", \
+	"⟨", \
+	"←", \
+	"[", \
+	"{", \
+	"⌈", \
+	"⟪", \
+	"⟦", \
+	"⌊", \
+	"(", \
+	"<", \
+	"≤", \
+	"log", \
+	"↦", \
+	"⁜→", \
+	"⁜ā", \
+	"⁜ă", \
+	"⁜⋯", \
+	"⁜ä", \
+	"⁜ȧ", \
+	"⁜â", \
+	"⁜ã", \
+	"⁜b", \
+	"⁜c", \
+	"⏵", \
+	"⁜∯", \
+	"⁜∰", \
+	"⁜∮", \
+	"⁜∐", \
+	"⁜∬", \
+	"⁜Δ", \
+	"⁜┊", \
+	"⁜f", \
+	"⁜|", \
+	"⁜[", \
+	"⁜⌈", \
+	"⁜‖", \
+	"⁜⌊", \
+	"⁜(", \
+	"⁜↘", \
+	"⁜∫", \
+	"⁜⋂", \
+	"⁜l", \
+	"⁜⊞", \
+	"⁜↑", \
+	"⁜↓", \
+	"⏴", \
+	"⁜∏", \
+	"⁜√", \
+	"⁜_", \
+	"⁜∑", \
+	"⁜^", \
+	"⁜↗", \
+	"⁜∭", \
+	"⁜⋃", \
+	"⁜⨄", \
+	"-", \
+	"∓", \
+	"*", \
+	"∇", \
+	"ln", \
+	"\n", \
+	"∋", \
+	"¬", \
+	"≠", \
+	"∄", \
+	"≯", \
+	"∉", \
+	"≮", \
+	"∌", \
+	"⊄", \
+	"⊈", \
+	"", \
+	"⨀", \
+	"⊗", \
+	"∂", \
+	"%", \
+	".", \
+	"⊥", \
+	"ℎ", \
+	"+", \
+	"±", \
+	"#", \
+	"£", \
+	"≺", \
+	"∝", \
+	"■", \
+	"⟩", \
+	"→", \
+	"⇒", \
+	"]", \
+	"}", \
+	"⌉", \
+	"⟫", \
+	"⟧", \
+	"⌋", \
+	")", \
+	";", \
+	"sin", \
+	"sub-", \
+	"₍", \
+	"₋", \
+	"sub-", \
+	"₊", \
+	"₎", \
+	"⊂", \
+	"⊆", \
+	"≻", \
+	"sup-", \
+	"⁽", \
+	"⁻", \
+	"sup-", \
+	"⁺", \
+	"⁾", \
+	"ⱽ", \
+	"ᶺ", \
+	"…", \
+	"tan", \
+	"∴", \
+	"⧧", \
+	"'", \
+	"~", \
+	"×", \
+	"⊤", \
+	"⋙", \
+	"⋘", \
+	"where", \
+	"while", \
 };
-#endif
 
-#define NEB_KEYWORD_TOKEN_PAIRS {\
-	{"cos", Cos},\
-	{"for", For},\
-	{"log", Log},\
-	{"ln", NaturalLog},\
-	{"sin", Sin},\
-	{"tan", Tangent},\
-	{"where", Where},\
-	{"while", While},\
+#define NEB_DECLARE_KEYWORD_SEARCH \
+static TokenType getTextLexemeType(const QStringRef& key){ \
+    if(key.size() < 2 || key.size() > 5) return Identifier; \
+\
+    switch(key[0].unicode()){ \
+        case 'c': \
+            return key.mid(1)=="os" ? Cos : Identifier; \
+        case 'f': \
+            return key.mid(1)=="or" ? For : Identifier; \
+        case 'l': \
+            switch(key[1].unicode()){ \
+                case 'o': \
+                    return key.size()>=3 && key[2]=='g' ? Log : Identifier; \
+                case 'n': \
+                    return key.size()==2 ? NaturalLog : Identifier; \
+                default: return Identifier; \
+            } \
+        case 's': \
+            return key.mid(1)=="in" ? Sin : Identifier; \
+        case 't': \
+            return key.mid(1)=="an" ? Tangent : Identifier; \
+        case 'w': \
+            switch(key[1].unicode()){ \
+                case 'h': \
+                    if(key.size() < 3) return Identifier; \
+                    switch(key[2].unicode()){ \
+                        case 'e': \
+                            return key.mid(3)=="re" ? Where : Identifier; \
+                        case 'i': \
+                            return key.mid(3)=="le" ? While : Identifier; \
+                        default: return Identifier; \
+                    } \
+                default: return Identifier; \
+            } \
+        default: return Identifier; \
+    } \
 }
 
 #define NEB_ONE_TO_ONE_CASES_MACRO_EXPANSION\

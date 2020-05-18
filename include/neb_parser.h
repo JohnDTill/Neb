@@ -3,6 +3,7 @@
 
 #include "neb_node.h"
 #include "neb_token.h"
+#include <array>
 
 namespace Neb {
 

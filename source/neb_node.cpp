@@ -4,6 +4,8 @@
 
 namespace Neb {
 
+NEB_DECLARE_NODE_LABELS
+
 static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     uint64_t id = curr++;
 

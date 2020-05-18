@@ -2,15 +2,16 @@
 #define NEB_SCANNER_H
 
 #include "neb_token.h"
+class QString;
 
 namespace Neb {
 
 class Scanner{
 private:
     const QString& source;
-    QString::size_type curr = 0;
+    int curr = 0;
     #ifndef NEB_IDENTIFIERS_USE_MULTIPLE_CHARS
-    QString::size_type id_stop;
+    int id_stop;
     #endif
     QString& err_msg;
 

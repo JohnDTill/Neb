@@ -12,7 +12,8 @@ SOURCES += main.cpp
 HEADERS += ../neb_tokentype.h \
            ../neb_nodetype.h \
     script_nodes.h \
-    script_tokens.h
+    script_tokens.h \
+    trie.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

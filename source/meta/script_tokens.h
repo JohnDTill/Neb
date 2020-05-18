@@ -1,31 +1,11 @@
 #ifndef SCRIPT_TOKENS_H
 #define SCRIPT_TOKENS_H
 
+#include "trie.h"
 #include <QDebug>
 #include <QFile>
 #include <QTextCodec>
-
-struct Entry{
-    QString name;
-    QString label;
-    bool is_one_to_one;
-    bool is_keyword;
-    bool is_mathbran;
-    bool implicit_mult;
-
-    Entry(QString name,
-          QString label,
-          bool is_one_to_one,
-          bool is_keyword,
-          bool is_mathbran,
-          bool implicit_mult)
-        : name(name),
-          label(label),
-          is_one_to_one(is_one_to_one),
-          is_keyword(is_keyword),
-          is_mathbran(is_mathbran),
-          implicit_mult(implicit_mult) {}
-};
+#include <QtMath>
 
 static ushort u(QString s){
     return s.front().unicode();
@@ -87,10 +67,6 @@ int processTokens(){
            "#ifndef NEB_TOKENTYPE_H\n"
            "#define NEB_TOKENTYPE_H\n"
            "\n"
-           "#ifndef Neb_NDebug\n"
-           "#include <QHash>\n"
-           "#endif\n"
-           "\n"
            "namespace Neb{\n"
            "\n";
 
@@ -100,22 +76,20 @@ int processTokens(){
     out << "};\n\n";
 
     //Labels
-    out << "#ifndef Neb_NDebug\n"
-           "static const QHash<TokenType, QString> token_labels {\n";
+    out << "#define NEB_DECLARE_TOKEN_LABELS \\\n"
+           "static const QString token_labels[" << rows.size() << "] { \\\n";
     for(Entry e : rows){
-        out << "\t{" << e.name << ", \"";
+        out << "\t\"";
         if(e.is_mathbran) out << QChar(8284);
         else if(e.label == "\\") out << "\\";
-        out << e.label << "\"},\n";
+        out << e.label << "\", \\\n";
     }
-    out << "};\n#endif\n\n";
+    out << "};\n\n";
 
-    //Keywords
-    out << "#define NEB_KEYWORD_TOKEN_PAIRS {\\\n";
-    for(Entry e : rows)
-        if(e.is_keyword)
-            out << "\t{\"" << e.label << "\", " << e.name << "},\\\n";
-    out << "}\n\n";
+    //Build trie of keywords, assuming keywords are sorted alphabetically
+    std::vector<TrieNode> trie;
+    for(Entry& e : rows) if(e.is_keyword) addTrieNode(e);
+    writeTrie(out);
 
     //One-to-one tokens
     constexpr ushort USHORT_MAX = 55349;

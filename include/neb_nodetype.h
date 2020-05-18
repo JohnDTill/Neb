@@ -5,10 +5,6 @@
 #ifndef NEB_NODETYPE_H
 #define NEB_NODETYPE_H
 
-#ifndef Neb_NDebug
-#include <QHash>
-#endif
-
 namespace Neb{
 
 enum NodeType{
@@ -137,133 +133,132 @@ enum NodeType{
 	WEDGE,
 };
 
-#ifndef Neb_NDebug
-static const QHash<NodeType, QString> labels {
-	{ABS, "| |"},
-	{ACCENT_ARROW, "⁜→"},
-	{ACCENT_BAR, "⁜ā"},
-	{ACCENT_BREVE, "⁜ă"},
-	{ACCENT_DDDOT, "⁜⋯"},
-	{ACCENT_DDOT, "⁜ä"},
-	{ACCENT_DOT, "⁜ȧ"},
-	{ACCENT_HAT, "⁜â"},
-	{ACCENT_TILDE, "⁜ã"},
-	{ADDITION, "+"},
-	{ALEPH, "ℵ"},
-	{ARGS, "args"},
-	{BACKSLASH, "\\\\"},
-	{BETH, "ℶ"},
-	{BINOMIAL, "⁜b"},
-	{BOOLEANS, "𝔹"},
-	{CALL, "f( )"},
-	{CASES, "⁜c"},
-	{CEIL, "⌈ ⌉"},
-	{COMPLEX_NUMS, "ℂ "},
-	{CONDITIONAL_PROBABLITY, "P( | )"},
-	{CONTOUR_INTEGRAL, "∮"},
-	{CROSS, "×"},
-	{CURL, "∇×"},
-	{CURRENCY_DOLLARS, "$"},
-	{CURRENCY_EUROS, "€"},
-	{CURRENCY_POUNDS, "£"},
-	{DAGGER, "†"},
-	{DECREMENT, "x⁻"},
-	{DEFINE_EQUALS, "≔"},
-	{DERIVATIVE, "ⅆy/ⅆx"},
-	{DIVERGENCE, "∇⋅"},
-	{DIVIDE, "÷"},
-	{DOT, "⋅"},
-	{CARDINALITY, "#"},
-	{CLOSED_SURFACE_INTEGRAL, "∯"},
-	{DOUBLE_INTEGRAL, "∬"},
-	{EMPTY_SET, "∅"},
-	{EQUAL, "="},
-	{ERROR, "err"},
-	{EVAL, "⁜_|"},
-	{EXPR_STMT, "expr\\nstmt"},
-	{FACTORIAL, "!"},
-	{FLOOR, "⌊ ⌋"},
-	{FORWARDSLASH, "/"},
-	{FRACTION, "⁜f"},
-	{FUN_DEF, "f:()↦"},
-	{FUN_SIGNATURE, "f:×→"},
-	{GRADIENT, "∇"},
-	{GREATER, ">"},
-	{GREATER_EQUAL, "≥"},
-	{GROUP_BRACKET, "[ ]"},
-	{GROUP_PAREN, "( )"},
-	{IDENTIFIER, "id: "},
-	{IMPLICIT_MULTIPLY, "*imp"},
-	{IN, "∈"},
-	{INCREMENT, "x⁺"},
-	{INFIMUM, "inf"},
-	{INFTY, "∞"},
-	{INNER_PRODUCT, "⟨ | ⟩"},
-	{INTEGERS, "ℤ"},
-	{INTEGRAL, "∫"},
-	{INTERSECTION, "∩"},
-	{LESS, "<"},
-	{LESS_EQUAL, "≤"},
-	{LIMIT, "lim"},
-	{LOGICAL_AND, "∧"},
-	{LOGICAL_NOT, "¬"},
-	{LOGICAL_OR, "∨"},
-	{MATRIX, "⁜⊞"},
-	{MAX, "max"},
-	{MIN, "min"},
-	{MINUS_PLUS_BINARY, "∓"},
-	{MINUS_PLUS_UNARY, "∓"},
-	{MODULUS, "%"},
-	{MULTIPLICATION, "*"},
-	{NARY_INTERSECTION, "⁜⋂"},
-	{NARY_UNION, "⁜⋃"},
-	{NARY_UNIONPLUS, "⁜⨄"},
-	{NATURALS, "ℕ"},
-	{NEGATIVE_RATIONALS, "ℚ⁻"},
-	{NEGATIVE_REALS, "ℝ⁻"},
-	{NORM, "‖ ‖"},
-	{NOT_EQUAL, "≠"},
-	{NOT_IN, "∉"},
-	{NUMBER, ""},
-	{ODOT, "⨀"},
-	{OUTER_PRODUCT, "⊗"},
-	{PARTIAL, "∂y/∂x"},
-	{PLUS_MINUS_BINARY, "±"},
-	{PLUS_MINUS_UNARY, "±"},
-	{POSITIVE_RATIONALS, "ℚ⁺"},
-	{POSITIVE_REALS, "ℝ⁺"},
-	{POWER, "^"},
-	{PRODUCT, "∏"},
-	{PROPORTIONAL, "∝"},
-	{QUATERNIONS, "ℍ"},
-	{INTERVAL_INTEGER, "⟦,⟧"},
-	{INTERVAL_CLOSE_CLOSE, "[,]"},
-	{INTERVAL_CLOSE_OPEN, "[,)"},
-	{INTERVAL_OPEN_CLOSE, "(,]"},
-	{INTERVAL_OPEN_OPEN, "(,)"},
-	{RATIONALS, "ℚ"},
-	{REALS, "ℝ"},
-	{ROOT, "⁜∛"},
-	{SET_BUILDER, "{ | }"},
-	{SET_ENUMERATED, "{,,,}"},
-	{SET_LITERAL_DIMENSIONS, "dim"},
-	{SEQUENCE_ENUMERATED, "(,,,)"},
-	{SQRT, "⁜√"},
-	{SUBSCRIPT_ACCESS, "xᵢ"},
-	{SUBSCRIPT_PARTIAL, "∂"},
-	{SUBTRACTION, "-"},
-	{SUMMATION, "Σ"},
-	{SUPREMUM, "sup"},
-	{TICK_DERIVATIVE, "'"},
-	{TRANSPOSE, "⊤"},
-	{CLOSED_VOLUME_INTEGRAL, "∰"},
-	{TRIPLE_INTEGRAL, "∭"},
-	{UNARY_MINUS, "-"},
-	{UNION, "∪"},
-	{VEE, "∨"},
-	{WEDGE, "∧"},
+#define NEB_DECLARE_NODE_LABELS \
+static const QString labels[123] { \
+	{ "| |"}, \
+	{ "⁜→"}, \
+	{ "⁜ā"}, \
+	{ "⁜ă"}, \
+	{ "⁜⋯"}, \
+	{ "⁜ä"}, \
+	{ "⁜ȧ"}, \
+	{ "⁜â"}, \
+	{ "⁜ã"}, \
+	{ "+"}, \
+	{ "ℵ"}, \
+	{ "args"}, \
+	{ "\\\\"}, \
+	{ "ℶ"}, \
+	{ "⁜b"}, \
+	{ "𝔹"}, \
+	{ "f( )"}, \
+	{ "⁜c"}, \
+	{ "⌈ ⌉"}, \
+	{ "ℂ "}, \
+	{ "P( | )"}, \
+	{ "∮"}, \
+	{ "×"}, \
+	{ "∇×"}, \
+	{ "$"}, \
+	{ "€"}, \
+	{ "£"}, \
+	{ "†"}, \
+	{ "x⁻"}, \
+	{ "≔"}, \
+	{ "ⅆy/ⅆx"}, \
+	{ "∇⋅"}, \
+	{ "÷"}, \
+	{ "⋅"}, \
+	{ "#"}, \
+	{ "∯"}, \
+	{ "∬"}, \
+	{ "∅"}, \
+	{ "="}, \
+	{ "err"}, \
+	{ "⁜_|"}, \
+	{ "expr\\nstmt"}, \
+	{ "!"}, \
+	{ "⌊ ⌋"}, \
+	{ "/"}, \
+	{ "⁜f"}, \
+	{ "f:()↦"}, \
+	{ "f:×→"}, \
+	{ "∇"}, \
+	{ ">"}, \
+	{ "≥"}, \
+	{ "[ ]"}, \
+	{ "( )"}, \
+	{ "id: "}, \
+	{ "*imp"}, \
+	{ "∈"}, \
+	{ "x⁺"}, \
+	{ "inf"}, \
+	{ "∞"}, \
+	{ "⟨ | ⟩"}, \
+	{ "ℤ"}, \
+	{ "∫"}, \
+	{ "∩"}, \
+	{ "<"}, \
+	{ "≤"}, \
+	{ "lim"}, \
+	{ "∧"}, \
+	{ "¬"}, \
+	{ "∨"}, \
+	{ "⁜⊞"}, \
+	{ "max"}, \
+	{ "min"}, \
+	{ "∓"}, \
+	{ "∓"}, \
+	{ "%"}, \
+	{ "*"}, \
+	{ "⁜⋂"}, \
+	{ "⁜⋃"}, \
+	{ "⁜⨄"}, \
+	{ "ℕ"}, \
+	{ "ℚ⁻"}, \
+	{ "ℝ⁻"}, \
+	{ "‖ ‖"}, \
+	{ "≠"}, \
+	{ "∉"}, \
+	{ ""}, \
+	{ "⨀"}, \
+	{ "⊗"}, \
+	{ "∂y/∂x"}, \
+	{ "±"}, \
+	{ "±"}, \
+	{ "ℚ⁺"}, \
+	{ "ℝ⁺"}, \
+	{ "^"}, \
+	{ "∏"}, \
+	{ "∝"}, \
+	{ "ℍ"}, \
+	{ "⟦,⟧"}, \
+	{ "[,]"}, \
+	{ "[,)"}, \
+	{ "(,]"}, \
+	{ "(,)"}, \
+	{ "ℚ"}, \
+	{ "ℝ"}, \
+	{ "⁜∛"}, \
+	{ "{ | }"}, \
+	{ "{,,,}"}, \
+	{ "dim"}, \
+	{ "(,,,)"}, \
+	{ "⁜√"}, \
+	{ "xᵢ"}, \
+	{ "∂"}, \
+	{ "-"}, \
+	{ "Σ"}, \
+	{ "sup"}, \
+	{ "'"}, \
+	{ "⊤"}, \
+	{ "∰"}, \
+	{ "∭"}, \
+	{ "-"}, \
+	{ "∪"}, \
+	{ "∨"}, \
+	{ "∧"}, \
 };
-#endif
 
 #define NEB_NUM_NODETYPES 123
 

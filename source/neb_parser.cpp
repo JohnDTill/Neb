@@ -1,7 +1,6 @@
 #include "neb_parser.h"
 
 #include "neb_scanner.h"
-#include <array>
 #include <QDebug>
 
 namespace Neb {
