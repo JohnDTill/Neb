@@ -15,17 +15,25 @@ Parser::~Parser(){
     delete &scanner;
 }
 
-Node* Parser::parseStatement(){
+Node* Parser::parseStatement(TokenType surrounding_terminator){
     if(current.type == Error){
         scanToRecoveryPoint();
         err_msg.clear();
     }
 
     while(match(Newline));
-    if(match(EndOfFile)) return nullptr;
+    if(match(surrounding_terminator)) return nullptr;
 
-    Node* body = statementBody();
-    consume<3>({Newline, Comma, EndOfFile}, "Expect statement terminator");
+    Node* body;
+
+    switch (current.type) {
+        case Print: body = printStatement(); break;
+        case While: body = whileStatement(); break;
+        case If: body = ifStatement(); break;
+        default: body = mathStatement();
+    }
+
+    consume<3>({Newline, Comma, surrounding_terminator}, "Expect statement terminator");
 
     if(current.type == Error){
         NodeFunction::deletePostorder(body);
@@ -161,7 +169,48 @@ bool Parser::peek(const std::array<TokenType,n>& types) const{
     return false;
 }
 
-Node* Parser::statementBody(){
+Node* Parser::printStatement(){
+    advance();
+    consume(LeftParen, "Expect '(' in Print stmt.");
+    Node* print_stmt = createNode(PRINT, expression());
+    consume(RightParen, "Expect ')' to close Print stmt.");
+
+    return print_stmt;
+}
+
+Node* Parser::whileStatement(){
+    advance();
+    consume(LeftParen, "Expect '(' in Print stmt.");
+    Node* condition = expression();
+    consume(RightParen, "Expect ')' to close Print stmt.");
+
+    return createNode(WHILE, condition, blockStatement());
+}
+
+Node* Parser::ifStatement(){
+    advance();
+    consume(LeftParen, "Expect '(' in Print stmt.");
+    Node* condition = expression();
+    consume(RightParen, "Expect ')' to close Print stmt.");
+
+    Node* if_stmt = createNode(IF, condition, blockStatement());
+
+    if(match(Else)) if_stmt->children.push_back(blockStatement());
+
+    return if_stmt;
+}
+
+Node* Parser::blockStatement(){
+    consume(LeftBracket, "Expect '{' in block statement.");
+    Node* body = createNode(BLOCK);
+    while(!match(RightBracket) && err_msg.isEmpty()){
+        body->children.push_back(parseStatement(RightBracket));
+    }
+
+    return body;
+}
+
+Node* Parser::mathStatement(){
     Node* n = expression();
 
     switch (current.type) {
@@ -853,8 +902,8 @@ Node* Parser::setStart(){
 
         consume<2>({Colon, Bar}, "Expect set builder");
 
-        expr->children.push_back(statementBody());
-        while(match(Comma)) expr->children.push_back(statementBody());
+        expr->children.push_back(mathStatement());
+        while(match(Comma)) expr->children.push_back(mathStatement());
         consume(RightBracket, "Expect } to close set builder");
 
         return expr;
@@ -958,7 +1007,7 @@ Node* Parser::mathBranCases(){
         n->children.push_back(expression());
         consume(MB_Close, "Expect close symbol");
         consume(MB_Open, "Expect open symbol");
-        n->children.push_back(statementBody());
+        n->children.push_back(mathStatement());
         consume(MB_Close, "Expect close symbol");
     } while(match(MB_Open));
 
@@ -971,7 +1020,7 @@ Node* Parser::mathBranBigOperator(const NodeType& t){
 
     //Optional underscript
     if(match(MB_Open)){
-        initializer = statementBody();
+        initializer = mathStatement();
         consume(MB_Close, "Expect close symbol");
 
         //Optional overscript
@@ -1102,7 +1151,7 @@ Node* Parser::mathBranSubscript(Node* body, bool consume_on_start){
         }
         case Bar:{
             advance();
-            Node* n = createNode(EVAL, body, statementBody());
+            Node* n = createNode(EVAL, body, mathStatement());
             consume(MB_Close, "Expect close symbol");
             return n;
         }

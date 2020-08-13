@@ -39,6 +39,7 @@ Doublestruck_S¦𝕊¦y¦¦¦¦¦
 Doublestruck_W¦𝕎¦y¦¦¦¦¦
 Doublestruck_Z¦ℤ¦y¦¦¦¦¦
 EmptySet¦∅¦y¦¦¦¦¦
+Else¦else¦¦y¦¦¦¦
 EndOfFile¦EndOfFile¦¦¦¦¦¦
 Equals¦=¦y¦¦¦¦¦
 Equivalent¦≡¦y¦¦¦¦¦
@@ -53,6 +54,7 @@ Greater¦>¦y¦¦¦¦¦
 GreaterEqual¦≥¦y¦¦¦¦¦
 Hamiltonian¦ℋ¦y¦¦¦¦¦
 Identifier¦ID¦¦¦¦y¦¦
+If¦if¦¦y¦¦¦¦
 In¦∈¦y¦¦¦¦¦
 Infinity¦∞¦y¦¦¦¦¦
 Integral¦∫¦y¦¦¦y¦¦
@@ -141,6 +143,7 @@ PlusMinus¦±¦y¦¦¦¦¦
 Pound¦#¦y¦¦¦¦¦
 PoundSterling¦£¦y¦¦¦¦¦
 Prec¦≺¦y¦¦¦¦¦
+Print¦print¦¦y¦¦¦¦
 Proportional¦∝¦y¦¦¦¦¦
 Qed¦■¦y¦¦¦¦¦
 RightAngle¦⟩¦y¦¦¦¦¦

@@ -8,10 +8,10 @@
 struct NodeEntry{
     QString name;
     QString label;
+    bool in_use;
 
-    NodeEntry(QString name, QString label)
-        : name(name),
-          label(label) {}
+    NodeEntry(QString name, QString label, bool in_use)
+        : name(name), label(label), in_use(in_use) {}
 };
 
 int processNodes(){
@@ -21,6 +21,14 @@ int processNodes(){
         qDebug() << table.errorString();
         return 0;
     }
+
+    //Open parser definition file
+    QFile parser("../neb_parser.cpp");
+    if(!parser.open(QIODevice::ReadOnly)){
+        qDebug() << parser.errorString();
+        return 0;
+    }
+    QString parser_code = parser.readAll();
 
     //Process table file
     std::vector<NodeEntry> rows;
@@ -33,8 +41,10 @@ int processNodes(){
 
         QString name = entries.at(0);
         QString label = entries.at(1);
+        bool in_use = parser_code.contains(name);
 
-        rows.push_back(NodeEntry(name, label));
+        rows.push_back(NodeEntry(name, label, in_use));
+        if(!in_use) qDebug() << "NodeType" << name << "is not in use";
     }
 
     //Open gen file for writing

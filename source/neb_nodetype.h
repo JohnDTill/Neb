@@ -19,10 +19,10 @@ enum NodeType{
 	ACCENT_TILDE,
 	ADDITION,
 	ALEPH,
-	ARGS,
 	BACKSLASH,
 	BETH,
 	BINOMIAL,
+	BLOCK,
 	BOOLEANS,
 	CALL,
 	CASES,
@@ -62,6 +62,7 @@ enum NodeType{
 	GROUP_BRACKET,
 	GROUP_PAREN,
 	IDENTIFIER,
+	IF,
 	IMPLICIT_MULTIPLY,
 	IN,
 	INCREMENT,
@@ -102,6 +103,7 @@ enum NodeType{
 	POSITIVE_RATIONALS,
 	POSITIVE_REALS,
 	POWER,
+	PRINT,
 	PRODUCT,
 	PROPORTIONAL,
 	QUATERNIONS,
@@ -131,10 +133,11 @@ enum NodeType{
 	UNION,
 	VEE,
 	WEDGE,
+	WHILE,
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[123] { \
+static const QString labels[126] { \
 	"| |", \
 	"⁜→", \
 	"⁜ā", \
@@ -146,10 +149,10 @@ static const QString labels[123] { \
 	"⁜ã", \
 	"+", \
 	"ℵ", \
-	"args", \
 	"\\\\", \
 	"ℶ", \
 	"⁜b", \
+	"block", \
 	"𝔹", \
 	"f( )", \
 	"⁜c", \
@@ -189,6 +192,7 @@ static const QString labels[123] { \
 	"[ ]", \
 	"( )", \
 	"id: ", \
+	"if", \
 	"*imp", \
 	"∈", \
 	"x⁺", \
@@ -229,6 +233,7 @@ static const QString labels[123] { \
 	"ℚ⁺", \
 	"ℝ⁺", \
 	"^", \
+	"print", \
 	"∏", \
 	"∝", \
 	"ℍ", \
@@ -258,9 +263,10 @@ static const QString labels[123] { \
 	"∪", \
 	"∨", \
 	"∧", \
+	"while", \
 };
 
-#define NEB_NUM_NODETYPES 123
+#define NEB_NUM_NODETYPES 126
 
 }
 

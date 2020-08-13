@@ -48,6 +48,7 @@ enum TokenType{
 	Doublestruck_W,
 	Doublestruck_Z,
 	EmptySet,
+	Else,
 	EndOfFile,
 	Equals,
 	Equivalent,
@@ -62,6 +63,7 @@ enum TokenType{
 	GreaterEqual,
 	Hamiltonian,
 	Identifier,
+	If,
 	In,
 	Infinity,
 	Integral,
@@ -150,6 +152,7 @@ enum TokenType{
 	Pound,
 	PoundSterling,
 	Prec,
+	Print,
 	Proportional,
 	Qed,
 	RightAngle,
@@ -196,7 +199,7 @@ enum TokenType{
 };
 
 #define NEB_DECLARE_TOKEN_LABELS \
-static const QString token_labels[185] { \
+static const QString token_labels[188] { \
 	"ℵ", \
 	"@", \
 	"\\", \
@@ -237,6 +240,7 @@ static const QString token_labels[185] { \
 	"𝕎", \
 	"ℤ", \
 	"∅", \
+	"else", \
 	"EndOfFile", \
 	"=", \
 	"≡", \
@@ -251,6 +255,7 @@ static const QString token_labels[185] { \
 	"≥", \
 	"ℋ", \
 	"ID", \
+	"if", \
 	"∈", \
 	"∞", \
 	"∫", \
@@ -339,6 +344,7 @@ static const QString token_labels[185] { \
 	"#", \
 	"£", \
 	"≺", \
+	"print", \
 	"∝", \
 	"■", \
 	"⟩", \
@@ -391,8 +397,12 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
     switch(key[0].unicode()){ \
         case 'c': \
             return key.mid(1)=="os" ? Cos : Identifier; \
+        case 'e': \
+            return key.mid(1)=="lse" ? Else : Identifier; \
         case 'f': \
             return key.mid(1)=="or" ? For : Identifier; \
+        case 'i': \
+            return key.size()>=2 && key[1]=='f' ? If : Identifier; \
         case 'l': \
             switch(key[1].unicode()){ \
                 case 'o': \
@@ -401,6 +411,8 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
                     return key.size()==2 ? NaturalLog : Identifier; \
                 default: return Identifier; \
             } \
+        case 'p': \
+            return key.mid(1)=="rint" ? Print : Identifier; \
         case 's': \
             return key.mid(1)=="in" ? Sin : Identifier; \
         case 't': \
@@ -631,7 +643,7 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 185
+#define NEB_NUM_TOKENTYPES 188
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ContourIntegral,\

@@ -24,6 +24,14 @@ int processTokens(){
         return 0;
     }
 
+    //Open parser definition file
+    QFile parser("../neb_parser.cpp");
+    if(!parser.open(QIODevice::ReadOnly)){
+        qDebug() << parser.errorString();
+        return 0;
+    }
+    QString parser_code = parser.readAll();
+
     //Process table file
     std::vector<Entry> rows;
     table.readLine(); //Discard headers
@@ -34,6 +42,9 @@ int processTokens(){
         if(line_str.contains(' ')){
             qDebug() << "Warning: line " << line << " contains a space.";
             continue;
+        }else if(!line_str.contains("¦")){
+            qDebug() << "Error: TokenTable.csv is not deliminated by '¦'";
+            return 0;
         }
         QList<QString> entries = line_str.split("¦");
 
@@ -43,10 +54,13 @@ int processTokens(){
         bool is_keyword = entries.at(3) == "y";
         bool is_mathbran = entries.at(4) == "y";
         bool implicit_mult = entries.at(5) == "y";
+        bool in_use = parser_code.contains(name);
 
         rows.push_back(
-            Entry(name, label, is_one_to_one, is_keyword, is_mathbran, implicit_mult)
+            Entry(name, label, is_one_to_one, is_keyword, is_mathbran, implicit_mult, in_use)
         );
+
+        if(!in_use) qDebug() << "TokenType" << name << "is not in use";
     }
 
     //Open gen file for writing

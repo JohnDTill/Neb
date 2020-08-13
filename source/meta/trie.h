@@ -12,19 +12,22 @@ struct Entry{
     bool is_keyword;
     bool is_mathbran;
     bool implicit_mult;
+    bool in_use;
 
     Entry(QString name,
           QString label,
           bool is_one_to_one,
           bool is_keyword,
           bool is_mathbran,
-          bool implicit_mult)
+          bool implicit_mult,
+          bool in_use)
         : name(name),
           label(label),
           is_one_to_one(is_one_to_one),
           is_keyword(is_keyword),
           is_mathbran(is_mathbran),
-          implicit_mult(implicit_mult) {}
+          implicit_mult(implicit_mult),
+          in_use(in_use) {}
 };
 
 static int max_key_len = 0;
@@ -34,7 +37,7 @@ struct TrieNode{
     QChar c;
     std::vector<TrieNode> next;
     int branch_count = 0;
-    QString token_label;
+    QString token_type;
     TrieNode(QChar c) : c(c){}
 };
 
@@ -62,7 +65,7 @@ inline void addTrieNode(Entry& e){
         if(!found_node){
             curr->next.push_back(TrieNode(key[i]));
             curr = &curr->next.back();
-            curr->token_label = e.name;
+            curr->token_type = e.name;
         }
     }
 }
@@ -89,16 +92,16 @@ static void indent(QTextStream& out, int level){
 static void writeTrie(QTextStream& out, const TrieNode& t, const QString& word){
     if(t.branch_count == 1 && t.next.empty()){
         indent(out, 1 + 2*word.size());
-        out << "return key.size()==" << word.size() << " ? " << t.token_label << " : Identifier; \\\n";
+        out << "return key.size()==" << word.size() << " ? " << t.token_type << " : Identifier; \\\n";
     }else if(t.branch_count == 1){
         indent(out, 1 + 2*word.size());
         QString end = getWord(t.next[0]);
         if(end.size() > 1){
             out << "return key.mid(" << word.size() << ")==\"" << end << "\""
-                   " ? " << t.next[0].token_label << " : Identifier; \\\n";
+                   " ? " << t.next[0].token_type << " : Identifier; \\\n";
         }else{
             out << "return key.size()>=" << word.size()+1 << " && key[" << word.size() << "]"
-                   "=='" << end << "' ? " << t.token_label << " : Identifier; \\\n";
+                   "=='" << end << "' ? " << t.next[0].token_type << " : Identifier; \\\n";
         }
     }else{
         if(word.size()+1 > min_key_len){

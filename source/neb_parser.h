@@ -23,7 +23,7 @@ private:
 public:
     Parser(const QString& source);
     ~Parser();
-    Node* parseStatement();
+    Node* parseStatement(TokenType surrounding_terminator = EndOfFile);
 
 private:
     //Parser helpers
@@ -45,7 +45,11 @@ private:
     template<int n> bool peek(const std::array<TokenType,n>& types) const;
 
     //Statements
-    Node* statementBody();
+    Node* printStatement();
+    Node* whileStatement();
+    Node* ifStatement();
+    Node* blockStatement();
+    Node* mathStatement();
     Node* equality(Node* n);
     Node* less(Node* n);
     Node* greater(Node* n);
