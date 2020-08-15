@@ -47,6 +47,7 @@ Error¦ERR¦¦¦¦¦¦
 Euro¦€¦y¦¦¦¦¦
 Exclam¦!¦y¦¦¦¦¦
 Exists¦∃¦y¦¦¦¦¦
+False¦false¦¦y¦¦¦¦
 For¦for¦¦y¦¦¦¦
 ForAll¦∀¦y¦¦¦¦¦
 Forwardslash¦/¦y¦¦¦¦¦
@@ -185,5 +186,6 @@ Times¦×¦y¦¦¦¦¦
 Transpose¦⊤¦y¦¦¦¦¦
 TripleGreater¦⋙¦y¦¦¦¦¦
 TripleLess¦⋘¦y¦¦¦¦¦
+True¦true¦¦y¦¦¦¦
 Where¦where¦¦y¦¦¦¦
 While¦while¦¦y¦¦¦¦

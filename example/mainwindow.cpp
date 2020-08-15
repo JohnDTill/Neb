@@ -42,7 +42,7 @@ void MainWindow::on_exec_button_clicked(){
         }
     }
 
-    if(errors.isEmpty()) ui->dot_view->setPlainText(Neb::NodeFunction::toDOT(nodes));
+    if(errors.isEmpty()) ui->dot_view->setPlainText(Neb::Node::toDOT(nodes));
     else ui->dot_view->setPlainText(errors);
-    for(Neb::Node* n : nodes) Neb::NodeFunction::deletePostorder(n);
+    for(Neb::Node* n : nodes) Neb::Node::deletePostorder(n);
 }

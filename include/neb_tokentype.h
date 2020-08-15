@@ -56,6 +56,7 @@ enum TokenType{
 	Euro,
 	Exclam,
 	Exists,
+	False,
 	For,
 	ForAll,
 	Forwardslash,
@@ -194,12 +195,13 @@ enum TokenType{
 	Transpose,
 	TripleGreater,
 	TripleLess,
+	True,
 	Where,
 	While,
 };
 
 #define NEB_DECLARE_TOKEN_LABELS \
-static const QString token_labels[188] { \
+static const QString token_labels[190] { \
 	"ℵ", \
 	"@", \
 	"\\", \
@@ -248,6 +250,7 @@ static const QString token_labels[188] { \
 	"€", \
 	"!", \
 	"∃", \
+	"false", \
 	"for", \
 	"∀", \
 	"/", \
@@ -386,6 +389,7 @@ static const QString token_labels[188] { \
 	"⊤", \
 	"⋙", \
 	"⋘", \
+	"true", \
 	"where", \
 	"while", \
 };
@@ -400,7 +404,13 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
         case 'e': \
             return key.mid(1)=="lse" ? Else : Identifier; \
         case 'f': \
-            return key.mid(1)=="or" ? For : Identifier; \
+            switch(key[1].unicode()){ \
+                case 'a': \
+                    return key.mid(2)=="lse" ? False : Identifier; \
+                case 'o': \
+                    return key.size()>=3 && key[2]=='r' ? For : Identifier; \
+                default: return Identifier; \
+            } \
         case 'i': \
             return key.size()>=2 && key[1]=='f' ? If : Identifier; \
         case 'l': \
@@ -416,7 +426,13 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
         case 's': \
             return key.mid(1)=="in" ? Sin : Identifier; \
         case 't': \
-            return key.mid(1)=="an" ? Tangent : Identifier; \
+            switch(key[1].unicode()){ \
+                case 'a': \
+                    return key.size()>=3 && key[2]=='n' ? Tangent : Identifier; \
+                case 'r': \
+                    return key.mid(2)=="ue" ? True : Identifier; \
+                default: return Identifier; \
+            } \
         case 'w': \
             switch(key[1].unicode()){ \
                 case 'h': \
@@ -643,7 +659,7 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 188
+#define NEB_NUM_TOKENTYPES 190
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ContourIntegral,\

@@ -51,6 +51,7 @@ enum NodeType{
 	EVAL,
 	EXPR_STMT,
 	FACTORIAL,
+	FALSE,
 	FLOOR,
 	FORWARDSLASH,
 	FRACTION,
@@ -127,6 +128,7 @@ enum NodeType{
 	SUPREMUM,
 	TICK_DERIVATIVE,
 	TRANSPOSE,
+	TRUE,
 	CLOSED_VOLUME_INTEGRAL,
 	TRIPLE_INTEGRAL,
 	UNARY_MINUS,
@@ -137,7 +139,7 @@ enum NodeType{
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[126] { \
+static const QString labels[128] { \
 	"| |", \
 	"⁜→", \
 	"⁜ā", \
@@ -181,6 +183,7 @@ static const QString labels[126] { \
 	"⁜_|", \
 	"expr\\nstmt", \
 	"!", \
+	"false", \
 	"⌊ ⌋", \
 	"/", \
 	"⁜f", \
@@ -257,6 +260,7 @@ static const QString labels[126] { \
 	"sup", \
 	"'", \
 	"⊤", \
+	"true", \
 	"∰", \
 	"∭", \
 	"-", \
@@ -266,7 +270,7 @@ static const QString labels[126] { \
 	"while", \
 };
 
-#define NEB_NUM_NODETYPES 126
+#define NEB_NUM_NODETYPES 128
 
 }
 

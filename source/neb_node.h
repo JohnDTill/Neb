@@ -7,7 +7,8 @@
 
 namespace Neb {
 
-struct Node {
+class Node {
+public:
     NodeType type;
     QString data; //Copying all the data is not ideal, but okay in early stage
     std::vector<Node*> children;
@@ -15,12 +16,9 @@ struct Node {
     Node(){}
     Node(NodeType type) : type(type) {}
     Node(NodeType type, QString data) : type(type), data(data) {}
-};
-
-namespace NodeFunction{
-    QString toDOT(const Node* n, bool LR = false);
-    QString toDOT(const std::vector<Node*>& nodes, bool LR = false);
-    void deletePostorder(Node* n);
+    QString toDOT(bool LR = false) const;
+    static QString toDOT(const std::vector<Node*>& nodes, bool LR = false);
+    static void deletePostorder(Node* n);
 };
 
 }

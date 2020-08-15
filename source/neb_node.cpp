@@ -26,22 +26,20 @@ static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     return id;
 }
 
-QString NodeFunction::toDOT(const Node* n, bool LR){
-    Q_ASSERT(n);
-
+QString Node::toDOT(bool LR) const{
     QString str;
     QTextStream out(&str);
 
     out << "digraph{\n";
     if(LR) out << "\trankdir=\"LR\"\n";
     uint64_t curr = 0;
-    writeDOT(out, *n, curr);
+    writeDOT(out, *this, curr);
     out << "}";
 
     return str;
 }
 
-QString NodeFunction::toDOT(const std::vector<Node*>& nodes, bool LR){
+QString Node::toDOT(const std::vector<Node*>& nodes, bool LR){
     QString str;
     QTextStream out(&str);
 
@@ -55,7 +53,7 @@ QString NodeFunction::toDOT(const std::vector<Node*>& nodes, bool LR){
     return str;
 }
 
-void NodeFunction::deletePostorder(Node* n){
+void Node::deletePostorder(Node* n){
     for(Node* child : n->children) deletePostorder(child);
     delete n;
 }

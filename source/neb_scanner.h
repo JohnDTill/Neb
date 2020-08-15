@@ -1,6 +1,8 @@
 #ifndef NEB_SCANNER_H
 #define NEB_SCANNER_H
 
+#define NEB_IDENTIFIERS_USE_MULTIPLE_CHARS
+
 #include "neb_token.h"
 class QString;
 

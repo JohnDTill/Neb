@@ -36,7 +36,7 @@ Node* Parser::parseStatement(TokenType surrounding_terminator){
     consume<3>({Newline, Comma, surrounding_terminator}, "Expect statement terminator");
 
     if(current.type == Error){
-        NodeFunction::deletePostorder(body);
+        Node::deletePostorder(body);
         return new Node(ERROR, QString(current.start));
     }else{
         return body;
@@ -262,7 +262,7 @@ Node* Parser::greater(Node* n){
 Node* Parser::functionDefinition(Node* n){
     if(n->type != IDENTIFIER){
         error("Expected identifier in function definition");
-        NodeFunction::deletePostorder(n);
+        Node::deletePostorder(n);
         return createNode(Error);
     }
 
@@ -487,6 +487,8 @@ Node* Parser::primary(){
         case EmptySet: return createNode(EMPTY_SET);
         case Infinity: return createNode(INFTY);
         case Number: return createNode(NUMBER);
+        case True: return createNode(TRUE);
+        case False: return createNode(FALSE);
 
         //Grouping
         case LeftCeil: return grouping(CEIL, RightCeil);
