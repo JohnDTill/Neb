@@ -23,7 +23,8 @@ private:
 public:
     Parser(const QString& source);
     ~Parser();
-    Node* parseStatement(TokenType surrounding_terminator = EndOfFile);
+    Node* parseStatement(TokenType surrounding_terminator = EndOfFile, bool nested = false);
+    std::vector<Node*> parseAll();
 
 private:
     //Parser helpers
@@ -46,9 +47,9 @@ private:
 
     //Statements
     Node* printStatement();
-    Node* whileStatement();
-    Node* ifStatement();
-    Node* blockStatement();
+    Node* whileStatement(TokenType surrounding_terminator);
+    Node* ifStatement(TokenType surrounding_terminator);
+    Node* blockStatement(bool nested);
     Node* mathStatement();
     Node* equality(Node* n);
     Node* less(Node* n);

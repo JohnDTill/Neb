@@ -15,8 +15,8 @@ Parser::~Parser(){
     delete &scanner;
 }
 
-Node* Parser::parseStatement(TokenType surrounding_terminator){
-    if(current.type == Error){
+Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
+    if(current.type == Error && !nested){
         scanToRecoveryPoint();
         err_msg.clear();
     }
@@ -28,8 +28,8 @@ Node* Parser::parseStatement(TokenType surrounding_terminator){
 
     switch (current.type) {
         case Print: body = printStatement(); break;
-        case While: body = whileStatement(); break;
-        case If: body = ifStatement(); break;
+        case While: body = whileStatement(surrounding_terminator); break;
+        case If: body = ifStatement(surrounding_terminator); break;
         default: body = mathStatement();
     }
 
@@ -41,6 +41,13 @@ Node* Parser::parseStatement(TokenType surrounding_terminator){
     }else{
         return body;
     }
+}
+
+std::vector<Node*> Parser::parseAll(){
+    std::vector<Node*> stmts;
+    while(Node* stmt = parseStatement()) stmts.push_back(stmt);
+
+    return stmts;
 }
 
 Node* Parser::createNode(const NodeType& type){
@@ -178,34 +185,38 @@ Node* Parser::printStatement(){
     return print_stmt;
 }
 
-Node* Parser::whileStatement(){
+Node* Parser::whileStatement(TokenType surrounding_terminator){
     advance();
     consume(LeftParen, "Expect '(' in Print stmt.");
     Node* condition = expression();
     consume(RightParen, "Expect ')' to close Print stmt.");
 
-    return createNode(WHILE, condition, blockStatement());
+    return createNode(WHILE,
+        condition,
+        peek(LeftBracket) ? blockStatement(true) : parseStatement(surrounding_terminator, true));
 }
 
-Node* Parser::ifStatement(){
+Node* Parser::ifStatement(TokenType surrounding_terminator){
     advance();
-    consume(LeftParen, "Expect '(' in Print stmt.");
+    consume(LeftParen, "Expect '(' in IF stmt.");
     Node* condition = expression();
-    consume(RightParen, "Expect ')' to close Print stmt.");
+    consume(RightParen, "Expect ')' to close IF stmt.");
 
-    Node* if_stmt = createNode(IF, condition, blockStatement());
+    Node* if_stmt = createNode(IF,
+        condition,
+        peek(LeftBracket) ? blockStatement(true) : parseStatement(surrounding_terminator, true));
 
-    if(match(Else)) if_stmt->children.push_back(blockStatement());
+    if(match(Else)) if_stmt->children.push_back(
+        peek(LeftBracket) ? blockStatement(true) : parseStatement(surrounding_terminator, true));
 
     return if_stmt;
 }
 
-Node* Parser::blockStatement(){
+Node* Parser::blockStatement(bool nested){
     consume(LeftBracket, "Expect '{' in block statement.");
     Node* body = createNode(BLOCK);
-    while(!match(RightBracket) && err_msg.isEmpty()){
-        body->children.push_back(parseStatement(RightBracket));
-    }
+    while(!match(RightBracket) && err_msg.isEmpty())
+        body->children.push_back(parseStatement(RightBracket, nested));
 
     return body;
 }
