@@ -239,7 +239,7 @@ Token Scanner::scanZeroNumber(){
         }
         while(curr != source.size()){
             ushort c = source[curr].unicode();
-            if(isDigit(c)) break;
+            if(!isDigit(c)) break;
             curr++;
         }
         return Token(Number, start, curr - start);
