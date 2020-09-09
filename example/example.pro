@@ -23,11 +23,16 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RC_ICONS += resources/Neb.ico
 
-LIBS += -L$$PWD/../lib/ -lNeb
-
 INCLUDEPATH += $$PWD/../
 DEPENDPATH += $$PWD/../
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../lib/Neb.lib
-else:win32-g++: PRE_TARGETDEPS += $$PWD/../lib/libNeb.a
+CONFIG(debug, debug|release) {
+    LIBS += -L$$PWD/../lib/debug/ -lNeb
+    win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../lib/debug/Neb.lib
+    else:win32-g++: PRE_TARGETDEPS += $$PWD/../lib/debug/libNeb.a
+}else{
+    LIBS += -L$$PWD/../lib/release/ -lNeb
+    win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../lib/release/Neb.lib
+    else:win32-g++: PRE_TARGETDEPS += $$PWD/../lib/release/libNeb.a
+}
 

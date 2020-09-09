@@ -3,9 +3,14 @@ QT += core gui
 TARGET = Neb
 TEMPLATE = lib
 DEFINES += QT_DEPRECATED_WARNINGS
-DESTDIR = $$shell_path($$_PRO_FILE_PWD_)/../lib
 CONFIG += c++11
 CONFIG += staticlib
+
+CONFIG(debug, debug|release) {
+    DESTDIR = $$shell_path($$_PRO_FILE_PWD_)/../lib/debug
+} else {
+    DESTDIR = $$shell_path($$_PRO_FILE_PWD_)/../lib/release
+}
 
 DEFINES += QT_DEPRECATED_WARNINGS
 
