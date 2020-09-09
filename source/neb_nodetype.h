@@ -19,6 +19,7 @@ enum NodeType{
 	ACCENT_TILDE,
 	ADDITION,
 	ALEPH,
+	ALGORITHM,
 	BACKSLASH,
 	BETH,
 	BINOMIAL,
@@ -139,7 +140,7 @@ enum NodeType{
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[128] { \
+static const QString labels[129] { \
 	"| |", \
 	"⁜→", \
 	"⁜ā", \
@@ -151,6 +152,7 @@ static const QString labels[128] { \
 	"⁜ã", \
 	"+", \
 	"ℵ", \
+	"alg", \
 	"\\\\", \
 	"ℶ", \
 	"⁜b", \
@@ -270,7 +272,7 @@ static const QString labels[128] { \
 	"while", \
 };
 
-#define NEB_NUM_NODETYPES 128
+#define NEB_NUM_NODETYPES 129
 
 }
 

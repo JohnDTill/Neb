@@ -27,9 +27,10 @@ Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
     Node* body;
 
     switch (current.type) {
+        case Algorithm: body = algorithm(surrounding_terminator); break;
+        case If: body = ifStatement(surrounding_terminator); break;
         case Print: body = printStatement(); break;
         case While: body = whileStatement(surrounding_terminator); break;
-        case If: body = ifStatement(surrounding_terminator); break;
         default: body = mathStatement();
     }
 
@@ -219,6 +220,33 @@ Node* Parser::blockStatement(bool nested){
         body->children.push_back(parseStatement(RightBracket, nested));
 
     return body;
+}
+
+Node* Parser::algorithm(TokenType surrounding_terminator){
+    advance();
+
+    consume(Identifier, "Expected identifier in algorithm definition");
+    Node* alg = createNode(ALGORITHM, createNode(IDENTIFIER));
+
+    consume(LeftParen, "Expect '(' after algorithm name");
+    if(!match(RightParen)){
+        consume(Identifier, "Expected identifier as parameter name");
+        Node* id = createNode(IDENTIFIER);
+        alg->children.push_back(match(In) ? createNode(IN,id,expression()) : id);
+
+        while(!match(RightParen)){
+            consume(Comma, "Expect ',' between algorithm parameters");
+            consume(Identifier, "Expected identifier as parameter name");
+            Node* id = createNode(IDENTIFIER);
+            alg->children.push_back(match(In) ? createNode(IN,id,expression()) : id);
+        }
+    }
+
+    alg->children.push_back(
+        peek(LeftBracket) ? blockStatement(true) : parseStatement(surrounding_terminator, true)
+    );
+
+    return alg;
 }
 
 Node* Parser::mathStatement(){

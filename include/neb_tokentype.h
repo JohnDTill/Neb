@@ -9,6 +9,7 @@ namespace Neb{
 
 enum TokenType{
 	Aleph,
+	Algorithm,
 	At,
 	Backslash,
 	Bar,
@@ -201,8 +202,9 @@ enum TokenType{
 };
 
 #define NEB_DECLARE_TOKEN_LABELS \
-static const QString token_labels[190] { \
+static const QString token_labels[191] { \
 	"ℵ", \
+	"algorithm", \
 	"@", \
 	"\\", \
 	"|", \
@@ -396,9 +398,11 @@ static const QString token_labels[190] { \
 
 #define NEB_DECLARE_KEYWORD_SEARCH \
 static TokenType getTextLexemeType(const QStringRef& key){ \
-    if(key.size() < 2 || key.size() > 5) return Identifier; \
+    if(key.size() < 2 || key.size() > 9) return Identifier; \
 \
     switch(key[0].unicode()){ \
+        case 'a': \
+            return key.mid(1)=="lgorithm" ? Algorithm : Identifier; \
         case 'c': \
             return key.mid(1)=="os" ? Cos : Identifier; \
         case 'e': \
@@ -659,7 +663,7 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 190
+#define NEB_NUM_TOKENTYPES 191
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ContourIntegral,\

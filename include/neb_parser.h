@@ -50,6 +50,7 @@ private:
     Node* whileStatement(TokenType surrounding_terminator);
     Node* ifStatement(TokenType surrounding_terminator);
     Node* blockStatement(bool nested);
+    Node* algorithm(TokenType surrounding_terminator);
     Node* mathStatement();
     Node* equality(Node* n);
     Node* less(Node* n);
