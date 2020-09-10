@@ -116,6 +116,7 @@ enum NodeType{
 	INTERVAL_OPEN_OPEN,
 	RATIONALS,
 	REALS,
+	RETURN,
 	ROOT,
 	SET_BUILDER,
 	SET_ENUMERATED,
@@ -131,7 +132,10 @@ enum NodeType{
 	TEST_NOTEQUAL,
 	TEST_GREATER,
 	TEST_LESS,
+	TEST_LESS_EQUAL,
+	TEST_GREATER_EQUAL,
 	TEST_IN,
+	TEST_NOT_IN,
 	TICK_DERIVATIVE,
 	TRANSPOSE,
 	TRUE,
@@ -145,7 +149,7 @@ enum NodeType{
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[134] { \
+static const QString labels[138] { \
 	"| |", \
 	"⁜→", \
 	"⁜ā", \
@@ -254,6 +258,7 @@ static const QString labels[134] { \
 	"(,)", \
 	"ℚ", \
 	"ℝ", \
+	"return", \
 	"⁜∛", \
 	"{ | }", \
 	"{,,,}", \
@@ -269,7 +274,10 @@ static const QString labels[134] { \
 	"≠?", \
 	">?", \
 	"<?", \
+	"≤?", \
+	"≥?", \
 	"∈?", \
+	"∉?", \
 	"'", \
 	"⊤", \
 	"true", \
@@ -282,7 +290,7 @@ static const QString labels[134] { \
 	"while", \
 };
 
-#define NEB_NUM_NODETYPES 134
+#define NEB_NUM_NODETYPES 138
 
 }
 

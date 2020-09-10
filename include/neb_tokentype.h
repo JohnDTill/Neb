@@ -157,6 +157,7 @@ enum TokenType{
 	Print,
 	Proportional,
 	Qed,
+	Return,
 	RightAngle,
 	RightArrow,
 	RightArrowDouble,
@@ -202,7 +203,7 @@ enum TokenType{
 };
 
 #define NEB_DECLARE_TOKEN_LABELS \
-static const QString token_labels[191] { \
+static const QString token_labels[192] { \
 	"ℵ", \
 	"algorithm", \
 	"@", \
@@ -352,6 +353,7 @@ static const QString token_labels[191] { \
 	"print", \
 	"∝", \
 	"■", \
+	"return", \
 	"⟩", \
 	"→", \
 	"⇒", \
@@ -427,6 +429,8 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
             } \
         case 'p': \
             return key.mid(1)=="rint" ? Print : Identifier; \
+        case 'r': \
+            return key.mid(1)=="eturn" ? Return : Identifier; \
         case 's': \
             return key.mid(1)=="in" ? Sin : Identifier; \
         case 't': \
@@ -663,7 +667,7 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 191
+#define NEB_NUM_TOKENTYPES 192
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ContourIntegral,\

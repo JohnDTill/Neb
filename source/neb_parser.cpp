@@ -30,6 +30,7 @@ Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
         case Algorithm: body = algorithm(surrounding_terminator); break;
         case If: body = ifStatement(surrounding_terminator); break;
         case Print: body = printStatement(); break;
+        case Return: body = returnStatement(surrounding_terminator); break;
         case While: body = whileStatement(surrounding_terminator); break;
         default: body = mathStatement();
     }
@@ -222,6 +223,14 @@ Node* Parser::blockStatement(bool nested){
     return body;
 }
 
+Node* Parser::returnStatement(TokenType surrounding_terminator){
+    advance();
+
+    if(peek<3>({Newline, Comma, surrounding_terminator}))
+        return createNode(RETURN);
+    else return createNode(RETURN, boolExpression());
+}
+
 Node* Parser::algorithm(TokenType surrounding_terminator){
     advance();
 
@@ -230,15 +239,11 @@ Node* Parser::algorithm(TokenType surrounding_terminator){
 
     consume(LeftParen, "Expect '(' after algorithm name");
     if(!match(RightParen)){
-        consume(Identifier, "Expected identifier as parameter name");
-        Node* id = createNode(IDENTIFIER);
-        alg->children.push_back(match(In) ? createNode(IN,id,expression()) : id);
+        alg->children.push_back(mathStatement());
 
         while(!match(RightParen)){
             consume(Comma, "Expect ',' between algorithm parameters");
-            consume(Identifier, "Expected identifier as parameter name");
-            Node* id = createNode(IDENTIFIER);
-            alg->children.push_back(match(In) ? createNode(IN,id,expression()) : id);
+            alg->children.push_back(mathStatement());
         }
     }
 
@@ -609,7 +614,10 @@ Node* Parser::boolEquality(){
         case NotEqual: advance(); return createNode(TEST_NOTEQUAL, n, addition());
         case Less: advance(); return createNode(TEST_LESS, n, addition());
         case Greater: advance(); return createNode(TEST_GREATER, n, addition());
+        case LessEqual: advance(); return createNode(TEST_LESS_EQUAL, n, addition());
+        case GreaterEqual: advance(); return createNode(TEST_GREATER_EQUAL, n, addition());
         case In: advance(); return createNode(TEST_IN, n, addition());
+        case NotIn: advance(); return createNode(TEST_NOT_IN, n, addition());
         default: return n;
     }
 }
@@ -1187,7 +1195,7 @@ Node* Parser::mathBranSuperscript(Node* body, bool consume_on_start){
         case Conjunction: return mathBranExponentOp(body, WEDGE);
         case Disjunction: return mathBranExponentOp(body, VEE);
         case Plus: return mathBranExponentOp(body, INCREMENT);
-        case Minus: return mathBranExponentOp(body, DECREMENT);
+        case Minus: if(peek(MB_Close)) return mathBranExponentOp(body, DECREMENT);
         default:
             Node* n = createNode(POWER, body, expression());
             consume(MB_Close, "Expect close symbol");
