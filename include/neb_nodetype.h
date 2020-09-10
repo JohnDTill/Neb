@@ -127,6 +127,11 @@ enum NodeType{
 	SUBTRACTION,
 	SUMMATION,
 	SUPREMUM,
+	TEST_EQUALITY,
+	TEST_NOTEQUAL,
+	TEST_GREATER,
+	TEST_LESS,
+	TEST_IN,
 	TICK_DERIVATIVE,
 	TRANSPOSE,
 	TRUE,
@@ -140,7 +145,7 @@ enum NodeType{
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[129] { \
+static const QString labels[134] { \
 	"| |", \
 	"⁜→", \
 	"⁜ā", \
@@ -260,6 +265,11 @@ static const QString labels[129] { \
 	"-", \
 	"Σ", \
 	"sup", \
+	"=?", \
+	"≠?", \
+	">?", \
+	"<?", \
+	"∈?", \
 	"'", \
 	"⊤", \
 	"true", \
@@ -272,7 +282,7 @@ static const QString labels[129] { \
 	"while", \
 };
 
-#define NEB_NUM_NODETYPES 129
+#define NEB_NUM_NODETYPES 134
 
 }
 

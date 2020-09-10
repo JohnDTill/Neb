@@ -189,7 +189,7 @@ Node* Parser::printStatement(){
 Node* Parser::whileStatement(TokenType surrounding_terminator){
     advance();
     consume(LeftParen, "Expect '(' in Print stmt.");
-    Node* condition = expression();
+    Node* condition = boolExpression();
     consume(RightParen, "Expect ')' to close Print stmt.");
 
     return createNode(WHILE,
@@ -200,7 +200,7 @@ Node* Parser::whileStatement(TokenType surrounding_terminator){
 Node* Parser::ifStatement(TokenType surrounding_terminator){
     advance();
     consume(LeftParen, "Expect '(' in IF stmt.");
-    Node* condition = expression();
+    Node* condition = boolExpression();
     consume(RightParen, "Expect ')' to close IF stmt.");
 
     Node* if_stmt = createNode(IF,
@@ -346,32 +346,36 @@ Node* Parser::functionDefinition(Node* n){
     }
 }
 
+typedef Node* (Parser::*Rule)();
+
 Node* Parser::expression(){
-    return disjunction();
+    return disjunction<&Parser::conjunction<&Parser::addition> >();
 }
 
+template<Rule next>
 Node* Parser::disjunction(){
-    Node* expr = conjunction();
+    Node* expr = (this->*next)();
     if(match(Disjunction)){
         match(Newline);
-        expr = createNode(LOGICAL_OR, expr, conjunction());
+        expr = createNode(LOGICAL_OR, expr, (this->*next)());
         while(match(Disjunction)){
             match(Newline);
-            expr->children.push_back(conjunction());
+            expr->children.push_back((this->*next)());
         }
     }
 
     return expr;
 }
 
+template<Rule next>
 Node* Parser::conjunction(){
-    Node* expr = addition();
+    Node* expr = (this->*next)();
     if(match(Conjunction)){
         match(Newline);
-        expr = createNode(LOGICAL_AND, expr, addition());
+        expr = createNode(LOGICAL_AND, expr, (this->*next)());
         while(match(Conjunction)){
             match(Newline);
-            expr->children.push_back(addition());
+            expr->children.push_back((this->*next)());
         }
     }
 
@@ -593,8 +597,25 @@ Node* Parser::primary(){
     }
 }
 
+Node* Parser::boolExpression(){
+    return disjunction<&Parser::conjunction<&Parser::boolEquality> >();
+}
+
+Node* Parser::boolEquality(){
+    Node* n = addition();
+
+    switch (current.type) {
+        case Equals: advance(); return createNode(TEST_EQUALITY, n, addition());
+        case NotEqual: advance(); return createNode(TEST_NOTEQUAL, n, addition());
+        case Less: advance(); return createNode(TEST_LESS, n, addition());
+        case Greater: advance(); return createNode(TEST_GREATER, n, addition());
+        case In: advance(); return createNode(TEST_IN, n, addition());
+        default: return n;
+    }
+}
+
 Node* Parser::grouping(const NodeType& t, const TokenType& close){
-    Node* n = expression();
+    Node* n = boolExpression();
     consume(close, "Expect grouping close symbol.");
 
     return createNode(t, n);
@@ -637,7 +658,7 @@ Node* Parser::call(Node* id){
     if(match(RightParen)) return createNode(CALL, id);
 
     match(Newline);
-    Node* first_arg = expression();
+    Node* first_arg = boolExpression();
 
     if(match(Bar)){
         if(id->type != IDENTIFIER || id->data != "P")
@@ -655,7 +676,7 @@ Node* Parser::call(Node* id){
         while(!match(RightParen)){
             consume(Comma, "Expect ',' between call args");
             match(Newline);
-            n->children.push_back(expression());
+            n->children.push_back(boolExpression());
         }
 
         return n;
@@ -837,10 +858,10 @@ Node* Parser::nablaStart(){
 }
 
 Node* Parser::parenStart(){
-    Node* expr = expression();
+    Node* expr = boolExpression();
 
     if(match(Comma)){ //Exclusive start of range, e.g. x ∈ (0, 1]
-        Node* range_end = expression();
+        Node* range_end = boolExpression();
 
         if(match(RightParen)){
             return createNode(INTERVAL_OPEN_OPEN, expr, range_end);
@@ -850,7 +871,7 @@ Node* Parser::parenStart(){
             consume(Comma, "Invalid interval or sequence");
             Node* n = createNode(SEQUENCE_ENUMERATED, expr, range_end);
             do{
-                n->children.push_back(expression());
+                n->children.push_back(boolExpression());
             } while(match(Comma));
             consume(RightParen, "Expect ')' at end of sequence");
 
@@ -863,10 +884,10 @@ Node* Parser::parenStart(){
 }
 
 Node* Parser::braceStart(){
-    Node* expr = expression();
+    Node* expr = boolExpression();
 
     if(match(Comma)){ //Inclusive start of range, e.g. x ∈ [0, 1)
-        Node* range_end = expression();
+        Node* range_end = boolExpression();
 
         if(match(RightParen)){
             return createNode(INTERVAL_CLOSE_OPEN, expr, range_end);
@@ -879,7 +900,7 @@ Node* Parser::braceStart(){
             Node* n = createNode(MATRIX, expr, range_end);
             uint cols = 2;
             do{
-                n->children.push_back(expression());
+                n->children.push_back(boolExpression());
                 cols++;
             } while(match(Comma));
 
@@ -902,10 +923,10 @@ Node* Parser::braceStart(){
 Node* Parser::braceMatrix(Node* n, uint col_count, TokenType row_delimiter){
     do{
         if(row_delimiter == Semicolon) match(Newline);
-        n->children.push_back(expression());
+        n->children.push_back(boolExpression());
         for(uint i = col_count-1; i > 0; i--){
             consume(Comma, "Expect ',' between matrix elements");
-            n->children.push_back(expression());
+            n->children.push_back(boolExpression());
         }
     } while(match(row_delimiter));
     consume(RightBrace, "Expect ']' at end of matrix");
@@ -914,9 +935,9 @@ Node* Parser::braceMatrix(Node* n, uint col_count, TokenType row_delimiter){
 }
 
 Node* Parser::doubleBraceStart(){
-    Node* start = expression();
+    Node* start = boolExpression();
     consume(Comma, "Expect interval delimiter");
-    Node* end = expression();
+    Node* end = boolExpression();
     consume(RightDoubleBrace, "Expect '⟧' to close integer interval");
 
     return createNode(INTERVAL_INTEGER, start, end);
@@ -925,13 +946,13 @@ Node* Parser::doubleBraceStart(){
 Node* Parser::setStart(){
     if(match(RightBracket)) return createNode(EMPTY_SET);
 
-    Node* expr = expression();
+    Node* expr = boolExpression();
     if(match(RightBracket)) return createNode(SET_ENUMERATED, expr); //1 member set
     else if(current.type == Comma){ //n-member enumerated set
         expr = createNode(SET_ENUMERATED, expr);
         while(match(Comma)){
             match(Newline);
-            expr->children.push_back( expression() );
+            expr->children.push_back( boolExpression() );
         }
         consume(RightBracket, "Expect } to close enumerated set");
 
@@ -1048,7 +1069,7 @@ Node* Parser::mathBranCases(){
         n->children.push_back(expression());
         consume(MB_Close, "Expect close symbol");
         consume(MB_Open, "Expect open symbol");
-        n->children.push_back(mathStatement());
+        n->children.push_back(boolExpression());
         consume(MB_Close, "Expect close symbol");
     } while(match(MB_Open));
 

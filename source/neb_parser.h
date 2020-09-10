@@ -58,9 +58,10 @@ private:
     Node* functionDefinition(Node* n);
 
     //Expression descent
+    typedef Node* (Parser::*Rule)();
     Node* expression();
-    Node* conjunction();
-    Node* disjunction();
+    template<Rule next> Node* disjunction();
+    template<Rule next> Node* conjunction();
     Node* addition();
     Node* multiplication();
     Node* implicitMultiplication();
@@ -69,6 +70,10 @@ private:
     Node* exponent();
     Node* script();
     Node* primary();
+
+    //Boolean descent
+    Node* boolExpression();
+    Node* boolEquality();
 
     //Specialized rules
     Node* grouping(const NodeType& t, const TokenType& close);
