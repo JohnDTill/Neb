@@ -53,7 +53,8 @@ std::vector<Node*> Parser::parseAll(){
 }
 
 Node* Parser::createNode(const NodeType& type){
-    return new Node(type, source.mid(previous.start, previous.length));
+    Node* n = new Node(type, source.mid(previous.start, previous.length));
+    return n;
 }
 
 Node* Parser::createNode(const NodeType& type, Node* child){

@@ -8,287 +8,318 @@
 namespace Neb{
 
 enum NodeType{
-	ABS,
-	ACCENT_ARROW,
-	ACCENT_BAR,
-	ACCENT_BREVE,
-	ACCENT_DDDOT,
-	ACCENT_DDOT,
-	ACCENT_DOT,
-	ACCENT_HAT,
-	ACCENT_TILDE,
-	ADDITION,
-	ALEPH,
-	ALGORITHM,
-	BACKSLASH,
-	BETH,
-	BINOMIAL,
-	BLOCK,
-	BOOLEANS,
-	CALL,
-	CASES,
-	CEIL,
-	COMPLEX_NUMS,
-	CONDITIONAL_PROBABLITY,
-	CONTOUR_INTEGRAL,
-	CROSS,
-	CURL,
-	CURRENCY_DOLLARS,
-	CURRENCY_EUROS,
-	CURRENCY_POUNDS,
-	DAGGER,
-	DECREMENT,
-	DEFINE_EQUALS,
-	DERIVATIVE,
-	DIVERGENCE,
-	DIVIDE,
-	DOT,
-	CARDINALITY,
-	CLOSED_SURFACE_INTEGRAL,
-	DOUBLE_INTEGRAL,
-	EMPTY_SET,
-	EQUAL,
-	ERROR,
-	EVAL,
-	EXPR_STMT,
-	FACTORIAL,
-	FALSE,
-	FLOOR,
-	FORWARDSLASH,
-	FRACTION,
-	FUN_DEF,
-	FUN_SIGNATURE,
-	GRADIENT,
-	GREATER,
-	GREATER_EQUAL,
-	GROUP_BRACKET,
-	GROUP_PAREN,
-	IDENTIFIER,
-	IF,
-	IMPLICIT_MULTIPLY,
-	IN,
-	INCREMENT,
-	INFIMUM,
-	INFTY,
-	INNER_PRODUCT,
-	INTEGERS,
-	INTEGRAL,
-	INTERSECTION,
-	LESS,
-	LESS_EQUAL,
-	LIMIT,
-	LOGICAL_AND,
-	LOGICAL_NOT,
-	LOGICAL_OR,
-	MATRIX,
-	MAX,
-	MIN,
-	MINUS_PLUS_BINARY,
-	MINUS_PLUS_UNARY,
-	MODULUS,
-	MULTIPLICATION,
-	NARY_INTERSECTION,
-	NARY_UNION,
-	NARY_UNIONPLUS,
-	NATURALS,
-	NEGATIVE_RATIONALS,
-	NEGATIVE_REALS,
-	NORM,
-	NOT_EQUAL,
-	NOT_IN,
-	NUMBER,
-	ODOT,
-	OUTER_PRODUCT,
-	PARTIAL,
-	PLUS_MINUS_BINARY,
-	PLUS_MINUS_UNARY,
-	POSITIVE_RATIONALS,
-	POSITIVE_REALS,
-	POWER,
-	PRINT,
-	PRODUCT,
-	PROPORTIONAL,
-	QUATERNIONS,
-	INTERVAL_INTEGER,
-	INTERVAL_CLOSE_CLOSE,
-	INTERVAL_CLOSE_OPEN,
-	INTERVAL_OPEN_CLOSE,
-	INTERVAL_OPEN_OPEN,
-	RATIONALS,
-	REALS,
-	RETURN,
-	ROOT,
-	SET_BUILDER,
-	SET_ENUMERATED,
-	SET_LITERAL_DIMENSIONS,
-	SEQUENCE_ENUMERATED,
-	SQRT,
-	SUBSCRIPT_ACCESS,
-	SUBSCRIPT_PARTIAL,
-	SUBTRACTION,
-	SUMMATION,
-	SUPREMUM,
-	TEST_EQUALITY,
-	TEST_NOTEQUAL,
-	TEST_GREATER,
-	TEST_LESS,
-	TEST_LESS_EQUAL,
-	TEST_GREATER_EQUAL,
-	TEST_IN,
-	TEST_NOT_IN,
-	TICK_DERIVATIVE,
-	TRANSPOSE,
-	TRUE,
-	CLOSED_VOLUME_INTEGRAL,
-	TRIPLE_INTEGRAL,
-	UNARY_MINUS,
-	UNION,
-	VEE,
-	WEDGE,
-	WHILE,
+    FALSE,
+    GREATER,
+    GREATER_EQUAL,
+    LESS,
+    LESS_EQUAL,
+    LOGICAL_AND,
+    LOGICAL_NOT,
+    LOGICAL_OR,
+    TEST_EQUALITY,
+    TEST_GREATER,
+    TEST_GREATER_EQUAL,
+    TEST_IN,
+    TEST_LESS,
+    TEST_LESS_EQUAL,
+    TEST_NOT_IN,
+    TEST_NOTEQUAL,
+    TRUE,
+    ABS,
+    ADDITION,
+    BINOMIAL,
+    CEIL,
+    CLOSED_SURFACE_INTEGRAL,
+    CLOSED_VOLUME_INTEGRAL,
+    CONTOUR_INTEGRAL,
+    CROSS,
+    CURL,
+    CURRENCY_DOLLARS,
+    CURRENCY_EUROS,
+    CURRENCY_POUNDS,
+    DERIVATIVE,
+    DIVERGENCE,
+    DIVIDE,
+    DOT,
+    DOUBLE_INTEGRAL,
+    EVAL,
+    FACTORIAL,
+    FLOOR,
+    FRACTION,
+    GRADIENT,
+    INFIMUM,
+    INFTY,
+    INNER_PRODUCT,
+    MATRIX,
+    MAX,
+    MIN,
+    MODULUS,
+    MULTIPLICATION,
+    NORM,
+    NUMBER,
+    ODOT,
+    OUTER_PRODUCT,
+    PARTIAL,
+    POWER,
+    PRODUCT,
+    ROOT,
+    SQRT,
+    SUBSCRIPT_PARTIAL,
+    SUMMATION,
+    TRANSPOSE,
+    TRIPLE_INTEGRAL,
+    VEE,
+    WEDGE,
+    SEQUENCE_ENUMERATED,
+    ALEPH,
+    BOOLEANS,
+    COMPLEX_NUMS,
+    EMPTY_SET,
+    INTEGERS,
+    INTERSECTION,
+    INTERVAL_CLOSE_CLOSE,
+    INTERVAL_CLOSE_OPEN,
+    INTERVAL_INTEGER,
+    INTERVAL_OPEN_CLOSE,
+    INTERVAL_OPEN_OPEN,
+    NARY_INTERSECTION,
+    NARY_UNION,
+    NARY_UNIONPLUS,
+    NATURALS,
+    NEGATIVE_RATIONALS,
+    NEGATIVE_REALS,
+    POSITIVE_RATIONALS,
+    POSITIVE_REALS,
+    QUATERNIONS,
+    RATIONALS,
+    REALS,
+    SET_BUILDER,
+    SET_ENUMERATED,
+    UNION,
+    ACCENT_ARROW,
+    ACCENT_BAR,
+    ACCENT_BREVE,
+    ACCENT_DDDOT,
+    ACCENT_DDOT,
+    ACCENT_DOT,
+    ACCENT_HAT,
+    ACCENT_TILDE,
+    BACKSLASH,
+    BETH,
+    CALL,
+    CARDINALITY,
+    CASES,
+    CONDITIONAL_PROBABLITY,
+    DAGGER,
+    DECREMENT,
+    ERROR,
+    FORWARDSLASH,
+    FUN_SIGNATURE,
+    GROUP_BRACKET,
+    GROUP_PAREN,
+    IDENTIFIER,
+    IMPLICIT_MULTIPLY,
+    IN,
+    INCREMENT,
+    INTEGRAL,
+    LIMIT,
+    MINUS_PLUS_BINARY,
+    MINUS_PLUS_UNARY,
+    PLUS_MINUS_BINARY,
+    PLUS_MINUS_UNARY,
+    PROPORTIONAL,
+    SET_LITERAL_DIMENSIONS,
+    SUBSCRIPT_ACCESS,
+    SUBTRACTION,
+    SUPREMUM,
+    TICK_DERIVATIVE,
+    UNARY_MINUS,
+    ALGORITHM,
+    BLOCK,
+    DEFINE_EQUALS,
+    EQUAL,
+    EXPR_STMT,
+    FUN_DEF,
+    IF,
+    NOT_EQUAL,
+    NOT_IN,
+    PRINT,
+    RETURN,
+    WHILE,
 };
 
 #define NEB_DECLARE_NODE_LABELS \
 static const QString labels[138] { \
-	"| |", \
-	"⁜→", \
-	"⁜ā", \
-	"⁜ă", \
-	"⁜⋯", \
-	"⁜ä", \
-	"⁜ȧ", \
-	"⁜â", \
-	"⁜ã", \
-	"+", \
-	"ℵ", \
-	"alg", \
-	"\\\\", \
-	"ℶ", \
-	"⁜b", \
-	"block", \
-	"𝔹", \
-	"f( )", \
-	"⁜c", \
-	"⌈ ⌉", \
-	"ℂ ", \
-	"P( | )", \
-	"∮", \
-	"×", \
-	"∇×", \
-	"$", \
-	"€", \
-	"£", \
-	"†", \
-	"x⁻", \
-	"≔", \
-	"ⅆy/ⅆx", \
-	"∇⋅", \
-	"÷", \
-	"⋅", \
-	"#", \
-	"∯", \
-	"∬", \
-	"∅", \
-	"=", \
-	"err", \
-	"⁜_|", \
-	"expr\\nstmt", \
-	"!", \
-	"false", \
-	"⌊ ⌋", \
-	"/", \
-	"⁜f", \
-	"f:()↦", \
-	"f:×→", \
-	"∇", \
-	">", \
-	"≥", \
-	"[ ]", \
-	"( )", \
-	"id: ", \
-	"if", \
-	"*imp", \
-	"∈", \
-	"x⁺", \
-	"inf", \
-	"∞", \
-	"⟨ | ⟩", \
-	"ℤ", \
-	"∫", \
-	"∩", \
-	"<", \
-	"≤", \
-	"lim", \
-	"∧", \
-	"¬", \
-	"∨", \
-	"⁜⊞", \
-	"max", \
-	"min", \
-	"∓", \
-	"∓", \
-	"%", \
-	"*", \
-	"⁜⋂", \
-	"⁜⋃", \
-	"⁜⨄", \
-	"ℕ", \
-	"ℚ⁻", \
-	"ℝ⁻", \
-	"‖ ‖", \
-	"≠", \
-	"∉", \
-	"", \
-	"⨀", \
-	"⊗", \
-	"∂y/∂x", \
-	"±", \
-	"±", \
-	"ℚ⁺", \
-	"ℝ⁺", \
-	"^", \
-	"print", \
-	"∏", \
-	"∝", \
-	"ℍ", \
-	"⟦,⟧", \
-	"[,]", \
-	"[,)", \
-	"(,]", \
-	"(,)", \
-	"ℚ", \
-	"ℝ", \
-	"return", \
-	"⁜∛", \
-	"{ | }", \
-	"{,,,}", \
-	"dim", \
-	"(,,,)", \
-	"⁜√", \
-	"xᵢ", \
-	"∂", \
-	"-", \
-	"Σ", \
-	"sup", \
-	"=?", \
-	"≠?", \
-	">?", \
-	"<?", \
-	"≤?", \
-	"≥?", \
-	"∈?", \
-	"∉?", \
-	"'", \
-	"⊤", \
-	"true", \
-	"∰", \
-	"∭", \
-	"-", \
-	"∪", \
-	"∨", \
-	"∧", \
-	"while", \
+    "false", \
+    ">", \
+    "≥", \
+    "<", \
+    "≤", \
+    "∧", \
+    "¬", \
+    "∨", \
+    "=?", \
+    ">?", \
+    "≥?", \
+    "∈?", \
+    "<?", \
+    "≤?", \
+    "∉?", \
+    "≠?", \
+    "true", \
+    "| |", \
+    "+", \
+    "⁜b", \
+    "⌈ ⌉", \
+    "∯", \
+    "∰", \
+    "∮", \
+    "×", \
+    "∇×", \
+    "$", \
+    "€", \
+    "£", \
+    "ⅆy/ⅆx", \
+    "∇⋅", \
+    "÷", \
+    "⋅", \
+    "∬", \
+    "⁜_|", \
+    "!", \
+    "⌊ ⌋", \
+    "⁜f", \
+    "∇", \
+    "inf", \
+    "∞", \
+    "⟨ | ⟩", \
+    "⁜⊞", \
+    "max", \
+    "min", \
+    "%", \
+    "*", \
+    "‖ ‖", \
+    "", \
+    "⨀", \
+    "⊗", \
+    "∂y/∂x", \
+    "^", \
+    "∏", \
+    "⁜∛", \
+    "⁜√", \
+    "∂", \
+    "Σ", \
+    "⊤", \
+    "∭", \
+    "∨", \
+    "∧", \
+    "(,,,)", \
+    "ℵ", \
+    "𝔹", \
+    "ℂ ", \
+    "∅", \
+    "ℤ", \
+    "∩", \
+    "[,]", \
+    "[,)", \
+    "⟦,⟧", \
+    "(,]", \
+    "(,)", \
+    "⁜⋂", \
+    "⁜⋃", \
+    "⁜⨄", \
+    "ℕ", \
+    "ℚ⁻", \
+    "ℝ⁻", \
+    "ℚ⁺", \
+    "ℝ⁺", \
+    "ℍ", \
+    "ℚ", \
+    "ℝ", \
+    "{ | }", \
+    "{,,,}", \
+    "∪", \
+    "⁜→", \
+    "⁜ā", \
+    "⁜ă", \
+    "⁜⋯", \
+    "⁜ä", \
+    "⁜ȧ", \
+    "⁜â", \
+    "⁜ã", \
+    "\\\\", \
+    "ℶ", \
+    "f( )", \
+    "#", \
+    "⁜c", \
+    "P( | )", \
+    "†", \
+    "x⁻", \
+    "err", \
+    "/", \
+    "f:×→", \
+    "[ ]", \
+    "( )", \
+    "id: ", \
+    "*imp", \
+    "∈", \
+    "x⁺", \
+    "∫", \
+    "lim", \
+    "∓", \
+    "∓", \
+    "±", \
+    "±", \
+    "∝", \
+    "dim", \
+    "xᵢ", \
+    "-", \
+    "sup", \
+    "'", \
+    "-", \
+    "alg", \
+    "block", \
+    "≔", \
+    "=", \
+    "expr\\nstmt", \
+    "f:()↦", \
+    "if", \
+    "≠", \
+    "∉", \
+    "print", \
+    "return", \
+    "while", \
 };
+
+enum CourseType{
+    CT_Untyped,
+    CT_Boolean,
+    CT_Numeric,
+    CT_Sequence,
+    CT_Set,
+};
+
+#define NEB_DECLARE_COURSETYPE_LABELS \
+static const QString coursetype_labels[5] { \
+    "UNTYPED", \
+    "BOOLEAN", \
+    "NUMERIC", \
+    "SEQUENCE", \
+    "SET", \
+};
+
+#define NEB_DECLARE_COURSETYPE_INIT \
+static CourseType initCourseType(const NodeType& type){ \
+    if(type >= ACCENT_ARROW) return CT_Untyped; \
+    else if(type >= ALEPH) return CT_Set; \
+    else if(type >= SEQUENCE_ENUMERATED) return CT_Sequence; \
+    else if(type >= ABS) return CT_Numeric; \
+    else return CT_Boolean; \
+}
+
+#define NEB_DECLARE_IS_EXPR \
+static bool isExpr(const NodeType& type){ \
+    return type < ALGORITHM; \
+}
 
 #define NEB_NUM_NODETYPES 138
 

@@ -4,13 +4,24 @@
 
 namespace Neb {
 
+NEB_DECLARE_COURSETYPE_INIT
+
+Node::Node(NodeType type) : type(type), course_type(initCourseType(type)){}
+
+Node::Node(NodeType type, QString data) : type(type), course_type(initCourseType(type)), data(data) {}
+
 NEB_DECLARE_NODE_LABELS
+
+NEB_DECLARE_COURSETYPE_LABELS
+
+NEB_DECLARE_IS_EXPR
 
 static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     uint64_t id = curr++;
 
     out << "\tn" << QString::number(id) << "[label=\"" << labels[n.type];
     if(n.type == NUMBER || n.type == IDENTIFIER) out << n.data;
+    if(isExpr(n.type)) out << "\\n" << coursetype_labels[n.course_type];
     out << '"';
     if(n.type == IDENTIFIER) out << ", style=filled, fillcolor=lightblue";
     else if(n.type == ERROR) out << ", style=filled, fillcolor=red";
