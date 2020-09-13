@@ -10,14 +10,14 @@ namespace Neb {
 class Node {
 public:
     NodeType type;
-    CourseType course_type;
+    CoarseType course_type;
     QString data; //Copying all the data is not ideal, but okay in early stage
     std::vector<Node*> children;
 
     Node(NodeType type);
     Node(NodeType type, QString data);
-    QString toDOT(bool LR = false) const;
-    static QString toDOT(const std::vector<Node*>& nodes, bool LR = false);
+    QString toDOT(bool LR = false, bool typed = true) const;
+    static QString toDOT(const std::vector<Node*>& nodes, bool LR = false, bool typed = true);
     static void deletePostorder(Node* n);
 };
 

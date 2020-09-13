@@ -290,25 +290,27 @@ static const QString labels[138] { \
     "while", \
 };
 
-enum CourseType{
+enum CoarseType{
     CT_Untyped,
     CT_Boolean,
+    CT_Function,
     CT_Numeric,
     CT_Sequence,
     CT_Set,
 };
 
-#define NEB_DECLARE_COURSETYPE_LABELS \
-static const QString coursetype_labels[5] { \
-    "UNTYPED", \
-    "BOOLEAN", \
-    "NUMERIC", \
-    "SEQUENCE", \
-    "SET", \
+#define NEB_DECLARE_COARSETYPE_LABELS \
+static const QString coarsetype_labels[6] { \
+    "U", \
+    "B", \
+    "F", \
+    "N", \
+    "SEQ", \
+    "S", \
 };
 
-#define NEB_DECLARE_COURSETYPE_INIT \
-static CourseType initCourseType(const NodeType& type){ \
+#define NEB_DECLARE_COARSETYPE_INIT \
+static CoarseType initCoarseType(const NodeType& type){ \
     if(type >= ACCENT_ARROW) return CT_Untyped; \
     else if(type >= ALEPH) return CT_Set; \
     else if(type >= SEQUENCE_ENUMERATED) return CT_Sequence; \
