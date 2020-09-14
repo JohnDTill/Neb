@@ -6,9 +6,9 @@ namespace Neb {
 
 NEB_DECLARE_COARSETYPE_INIT
 
-Node::Node(NodeType type) : type(type), course_type(initCoarseType(type)){}
+Node::Node(NodeType type) : type(type), coarse_type(initCoarseType(type)){}
 
-Node::Node(NodeType type, QString data) : type(type), course_type(initCoarseType(type)), data(data) {}
+Node::Node(NodeType type, QString data) : type(type), coarse_type(initCoarseType(type)), data(data) {}
 
 NEB_DECLARE_NODE_LABELS
 
@@ -21,7 +21,7 @@ static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr, bool t
 
     out << "\tn" << QString::number(id) << "[label=\"" << labels[n.type];
     if(n.type == NUMBER || n.type == IDENTIFIER) out << n.data;
-    if(typed && isExpr(n.type)) out << "\\n" << coarsetype_labels[n.course_type];
+    if(typed && isExpr(n.type)) out << "\\n" << coarsetype_labels[n.coarse_type];
     out << '"';
     if(n.type == IDENTIFIER) out << ", style=filled, fillcolor=lightblue";
     else if(n.type == ERROR) out << ", style=filled, fillcolor=red";

@@ -10,9 +10,10 @@ namespace Neb {
 class Node {
 public:
     NodeType type;
-    CoarseType course_type;
+    CoarseType coarse_type;
     QString data; //Copying all the data is not ideal, but okay in early stage
     std::vector<Node*> children;
+    void* hook;
 
     Node(NodeType type);
     Node(NodeType type, QString data);
