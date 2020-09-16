@@ -8,10 +8,11 @@
 struct NodeEntry{
     QString name;
     QString label;
+    QString homogeneous_args;
     bool in_use;
 
-    NodeEntry(QString name, QString label, bool in_use)
-        : name(name), label(label), in_use(in_use) {}
+    NodeEntry(QString name, QString label, QString homogeneous_args, bool in_use)
+        : name(name), label(label), homogeneous_args(homogeneous_args), in_use(in_use) {}
 };
 
 int processNodes(){
@@ -49,6 +50,7 @@ int processNodes(){
         QString label = entries.at(1);
         QString expr = entries.at(2);
         QString type = entries.at(3);
+        QString homogeneous_args = entries.at(4);
 
         if(stmt_begin.isEmpty() && expr.isEmpty()) stmt_begin = name;
         if(numeric_begin.isEmpty() && type=="NUMERIC") numeric_begin = name;
@@ -57,7 +59,7 @@ int processNodes(){
         if(untyped_begin.isEmpty() && type.isEmpty()) untyped_begin = name;
         bool in_use = parser_code.contains(name);
 
-        rows.push_back(NodeEntry(name, label, in_use));
+        rows.push_back(NodeEntry(name, label, homogeneous_args, in_use));
         if(!in_use) qDebug() << "NodeType" << name << "is not in use";
     }
 
@@ -129,6 +131,22 @@ int processNodes(){
 
     //Size of enum
     out << "#define NEB_NUM_NODETYPES " << rows.size() << "\n\n";
+
+    //Homogeneous coarse type operators
+    out << "#define NEB_HOMOGENOUS_BOOLEAN_ARGS \\\n";
+    for(NodeEntry e : rows)
+        if(e.homogeneous_args == "BOOLEAN") out << "    case Neb::" << e.name << ": \\\n";
+    out << "\n";
+
+    out << "#define NEB_HOMOGENOUS_NUMERIC_ARGS \\\n";
+    for(NodeEntry e : rows)
+        if(e.homogeneous_args == "NUMERIC") out << "    case Neb::" << e.name << ": \\\n";
+    out << "\n";
+
+    out << "#define NEB_HOMOGENOUS_SET_ARGS \\\n";
+    for(NodeEntry e : rows)
+        if(e.homogeneous_args == "SET") out << "    case Neb::" << e.name << ": \\\n";
+    out << "\n";
 
     //Cleanup
     out << "}\n\n#endif\n";

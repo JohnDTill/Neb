@@ -22,8 +22,8 @@ enum NodeType{
     TEST_IN,
     TEST_LESS,
     TEST_LESS_EQUAL,
+    TEST_NOT_EQUAL,
     TEST_NOT_IN,
-    TEST_NOTEQUAL,
     TRUE,
     ABS,
     ADDITION,
@@ -37,19 +37,25 @@ enum NodeType{
     CURRENCY_DOLLARS,
     CURRENCY_EUROS,
     CURRENCY_POUNDS,
+    DAGGER,
+    DECREMENT,
     DERIVATIVE,
     DIVERGENCE,
     DIVIDE,
     DOT,
     DOUBLE_INTEGRAL,
-    EVAL,
     FACTORIAL,
     FLOOR,
+    FORWARDSLASH,
     FRACTION,
     GRADIENT,
+    IMPLICIT_MULTIPLY,
+    INCREMENT,
     INFIMUM,
     INFTY,
     INNER_PRODUCT,
+    INTEGRAL,
+    LIMIT,
     MATRIX,
     MAX,
     MIN,
@@ -68,6 +74,7 @@ enum NodeType{
     SUMMATION,
     TRANSPOSE,
     TRIPLE_INTEGRAL,
+    UNARY_MINUS,
     VEE,
     WEDGE,
     SEQUENCE_ENUMERATED,
@@ -95,6 +102,7 @@ enum NodeType{
     REALS,
     SET_BUILDER,
     SET_ENUMERATED,
+    SET_LITERAL_DIMENSIONS,
     UNION,
     ACCENT_ARROW,
     ACCENT_BAR,
@@ -110,30 +118,22 @@ enum NodeType{
     CARDINALITY,
     CASES,
     CONDITIONAL_PROBABLITY,
-    DAGGER,
-    DECREMENT,
     ERROR,
-    FORWARDSLASH,
+    EVAL,
     FUN_SIGNATURE,
     GROUP_BRACKET,
     GROUP_PAREN,
     IDENTIFIER,
-    IMPLICIT_MULTIPLY,
     IN,
-    INCREMENT,
-    INTEGRAL,
-    LIMIT,
     MINUS_PLUS_BINARY,
     MINUS_PLUS_UNARY,
     PLUS_MINUS_BINARY,
     PLUS_MINUS_UNARY,
     PROPORTIONAL,
-    SET_LITERAL_DIMENSIONS,
     SUBSCRIPT_ACCESS,
     SUBTRACTION,
     SUPREMUM,
     TICK_DERIVATIVE,
-    UNARY_MINUS,
     ALGORITHM,
     BLOCK,
     DEFINE_EQUALS,
@@ -164,8 +164,8 @@ static const QString labels[138] { \
     "∈?", \
     "<?", \
     "≤?", \
-    "∉?", \
     "≠?", \
+    "∉?", \
     "true", \
     "| |", \
     "+", \
@@ -179,19 +179,25 @@ static const QString labels[138] { \
     "$", \
     "€", \
     "£", \
+    "†", \
+    "x⁻", \
     "ⅆy/ⅆx", \
     "∇⋅", \
     "÷", \
     "⋅", \
     "∬", \
-    "⁜_|", \
     "!", \
     "⌊ ⌋", \
+    "/", \
     "⁜f", \
     "∇", \
+    "*imp", \
+    "x⁺", \
     "inf", \
     "∞", \
     "⟨ | ⟩", \
+    "∫", \
+    "lim", \
     "⁜⊞", \
     "max", \
     "min", \
@@ -210,6 +216,7 @@ static const QString labels[138] { \
     "Σ", \
     "⊤", \
     "∭", \
+    "-", \
     "∨", \
     "∧", \
     "(,,,)", \
@@ -237,6 +244,7 @@ static const QString labels[138] { \
     "ℝ", \
     "{ | }", \
     "{,,,}", \
+    "dim", \
     "∪", \
     "⁜→", \
     "⁜ā", \
@@ -252,30 +260,22 @@ static const QString labels[138] { \
     "#", \
     "⁜c", \
     "P( | )", \
-    "†", \
-    "x⁻", \
     "err", \
-    "/", \
+    "⁜_|", \
     "f:×→", \
     "[ ]", \
     "( )", \
     "id: ", \
-    "*imp", \
     "∈", \
-    "x⁺", \
-    "∫", \
-    "lim", \
     "∓", \
     "∓", \
     "±", \
     "±", \
     "∝", \
-    "dim", \
     "xᵢ", \
     "-", \
     "sup", \
     "'", \
-    "-", \
     "alg", \
     "block", \
     "≔", \
@@ -324,6 +324,70 @@ static bool isExpr(const NodeType& type){ \
 }
 
 #define NEB_NUM_NODETYPES 138
+
+#define NEB_HOMOGENOUS_BOOLEAN_ARGS \
+    case Neb::LOGICAL_AND: \
+    case Neb::LOGICAL_NOT: \
+    case Neb::LOGICAL_OR: \
+
+#define NEB_HOMOGENOUS_NUMERIC_ARGS \
+    case Neb::GREATER: \
+    case Neb::GREATER_EQUAL: \
+    case Neb::LESS: \
+    case Neb::LESS_EQUAL: \
+    case Neb::TEST_GREATER: \
+    case Neb::TEST_GREATER_EQUAL: \
+    case Neb::TEST_LESS: \
+    case Neb::TEST_LESS_EQUAL: \
+    case Neb::ABS: \
+    case Neb::ADDITION: \
+    case Neb::BINOMIAL: \
+    case Neb::CEIL: \
+    case Neb::CROSS: \
+    case Neb::CURL: \
+    case Neb::CURRENCY_DOLLARS: \
+    case Neb::CURRENCY_EUROS: \
+    case Neb::CURRENCY_POUNDS: \
+    case Neb::DAGGER: \
+    case Neb::DECREMENT: \
+    case Neb::DIVERGENCE: \
+    case Neb::DIVIDE: \
+    case Neb::DOT: \
+    case Neb::FACTORIAL: \
+    case Neb::FLOOR: \
+    case Neb::FORWARDSLASH: \
+    case Neb::FRACTION: \
+    case Neb::INCREMENT: \
+    case Neb::INNER_PRODUCT: \
+    case Neb::LIMIT: \
+    case Neb::MATRIX: \
+    case Neb::MODULUS: \
+    case Neb::MULTIPLICATION: \
+    case Neb::NORM: \
+    case Neb::ODOT: \
+    case Neb::OUTER_PRODUCT: \
+    case Neb::ROOT: \
+    case Neb::SQRT: \
+    case Neb::SUMMATION: \
+    case Neb::TRANSPOSE: \
+    case Neb::UNARY_MINUS: \
+    case Neb::VEE: \
+    case Neb::WEDGE: \
+    case Neb::INTERVAL_CLOSE_CLOSE: \
+    case Neb::INTERVAL_CLOSE_OPEN: \
+    case Neb::INTERVAL_INTEGER: \
+    case Neb::INTERVAL_OPEN_CLOSE: \
+    case Neb::INTERVAL_OPEN_OPEN: \
+    case Neb::SET_LITERAL_DIMENSIONS: \
+    case Neb::PROPORTIONAL: \
+
+#define NEB_HOMOGENOUS_SET_ARGS \
+    case Neb::INTERSECTION: \
+    case Neb::NARY_INTERSECTION: \
+    case Neb::NARY_UNION: \
+    case Neb::NARY_UNIONPLUS: \
+    case Neb::UNION: \
+    case Neb::CARDINALITY: \
 
 }
 

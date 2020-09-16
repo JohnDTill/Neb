@@ -1,139 +1,139 @@
-enum¦label¦stmt¦course return type¦comments
-FALSE¦false¦y¦BOOLEAN¦
-GREATER¦>¦y¦BOOLEAN¦
-GREATER_EQUAL¦≥¦y¦BOOLEAN¦
-LESS¦<¦y¦BOOLEAN¦
-LESS_EQUAL¦≤¦y¦BOOLEAN¦
-LOGICAL_AND¦∧¦y¦BOOLEAN¦
-LOGICAL_NOT¦¬¦y¦BOOLEAN¦
-LOGICAL_OR¦∨¦y¦BOOLEAN¦
-TEST_EQUALITY¦=?¦y¦BOOLEAN¦
-TEST_GREATER¦>?¦y¦BOOLEAN¦
-TEST_GREATER_EQUAL¦≥?¦y¦BOOLEAN¦
-TEST_IN¦∈?¦y¦BOOLEAN¦
-TEST_LESS¦<?¦y¦BOOLEAN¦
-TEST_LESS_EQUAL¦≤?¦y¦BOOLEAN¦
-TEST_NOT_IN¦∉?¦y¦BOOLEAN¦
-TEST_NOTEQUAL¦≠?¦y¦BOOLEAN¦
-TRUE¦true¦y¦BOOLEAN¦
-ABS¦| |¦y¦NUMERIC¦positive semidefinite for abs or determinant, type is unknown if cardinality op included
-ADDITION¦+¦y¦NUMERIC¦
-BINOMIAL¦⁜b¦y¦NUMERIC¦
-CEIL¦⌈ ⌉¦y¦NUMERIC¦
-CLOSED_SURFACE_INTEGRAL¦∯¦y¦NUMERIC¦
-CLOSED_VOLUME_INTEGRAL¦∰¦y¦NUMERIC¦
-CONTOUR_INTEGRAL¦∮¦y¦NUMERIC¦
-CROSS¦×¦y¦NUMERIC¦
-CURL¦∇×¦y¦NUMERIC¦
-CURRENCY_DOLLARS¦$¦y¦NUMERIC¦
-CURRENCY_EUROS¦€¦y¦NUMERIC¦
-CURRENCY_POUNDS¦£¦y¦NUMERIC¦
-DERIVATIVE¦ⅆy/ⅆx¦y¦NUMERIC¦
-DIVERGENCE¦∇⋅¦y¦NUMERIC¦
-DIVIDE¦÷¦y¦NUMERIC¦
-DOT¦⋅¦y¦NUMERIC¦
-DOUBLE_INTEGRAL¦∬¦y¦NUMERIC¦
-EVAL¦⁜_|¦y¦NUMERIC¦
-FACTORIAL¦!¦y¦NUMERIC¦natural number
-FLOOR¦⌊ ⌋¦y¦NUMERIC¦
-FRACTION¦⁜f¦y¦NUMERIC¦
-GRADIENT¦∇¦y¦NUMERIC¦
-INFIMUM¦inf¦y¦NUMERIC¦
-INFTY¦∞¦y¦NUMERIC¦
-INNER_PRODUCT¦⟨ | ⟩¦y¦NUMERIC¦
-MATRIX¦⁜⊞¦y¦NUMERIC¦
-MAX¦max¦y¦NUMERIC¦
-MIN¦min¦y¦NUMERIC¦
-MODULUS¦%¦y¦NUMERIC¦
-MULTIPLICATION¦*¦y¦NUMERIC¦
-NORM¦‖ ‖¦y¦NUMERIC¦
-NUMBER¦¦y¦NUMERIC¦
-ODOT¦⨀¦y¦NUMERIC¦
-OUTER_PRODUCT¦⊗¦y¦NUMERIC¦
-PARTIAL¦∂y/∂x¦y¦NUMERIC¦
-POWER¦^¦y¦NUMERIC¦
-PRODUCT¦∏¦y¦NUMERIC¦
-ROOT¦⁜∛¦y¦NUMERIC¦
-SQRT¦⁜√¦y¦NUMERIC¦
-SUBSCRIPT_PARTIAL¦∂¦y¦NUMERIC¦
-SUMMATION¦Σ¦y¦NUMERIC¦
-TRANSPOSE¦⊤¦y¦NUMERIC¦
-TRIPLE_INTEGRAL¦∭¦y¦NUMERIC¦
-VEE¦∨¦y¦NUMERIC¦
-WEDGE¦∧¦y¦NUMERIC¦
-SEQUENCE_ENUMERATED¦(,,,)¦y¦SEQUENCE¦
-ALEPH¦ℵ¦y¦SET¦
-BOOLEANS¦𝔹¦y¦SET¦
-COMPLEX_NUMS¦ℂ ¦y¦SET¦
-EMPTY_SET¦∅¦y¦SET¦
-INTEGERS¦ℤ¦y¦SET¦
-INTERSECTION¦∩¦y¦SET¦
-INTERVAL_CLOSE_CLOSE¦[,]¦y¦SET¦
-INTERVAL_CLOSE_OPEN¦[,)¦y¦SET¦
-INTERVAL_INTEGER¦⟦,⟧¦y¦SET¦
-INTERVAL_OPEN_CLOSE¦(,]¦y¦SET¦
-INTERVAL_OPEN_OPEN¦(,)¦y¦SET¦
-NARY_INTERSECTION¦⁜⋂¦y¦SET¦
-NARY_UNION¦⁜⋃¦y¦SET¦
-NARY_UNIONPLUS¦⁜⨄¦y¦SET¦
-NATURALS¦ℕ¦y¦SET¦
-NEGATIVE_RATIONALS¦ℚ⁻¦y¦SET¦
-NEGATIVE_REALS¦ℝ⁻¦y¦SET¦
-POSITIVE_RATIONALS¦ℚ⁺¦y¦SET¦
-POSITIVE_REALS¦ℝ⁺¦y¦SET¦
-QUATERNIONS¦ℍ¦y¦SET¦
-RATIONALS¦ℚ¦y¦SET¦
-REALS¦ℝ¦y¦SET¦
-SET_BUILDER¦{ | }¦y¦SET¦
-SET_ENUMERATED¦{,,,}¦y¦SET¦
-UNION¦∪¦y¦SET¦
-ACCENT_ARROW¦⁜→¦y¦¦
-ACCENT_BAR¦⁜ā¦y¦¦
-ACCENT_BREVE¦⁜ă¦y¦¦
-ACCENT_DDDOT¦⁜⋯¦y¦¦
-ACCENT_DDOT¦⁜ä¦y¦¦
-ACCENT_DOT¦⁜ȧ¦y¦¦
-ACCENT_HAT¦⁜â¦y¦¦
-ACCENT_TILDE¦⁜ã¦y¦¦
-BACKSLASH¦\\\\¦y¦¦
-BETH¦ℶ¦y¦¦
-CALL¦f( )¦y¦¦
-CARDINALITY¦#¦y¦¦
-CASES¦⁜c¦y¦¦
-CONDITIONAL_PROBABLITY¦P( | )¦y¦¦
-DAGGER¦†¦y¦¦
-DECREMENT¦x⁻¦y¦¦
-ERROR¦err¦y¦¦
-FORWARDSLASH¦/¦y¦¦
-FUN_SIGNATURE¦f:×→¦y¦¦
-GROUP_BRACKET¦[ ]¦y¦¦
-GROUP_PAREN¦( )¦y¦¦
-IDENTIFIER¦id: ¦y¦¦
-IMPLICIT_MULTIPLY¦*imp¦y¦¦
-IN¦∈¦y¦¦
-INCREMENT¦x⁺¦y¦¦
-INTEGRAL¦∫¦y¦¦
-LIMIT¦lim¦y¦¦
-MINUS_PLUS_BINARY¦∓¦y¦¦
-MINUS_PLUS_UNARY¦∓¦y¦¦
-PLUS_MINUS_BINARY¦±¦y¦¦
-PLUS_MINUS_UNARY¦±¦y¦¦
-PROPORTIONAL¦∝¦y¦¦
-SET_LITERAL_DIMENSIONS¦dim¦y¦¦
-SUBSCRIPT_ACCESS¦xᵢ¦y¦¦
-SUBTRACTION¦-¦y¦¦
-SUPREMUM¦sup¦y¦¦
-TICK_DERIVATIVE¦'¦y¦¦
-UNARY_MINUS¦-¦y¦¦
-ALGORITHM¦alg¦¦¦
-BLOCK¦block¦¦¦
-DEFINE_EQUALS¦≔¦¦¦
-EQUAL¦=¦¦¦
-EXPR_STMT¦expr\\nstmt¦¦¦
-FUN_DEF¦f:()↦¦¦¦
-IF¦if¦¦¦
-NOT_EQUAL¦≠¦¦¦
-NOT_IN¦∉¦¦¦
-PRINT¦print¦¦¦
-RETURN¦return¦¦¦
-WHILE¦while¦¦¦
+enum¦label¦expr¦coarse return type¦coarse arg type¦comments
+FALSE¦false¦y¦BOOLEAN¦¦
+GREATER¦>¦y¦BOOLEAN¦NUMERIC¦
+GREATER_EQUAL¦≥¦y¦BOOLEAN¦NUMERIC¦
+LESS¦<¦y¦BOOLEAN¦NUMERIC¦
+LESS_EQUAL¦≤¦y¦BOOLEAN¦NUMERIC¦
+LOGICAL_AND¦∧¦y¦BOOLEAN¦BOOLEAN¦
+LOGICAL_NOT¦¬¦y¦BOOLEAN¦BOOLEAN¦
+LOGICAL_OR¦∨¦y¦BOOLEAN¦BOOLEAN¦
+TEST_EQUALITY¦=?¦y¦BOOLEAN¦¦
+TEST_GREATER¦>?¦y¦BOOLEAN¦NUMERIC¦
+TEST_GREATER_EQUAL¦≥?¦y¦BOOLEAN¦NUMERIC¦
+TEST_IN¦∈?¦y¦BOOLEAN¦¦
+TEST_LESS¦<?¦y¦BOOLEAN¦NUMERIC¦
+TEST_LESS_EQUAL¦≤?¦y¦BOOLEAN¦NUMERIC¦
+TEST_NOT_EQUAL¦≠?¦y¦BOOLEAN¦¦
+TEST_NOT_IN¦∉?¦y¦BOOLEAN¦¦
+TRUE¦true¦y¦BOOLEAN¦¦
+ABS¦| |¦y¦NUMERIC¦NUMERIC¦positive semidefinite for abs or determinant, type is unknown if cardinality op included
+ADDITION¦+¦y¦NUMERIC¦NUMERIC¦
+BINOMIAL¦⁜b¦y¦NUMERIC¦NUMERIC¦
+CEIL¦⌈ ⌉¦y¦NUMERIC¦NUMERIC¦
+CLOSED_SURFACE_INTEGRAL¦∯¦y¦NUMERIC¦¦
+CLOSED_VOLUME_INTEGRAL¦∰¦y¦NUMERIC¦¦
+CONTOUR_INTEGRAL¦∮¦y¦NUMERIC¦¦
+CROSS¦×¦y¦NUMERIC¦NUMERIC¦
+CURL¦∇×¦y¦NUMERIC¦NUMERIC¦
+CURRENCY_DOLLARS¦$¦y¦NUMERIC¦NUMERIC¦
+CURRENCY_EUROS¦€¦y¦NUMERIC¦NUMERIC¦
+CURRENCY_POUNDS¦£¦y¦NUMERIC¦NUMERIC¦
+DAGGER¦†¦y¦NUMERIC¦NUMERIC¦
+DECREMENT¦x⁻¦y¦NUMERIC¦NUMERIC¦
+DERIVATIVE¦ⅆy/ⅆx¦y¦NUMERIC¦¦
+DIVERGENCE¦∇⋅¦y¦NUMERIC¦NUMERIC¦
+DIVIDE¦÷¦y¦NUMERIC¦NUMERIC¦
+DOT¦⋅¦y¦NUMERIC¦NUMERIC¦
+DOUBLE_INTEGRAL¦∬¦y¦NUMERIC¦¦
+FACTORIAL¦!¦y¦NUMERIC¦NUMERIC¦natural number
+FLOOR¦⌊ ⌋¦y¦NUMERIC¦NUMERIC¦
+FORWARDSLASH¦/¦y¦NUMERIC¦NUMERIC¦
+FRACTION¦⁜f¦y¦NUMERIC¦NUMERIC¦
+GRADIENT¦∇¦y¦NUMERIC¦¦
+IMPLICIT_MULTIPLY¦*imp¦y¦NUMERIC¦¦
+INCREMENT¦x⁺¦y¦NUMERIC¦NUMERIC¦
+INFIMUM¦inf¦y¦NUMERIC¦¦
+INFTY¦∞¦y¦NUMERIC¦¦
+INNER_PRODUCT¦⟨ | ⟩¦y¦NUMERIC¦NUMERIC¦
+INTEGRAL¦∫¦y¦NUMERIC¦¦
+LIMIT¦lim¦y¦NUMERIC¦NUMERIC¦
+MATRIX¦⁜⊞¦y¦NUMERIC¦NUMERIC¦
+MAX¦max¦y¦NUMERIC¦¦
+MIN¦min¦y¦NUMERIC¦¦
+MODULUS¦%¦y¦NUMERIC¦NUMERIC¦
+MULTIPLICATION¦*¦y¦NUMERIC¦NUMERIC¦
+NORM¦‖ ‖¦y¦NUMERIC¦NUMERIC¦
+NUMBER¦¦y¦NUMERIC¦¦
+ODOT¦⨀¦y¦NUMERIC¦NUMERIC¦
+OUTER_PRODUCT¦⊗¦y¦NUMERIC¦NUMERIC¦
+PARTIAL¦∂y/∂x¦y¦NUMERIC¦¦
+POWER¦^¦y¦NUMERIC¦¦
+PRODUCT¦∏¦y¦NUMERIC¦¦
+ROOT¦⁜∛¦y¦NUMERIC¦NUMERIC¦
+SQRT¦⁜√¦y¦NUMERIC¦NUMERIC¦
+SUBSCRIPT_PARTIAL¦∂¦y¦NUMERIC¦¦
+SUMMATION¦Σ¦y¦NUMERIC¦NUMERIC¦
+TRANSPOSE¦⊤¦y¦NUMERIC¦NUMERIC¦
+TRIPLE_INTEGRAL¦∭¦y¦NUMERIC¦¦
+UNARY_MINUS¦-¦y¦NUMERIC¦NUMERIC¦
+VEE¦∨¦y¦NUMERIC¦NUMERIC¦
+WEDGE¦∧¦y¦NUMERIC¦NUMERIC¦
+SEQUENCE_ENUMERATED¦(,,,)¦y¦SEQUENCE¦¦
+ALEPH¦ℵ¦y¦SET¦¦
+BOOLEANS¦𝔹¦y¦SET¦¦
+COMPLEX_NUMS¦ℂ ¦y¦SET¦¦
+EMPTY_SET¦∅¦y¦SET¦¦
+INTEGERS¦ℤ¦y¦SET¦¦
+INTERSECTION¦∩¦y¦SET¦SET¦
+INTERVAL_CLOSE_CLOSE¦[,]¦y¦SET¦NUMERIC¦
+INTERVAL_CLOSE_OPEN¦[,)¦y¦SET¦NUMERIC¦
+INTERVAL_INTEGER¦⟦,⟧¦y¦SET¦NUMERIC¦
+INTERVAL_OPEN_CLOSE¦(,]¦y¦SET¦NUMERIC¦
+INTERVAL_OPEN_OPEN¦(,)¦y¦SET¦NUMERIC¦
+NARY_INTERSECTION¦⁜⋂¦y¦SET¦SET¦
+NARY_UNION¦⁜⋃¦y¦SET¦SET¦
+NARY_UNIONPLUS¦⁜⨄¦y¦SET¦SET¦
+NATURALS¦ℕ¦y¦SET¦¦
+NEGATIVE_RATIONALS¦ℚ⁻¦y¦SET¦¦
+NEGATIVE_REALS¦ℝ⁻¦y¦SET¦¦
+POSITIVE_RATIONALS¦ℚ⁺¦y¦SET¦¦
+POSITIVE_REALS¦ℝ⁺¦y¦SET¦¦
+QUATERNIONS¦ℍ¦y¦SET¦¦
+RATIONALS¦ℚ¦y¦SET¦¦
+REALS¦ℝ¦y¦SET¦¦
+SET_BUILDER¦{ | }¦y¦SET¦¦
+SET_ENUMERATED¦{,,,}¦y¦SET¦¦
+SET_LITERAL_DIMENSIONS¦dim¦y¦SET¦NUMERIC¦
+UNION¦∪¦y¦SET¦SET¦
+ACCENT_ARROW¦⁜→¦y¦¦¦
+ACCENT_BAR¦⁜ā¦y¦¦¦
+ACCENT_BREVE¦⁜ă¦y¦¦¦
+ACCENT_DDDOT¦⁜⋯¦y¦¦¦
+ACCENT_DDOT¦⁜ä¦y¦¦¦
+ACCENT_DOT¦⁜ȧ¦y¦¦¦
+ACCENT_HAT¦⁜â¦y¦¦¦
+ACCENT_TILDE¦⁜ã¦y¦¦¦
+BACKSLASH¦\\\\¦y¦¦¦
+BETH¦ℶ¦y¦¦¦
+CALL¦f( )¦y¦¦¦
+CARDINALITY¦#¦y¦¦SET¦
+CASES¦⁜c¦y¦¦¦
+CONDITIONAL_PROBABLITY¦P( | )¦y¦¦¦
+ERROR¦err¦y¦¦¦
+EVAL¦⁜_|¦y¦¦¦
+FUN_SIGNATURE¦f:×→¦y¦¦¦
+GROUP_BRACKET¦[ ]¦y¦¦¦
+GROUP_PAREN¦( )¦y¦¦¦
+IDENTIFIER¦id: ¦y¦¦¦
+IN¦∈¦y¦¦¦
+MINUS_PLUS_BINARY¦∓¦y¦¦¦
+MINUS_PLUS_UNARY¦∓¦y¦¦¦
+PLUS_MINUS_BINARY¦±¦y¦¦¦
+PLUS_MINUS_UNARY¦±¦y¦¦¦
+PROPORTIONAL¦∝¦y¦¦NUMERIC¦
+SUBSCRIPT_ACCESS¦xᵢ¦y¦¦¦
+SUBTRACTION¦-¦y¦¦¦
+SUPREMUM¦sup¦y¦¦¦
+TICK_DERIVATIVE¦'¦y¦¦¦
+ALGORITHM¦alg¦¦¦¦
+BLOCK¦block¦¦¦¦
+DEFINE_EQUALS¦≔¦¦¦¦
+EQUAL¦=¦¦¦¦
+EXPR_STMT¦expr\\nstmt¦¦¦¦
+FUN_DEF¦f:()↦¦¦¦¦
+IF¦if¦¦¦¦
+NOT_EQUAL¦≠¦¦¦¦
+NOT_IN¦∉¦¦¦¦
+PRINT¦print¦¦¦¦
+RETURN¦return¦¦¦¦
+WHILE¦while¦¦¦¦

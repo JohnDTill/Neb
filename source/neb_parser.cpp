@@ -612,7 +612,7 @@ Node* Parser::boolEquality(){
 
     switch (current.type) {
         case Equals: advance(); return createNode(TEST_EQUALITY, n, addition());
-        case NotEqual: advance(); return createNode(TEST_NOTEQUAL, n, addition());
+        case NotEqual: advance(); return createNode(TEST_NOT_EQUAL, n, addition());
         case Less: advance(); return createNode(TEST_LESS, n, addition());
         case Greater: advance(); return createNode(TEST_GREATER, n, addition());
         case LessEqual: advance(); return createNode(TEST_LESS_EQUAL, n, addition());
