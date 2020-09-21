@@ -161,6 +161,7 @@ RightFloor¦⌋¦y¦¦¦¦¦
 RightParen¦)¦y¦¦¦¦¦
 Semicolon¦;¦y¦¦¦¦¦
 Sin¦sin¦¦y¦¦y¦¦
+String¦¦¦¦¦¦¦
 SubscriptIdentifier¦sub-¦¦¦¦¦¦
 SubscriptLeftParen¦₍¦y¦¦¦¦¦
 SubscriptMinus¦₋¦y¦¦¦¦¦

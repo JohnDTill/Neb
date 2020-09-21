@@ -259,6 +259,7 @@ Node* Parser::mathStatement(){
     Node* n = expression();
 
     switch (current.type) {
+        case LeftArrow: advance(); return createNode(ASSIGN, n, expression());
         case Equals: advance(); return equality(n);
         case Less: advance(); return less(n);
         case LessEqual: advance(); return less(n);
@@ -538,6 +539,7 @@ Node* Parser::primary(){
         case Number: return createNode(NUMBER);
         case True: return createNode(TRUE);
         case False: return createNode(FALSE);
+        case String: return createNode(STRING);
 
         //Grouping
         case LeftCeil: return grouping(CEIL, RightCeil);

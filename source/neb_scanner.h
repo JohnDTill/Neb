@@ -39,6 +39,7 @@ private:
     Token scanSuperscriptZeroNumber();
     Token scanSubscriptNonzeroNumber();
     Token scanSubscriptZeroNumber();
+    Token scanString();
 };
 
 }

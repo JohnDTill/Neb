@@ -170,6 +170,7 @@ enum TokenType{
 	RightParen,
 	Semicolon,
 	Sin,
+	String,
 	SubscriptIdentifier,
 	SubscriptLeftParen,
 	SubscriptMinus,
@@ -203,7 +204,7 @@ enum TokenType{
 };
 
 #define NEB_DECLARE_TOKEN_LABELS \
-static const QString token_labels[192] { \
+static const QString token_labels[193] { \
 	"ℵ", \
 	"algorithm", \
 	"@", \
@@ -366,6 +367,7 @@ static const QString token_labels[192] { \
 	")", \
 	";", \
 	"sin", \
+	"", \
 	"sub-", \
 	"₍", \
 	"₋", \
@@ -667,7 +669,7 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
 	 case 8328: return scanSubscriptNonzeroNumber();\
 	 case 8329: return scanSubscriptNonzeroNumber();
 
-#define NEB_NUM_TOKENTYPES 192
+#define NEB_NUM_TOKENTYPES 193
 
 #define NEB_IMPLICIT_MULT_MACRO_EXPANSION {\
 	ContourIntegral,\

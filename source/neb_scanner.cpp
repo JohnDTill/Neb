@@ -79,6 +79,7 @@ Token Scanner::scanToken(){
         NEB_SCRIPTED_NUMBER_CASES_MACRO_EXPANSION
         case USHORT_MAX: return scanBigToken();
         case MB_USHORT_CONSTRUCT_SYMBOL: return scanMathBranToken();
+        case '"': return  scanString();
         default:
             if(isLetter(c)) return scanIdentifier();
             else if(isSuperscriptLetter(c)) return scanSuperscriptIdentifier();
@@ -289,6 +290,22 @@ Token Scanner::scanSubscriptZeroNumber(){
         return Token(Error, start, 2);
     }else{
         return Token(SubscriptNumber, start);
+    }
+}
+
+Token Scanner::scanString(){
+    QString::size_type start = curr;
+
+    while(curr < source.size() && source[curr] != '"'){
+        curr++;
+    }
+    curr++;
+
+    if(curr >= source.size()){
+        err_msg = "Reached end of file while scanning string";
+        return Token(Error, start);
+    }else{
+        return Token(String, start, curr-start-1);
     }
 }
 

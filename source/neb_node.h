@@ -12,8 +12,9 @@ public:
     NodeType type;
     CoarseType coarse_type;
     QString data; //Copying all the data is not ideal, but okay in early stage
-    std::vector<Node*> children;
     void* hook;
+    void* type_info;
+    std::vector<Node*> children;
 
     Node(NodeType type);
     Node(NodeType type, QString data);
