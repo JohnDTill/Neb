@@ -25,17 +25,18 @@ Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
     if(match(surrounding_terminator)) return nullptr;
 
     Node* body;
+    bool must_terminate = true;
 
     switch (current.type) {
-        case Algorithm: body = algorithm(surrounding_terminator); break;
-        case If: body = ifStatement(surrounding_terminator); break;
+        case Algorithm: must_terminate = false; body = algorithm(surrounding_terminator); break;
+        case If: must_terminate = false; body = ifStatement(surrounding_terminator); break;
         case Print: body = printStatement(); break;
         case Return: body = returnStatement(surrounding_terminator); break;
-        case While: body = whileStatement(surrounding_terminator); break;
+        case While: must_terminate = false; body = whileStatement(surrounding_terminator); break;
         default: body = mathStatement();
     }
 
-    consume<3>({Newline, Comma, surrounding_terminator}, "Expect statement terminator");
+    if(must_terminate) consume<3>({Newline, Comma, surrounding_terminator}, "Expect statement terminator");
 
     if(current.type == Error){
         Node::deletePostorder(body);

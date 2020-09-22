@@ -35,11 +35,10 @@ int processNodes(){
     QString stmt_begin;
     QString numeric_begin;
     QString sequence_begin;
-    QString set_begin;
+    QString set_boolean_begin;
+    QString set_numeric_begin;
     QString string_begin;
     QString untyped_begin;
-    QString boolean_set_end;
-    QString numeric_set_end;
 
     std::vector<NodeEntry> rows;
     table.readLine(); //Discard headers
@@ -54,16 +53,14 @@ int processNodes(){
         QString expr = entries.at(2);
         QString type = entries.at(3);
         QString homogeneous_args = entries.at(4);
-        QString set_type = entries.at(5);
 
         if(stmt_begin.isEmpty() && expr.isEmpty()) stmt_begin = name;
         if(numeric_begin.isEmpty() && type=="NUMERIC") numeric_begin = name;
         if(sequence_begin.isEmpty() && type=="SEQUENCE") sequence_begin = name;
-        if(set_begin.isEmpty() && type=="SET") set_begin = name;
+        if(set_boolean_begin.isEmpty() && type=="SET_BOOLEAN") set_boolean_begin = name;
+        if(set_numeric_begin.isEmpty() && type=="SET_NUMERIC") set_numeric_begin = name;
         if(string_begin.isEmpty() && type=="STRING") string_begin = name;
         if(untyped_begin.isEmpty() && type.isEmpty()) untyped_begin = name;
-        if(set_type=="BOOLEAN") boolean_set_end = name;
-        if(set_type=="NUMERIC") numeric_set_end = name;
         bool in_use = parser_code.contains(name);
 
         rows.push_back(NodeEntry(name, label, homogeneous_args, in_use));
@@ -109,7 +106,8 @@ int processNodes(){
            "    CT_Function,\n"
            "    CT_Numeric,\n"
            "    CT_Sequence,\n"
-           "    CT_Set,\n"
+           "    CT_Set_Boolean,\n"
+           "    CT_Set_Numeric,\n"
            "    CT_String,\n"
            "    CT_Void,\n"
            "};\n"
@@ -130,7 +128,8 @@ int processNodes(){
            "static CoarseType initCoarseType(const NodeType& type){ \\\n"
            "    if(type >= " << untyped_begin << ") return CT_Untyped; \\\n"
            "    else if(type >= " << string_begin << ") return CT_String; \\\n"
-           "    else if(type >= " << set_begin << ") return CT_Set; \\\n"
+           "    else if(type >= " << set_numeric_begin << ") return CT_Set_Numeric; \\\n"
+           "    else if(type >= " << set_boolean_begin << ") return CT_Set_Boolean; \\\n"
            "    else if(type >= " << sequence_begin << ") return CT_Sequence; \\\n"
            "    else if(type >= " << numeric_begin << ") return CT_Numeric; \\\n"
            "    else return CT_Boolean; \\\n"
@@ -140,12 +139,6 @@ int processNodes(){
            "static bool isExpr(const NodeType& type){ \\\n"
            "    return type < " << stmt_begin << "; \\\n"
            "}\n"
-           "\n"
-           "#define NEB_DECLARE_SET_INIT \\\n"
-           "   if(type < " << set_begin << ") return; \\\n"
-           "   else if(type <= " << boolean_set_end << ") type_info = reinterpret_cast<void*>(CT_Boolean); \\\n"
-           "   else if(type <= " << numeric_set_end << ") type_info = reinterpret_cast<void*>(CT_Numeric); \\\n"
-           "   else if(type < " << sequence_begin << ") type_info = nullptr;\n"
            "\n";
 
     //Size of enum
@@ -162,9 +155,9 @@ int processNodes(){
         if(e.homogeneous_args == "NUMERIC") out << "    case Neb::" << e.name << ": \\\n";
     out << "\n";
 
-    out << "#define NEB_HOMOGENOUS_SET_ARGS \\\n";
+    out << "#define NEB_HOMOGENOUS_SET_NUMERIC_ARGS \\\n";
     for(NodeEntry e : rows)
-        if(e.homogeneous_args == "SET") out << "    case Neb::" << e.name << ": \\\n";
+        if(e.homogeneous_args == "SET_NUMERIC") out << "    case Neb::" << e.name << ": \\\n";
     out << "\n";
 
     //Cleanup

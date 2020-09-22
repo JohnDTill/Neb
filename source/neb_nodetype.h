@@ -81,16 +81,6 @@ enum NodeType{
     BOOLEANS,
     COMPLEX_NUMS,
     INTEGERS,
-    NATURALS,
-    NEGATIVE_RATIONALS,
-    NEGATIVE_REALS,
-    POSITIVE_RATIONALS,
-    POSITIVE_REALS,
-    QUATERNIONS,
-    RATIONALS,
-    REALS,
-    ALEPH,
-    EMPTY_SET,
     INTERSECTION,
     INTERVAL_CLOSE_CLOSE,
     INTERVAL_CLOSE_OPEN,
@@ -100,9 +90,16 @@ enum NodeType{
     NARY_INTERSECTION,
     NARY_UNION,
     NARY_UNIONPLUS,
+    NATURALS,
+    NEGATIVE_RATIONALS,
+    NEGATIVE_REALS,
+    POSITIVE_RATIONALS,
+    POSITIVE_REALS,
+    QUATERNIONS,
+    RATIONALS,
+    REALS,
     SET_BUILDER,
     SET_ENUMERATED,
-    SET_LITERAL_DIMENSIONS,
     UNION,
     STRING,
     ACCENT_ARROW,
@@ -113,12 +110,14 @@ enum NodeType{
     ACCENT_DOT,
     ACCENT_HAT,
     ACCENT_TILDE,
+    ALEPH,
     BACKSLASH,
     BETH,
     CALL,
     CARDINALITY,
     CASES,
     CONDITIONAL_PROBABLITY,
+    EMPTY_SET,
     ERROR,
     EVAL,
     FUN_SIGNATURE,
@@ -131,6 +130,7 @@ enum NodeType{
     PLUS_MINUS_BINARY,
     PLUS_MINUS_UNARY,
     PROPORTIONAL,
+    SET_LITERAL_DIMENSIONS,
     SUBSCRIPT_ACCESS,
     SUBTRACTION,
     SUPREMUM,
@@ -225,16 +225,6 @@ static const QString labels[140] { \
     "𝔹", \
     "ℂ ", \
     "ℤ", \
-    "ℕ", \
-    "ℚ⁻", \
-    "ℝ⁻", \
-    "ℚ⁺", \
-    "ℝ⁺", \
-    "ℍ", \
-    "ℚ", \
-    "ℝ", \
-    "ℵ", \
-    "∅", \
     "∩", \
     "[,]", \
     "[,)", \
@@ -244,9 +234,16 @@ static const QString labels[140] { \
     "⁜⋂", \
     "⁜⋃", \
     "⁜⨄", \
+    "ℕ", \
+    "ℚ⁻", \
+    "ℝ⁻", \
+    "ℚ⁺", \
+    "ℝ⁺", \
+    "ℍ", \
+    "ℚ", \
+    "ℝ", \
     "{ | }", \
     "{,,,}", \
-    "dim", \
     "∪", \
     "", \
     "⁜→", \
@@ -257,12 +254,14 @@ static const QString labels[140] { \
     "⁜ȧ", \
     "⁜â", \
     "⁜ã", \
+    "ℵ", \
     "\\\\", \
     "ℶ", \
     "f( )", \
     "#", \
     "⁜c", \
     "P( | )", \
+    "∅", \
     "err", \
     "⁜_|", \
     "f:×→", \
@@ -275,6 +274,7 @@ static const QString labels[140] { \
     "±", \
     "±", \
     "∝", \
+    "dim", \
     "xᵢ", \
     "-", \
     "sup", \
@@ -300,7 +300,8 @@ enum CoarseType{
     CT_Function,
     CT_Numeric,
     CT_Sequence,
-    CT_Set,
+    CT_Set_Boolean,
+    CT_Set_Numeric,
     CT_String,
     CT_Void,
 };
@@ -321,7 +322,8 @@ static const QString coarsetype_labels[8] { \
 static CoarseType initCoarseType(const NodeType& type){ \
     if(type >= ACCENT_ARROW) return CT_Untyped; \
     else if(type >= STRING) return CT_String; \
-    else if(type >= BOOLEANS) return CT_Set; \
+    else if(type >= COMPLEX_NUMS) return CT_Set_Numeric; \
+    else if(type >= BOOLEANS) return CT_Set_Boolean; \
     else if(type >= SEQUENCE_ENUMERATED) return CT_Sequence; \
     else if(type >= ABS) return CT_Numeric; \
     else return CT_Boolean; \
@@ -331,12 +333,6 @@ static CoarseType initCoarseType(const NodeType& type){ \
 static bool isExpr(const NodeType& type){ \
     return type < ALGORITHM; \
 }
-
-#define NEB_DECLARE_SET_INIT \
-   if(type < BOOLEANS) return; \
-   else if(type <= BOOLEANS) type_info = reinterpret_cast<void*>(CT_Boolean); \
-   else if(type <= REALS) type_info = reinterpret_cast<void*>(CT_Numeric); \
-   else if(type < SEQUENCE_ENUMERATED) type_info = nullptr;
 
 #define NEB_NUM_NODETYPES 140
 
@@ -393,10 +389,10 @@ static bool isExpr(const NodeType& type){ \
     case Neb::INTERVAL_INTEGER: \
     case Neb::INTERVAL_OPEN_CLOSE: \
     case Neb::INTERVAL_OPEN_OPEN: \
-    case Neb::SET_LITERAL_DIMENSIONS: \
+    case Neb::SET_ENUMERATED: \
     case Neb::PROPORTIONAL: \
 
-#define NEB_HOMOGENOUS_SET_ARGS \
+#define NEB_HOMOGENOUS_SET_NUMERIC_ARGS \
     case Neb::INTERSECTION: \
     case Neb::NARY_INTERSECTION: \
     case Neb::NARY_UNION: \
