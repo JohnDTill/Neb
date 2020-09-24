@@ -307,13 +307,14 @@ enum CoarseType{
 };
 
 #define NEB_DECLARE_COARSETYPE_LABELS \
-static const QString coarsetype_labels[8] { \
+static const QString coarsetype_labels[9] { \
     "U", \
     "B", \
     "F", \
     "N", \
     "SEQ", \
-    "SET", \
+    "SETB", \
+    "SETN", \
     "STR", \
     "V", \
 };

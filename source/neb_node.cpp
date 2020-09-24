@@ -14,15 +14,16 @@ NEB_DECLARE_NODE_LABELS
 
 NEB_DECLARE_COARSETYPE_LABELS
 
-NEB_DECLARE_IS_EXPR
+NEB_DECLARE_IS_EXPR 
 
-static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr, bool typed){
+static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr, bool typed, Node::DotCallback callback){
     uint64_t id = curr++;
 
     out << "\tn" << QString::number(id) << "[label=\"" << labels[n.type];
     if(n.type == NUMBER || n.type == IDENTIFIER) out << n.data;
     else if(n.type == STRING) out << "\\\"" << n.data << "\\\"";
     if(typed && isExpr(n.type)) out << "\\n" << coarsetype_labels[n.coarse_type];
+    callback(out, n);
     out << '"';
     if(n.type == IDENTIFIER) out << ", style=filled, fillcolor=lightblue";
     else if(n.type == ERROR) out << ", style=filled, fillcolor=red";
@@ -31,35 +32,35 @@ static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr, bool t
     out << "]\n";
 
     for(Node* n : n.children){
-        uint64_t child_id = writeDOT(out, *n, curr, typed);
+        uint64_t child_id = writeDOT(out, *n, curr, typed, callback);
         out << "\tn" << QString::number(id) << "->n" << QString::number(child_id) << '\n';
     }
 
     return id;
 }
 
-QString Node::toDOT(bool LR, bool typed) const{
+QString Node::toDOT(bool LR, bool typed, DotCallback callback) const{
     QString str;
     QTextStream out(&str);
 
     out << "digraph{\n";
     if(LR) out << "\trankdir=\"LR\"\n";
     uint64_t curr = 0;
-    writeDOT(out, *this, curr, typed);
+    writeDOT(out, *this, curr, typed, callback);
     out << "}";
 
     return str;
 }
 
-QString Node::toDOT(const std::vector<Node*>& nodes, bool LR, bool typed){
+QString Node::toDOT(const std::vector<Node*>& nodes, bool LR, bool typed, DotCallback callback){
     QString str;
     QTextStream out(&str);
 
     out << "digraph{\n";
     if(LR) out << "\trankdir=\"LR\"\n";
     uint64_t curr = 0;
-    if(LR) for(auto it = nodes.rbegin(); it != nodes.rend(); it++) writeDOT(out, **it, curr, typed);
-    else for(Node* n : nodes) writeDOT(out, *n, curr, typed);
+    if(LR) for(auto it = nodes.rbegin(); it != nodes.rend(); it++) writeDOT(out, **it, curr, typed, callback);
+    else for(Node* n : nodes) writeDOT(out, *n, curr, typed, callback);
     out << "}";
 
     return str;
