@@ -32,8 +32,10 @@ static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     if(n.type == IDENTIFIER) out << *n.data.text;
     else if(n.type == NUMBER) out << *n.data.text;
     else if(n.type == STRING) out << "\\\"" << *n.data.text << "\\\"";
-    else if((n.type == TICK_DERIVATIVE || n.type == FACTORIAL) && n.data.order)
-        out << n.data.order+1;
+    else if((n.type == TICK_DERIVATIVE || n.type == FACTORIAL) && n.data.number)
+        out << n.data.number+1;
+    else if(n.type == UINT_PARSED)
+        out << (n.data.number & 255) << QString("×") << (n.data.number >> 8);
     out << '"';
     if(n.type == IDENTIFIER) out << ", style=filled, fillcolor=lightblue";
     else if(n.type == ERROR) out << ", style=filled, fillcolor=red";

@@ -59,9 +59,11 @@ static bool isSubscriptLetterOrDigit(ushort c){
 }
 #endif
 
-Scanner::Scanner(const QString& source, QString& err_msg)
+Scanner::Scanner(const QString& source, QString& err_msg, int& err_start, int& err_end)
     : source(source),
-      err_msg(err_msg) {
+      err_msg(err_msg),
+      err_start(err_start),
+      err_end(err_end) {
     Q_ASSERT(MathBran::isWellFormed(source));
 }
 
@@ -89,6 +91,8 @@ Token Scanner::scanToken(){
             else if(isSubscriptLetter(c)) return scanSubscriptIdentifier();
 
             err_msg = QString("Unrecognized token: ") + source[curr-1];
+            err_start = curr-1;
+            err_end = curr;
             return createToken(Error);
     }
 }
@@ -120,6 +124,8 @@ void Scanner::skipLineComment(){
 Token Scanner::scanBigToken(){
     if(curr == source.size()){
         err_msg = QString("Unrecognized token: ") + QChar(USHORT_MAX);
+        err_start = curr-1;
+        err_end = curr;
         return createToken(Error);
     }
 
@@ -127,6 +133,8 @@ Token Scanner::scanBigToken(){
         NEB_BIG_ONE_TO_ONE_CASES_MACRO_EXPANSION
         default:
             err_msg = "Unrecognized big token: " + source.mid(curr-2, 2);
+            err_start = curr-2;
+            err_end = curr;
             return Token(Error, line, curr-2, 2);
     }
 }
@@ -141,6 +149,8 @@ Token Scanner::scanMathBranToken(){
         NEB_MATHBRAN_CASES_MACRO_EXPANSION
         default:
             err_msg = QString("Unrecognized token: ") + source[curr-1];
+            err_start = curr-1;
+            err_end = curr;
             return createToken(Error);
     }
 }
@@ -217,6 +227,8 @@ Token Scanner::scanNonzeroNumber(){
             decimal_available = false;
             if(++curr == source.size() || !isDigit(source[curr].unicode())){
                 err_msg = "Digits must come after decimal point";
+                err_start = start;
+                err_end = curr;
                 return Token(Error, line, start, curr - start);
             }
         }else if(!isDigit(c)){
@@ -235,10 +247,14 @@ Token Scanner::scanZeroNumber(){
     ushort c = source[curr].unicode();
     if(isDigit(c)){
         err_msg = "Numbers cannot have leading zeroes";
+        err_start = start;
+        err_end = curr;
         return Token(Error, line, start, 2);
     }else if(c == '.'){
         if(++curr == source.size() || !source[curr].isDigit()){
             err_msg = "Digits must come after decimal point";
+            err_start = start;
+            err_end = curr;
             return Token(Error, line, start, curr - start);
         }
         while(curr != source.size()){
@@ -268,6 +284,8 @@ Token Scanner::scanSuperscriptZeroNumber(){
 
     if(isSuperscriptDigit(source[curr].unicode())){
         err_msg = "Numbers cannot have leading zeroes";
+        err_start = start;
+        err_end = curr;
         return Token(Error, line, start, 2);
     }else{
         return Token(SuperscriptNumber, line, start);
@@ -290,6 +308,8 @@ Token Scanner::scanSubscriptZeroNumber(){
 
     if(isSubscriptDigit(source[curr].unicode())){
         err_msg = "Numbers cannot have leading zeroes";
+        err_start = start;
+        err_end = curr;
         return Token(Error, line, start, 2);
     }else{
         return Token(SubscriptNumber, line, start);
@@ -300,12 +320,20 @@ Token Scanner::scanString(){
     QString::size_type start = curr;
 
     while(curr < source.size() && source[curr] != '"'){
+        if(source[curr] == '\n' && source[curr-1] != '\\'){
+            err_msg = "String not terminated";
+            err_start = start-1;
+            err_end = curr;
+            return Token(Error, line, start);
+        }
         curr++;
     }
     curr++;
 
     if(curr >= source.size()){
         err_msg = "Reached end of file while scanning string";
+        err_start = start-1;
+        err_end = source.size()-1;
         return Token(Error, line, start);
     }else{
         return Token(String, line, start, curr-start-1);

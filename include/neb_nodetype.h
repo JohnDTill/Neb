@@ -74,6 +74,7 @@ enum NodeType{
     SUMMATION,
     TRANSPOSE,
     TRIPLE_INTEGRAL,
+    UINT_PARSED,
     UNARY_MINUS,
     VEE,
     WEDGE,
@@ -151,7 +152,7 @@ enum NodeType{
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[140] { \
+static const QString labels[141] { \
     "false", \
     ">", \
     "≥", \
@@ -218,6 +219,7 @@ static const QString labels[140] { \
     "Σ", \
     "⊤", \
     "∭", \
+    "", \
     "-", \
     "∨", \
     "∧", \
@@ -335,7 +337,7 @@ static bool isExpr(const NodeType& type){ \
     return type < ALGORITHM; \
 }
 
-#define NEB_NUM_NODETYPES 140
+#define NEB_NUM_NODETYPES 141
 
 #define NEB_HOMOGENOUS_BOOLEAN_ARGS \
     case Neb::LOGICAL_AND: \

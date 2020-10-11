@@ -7,7 +7,7 @@ namespace Neb {
 
 Parser::Parser(const QString& source)
     : source(source),
-      scanner(*new Scanner(source, err_msg)) {
+      scanner(*new Scanner(source, err_msg, err_start, err_end)) {
     advance();
 }
 
@@ -243,8 +243,7 @@ Node* Parser::returnStatement(TokenType surrounding_terminator){
 Node* Parser::algorithm(TokenType surrounding_terminator){
     advance();
 
-    consume(Identifier, "Expected identifier in algorithm definition");
-    Node* alg = createNodeFromPrevToken(ALGORITHM, createNodeFromPrevToken(IDENTIFIER));
+    Node* alg = createNodeFromPrevToken(ALGORITHM, idOnly());
 
     consume(LeftParen, "Expect '(' after algorithm name");
     if(!peek(RightParen)){
@@ -478,13 +477,13 @@ Node* Parser::rightUnary(){
     while(peek<2>( {Exclam, Tick} )){
         if(match(Exclam)){
             Node* n = createNodeFromPrevToken(FACTORIAL, expr);
-            n->data.order = 0;
+            n->data.number = 0;
             while(peek(Exclam)){
-                if(n->data.order == 255){
+                if(n->data.number == 255){
                     Node::deletePostorder(n);
                     return error("Cannot have more than 255 factorials");
                 }
-                n->data.order++;
+                n->data.number++;
 
                 checkGap();
                 advance();
@@ -494,13 +493,13 @@ Node* Parser::rightUnary(){
         }else{
             consume(Tick, "Expect '");
             Node* n = createNodeFromPrevToken(TICK_DERIVATIVE, expr);
-            n->data.order = 0;
+            n->data.number = 0;
             while(peek(Tick)){
-                if(n->data.order == 255){
+                if(n->data.number == 255){
                     Node::deletePostorder(n);
                     return error("Cannot have more than 255 tick derivatives");
                 }
-                n->data.order++;
+                n->data.number++;
 
                 checkGap();
                 advance();
@@ -1158,14 +1157,15 @@ Node* Parser::mathBranMatrix(){
     bool success;
     ushort rows = source.midRef(previous.start, previous.length).toUShort(&success);
     if(!success || rows==0 || rows> 255) error("Matrix column count must be positive");
-    n->children.push_back(createNodeFromPrevToken(NUMBER));
     consume(MB_Close, "Expect close symbol for matrix row count");
 
     consume(MB_Open, "Expect open symbol for matrix col count");
     consume(Number, "Expect matrix col count");
     ushort cols = source.midRef(previous.start, previous.length).toUShort(&success);
     if(!success || cols==0 || cols > 255) error("Matrix column count must be positive");
-    n->children.push_back(createNodeFromPrevToken(NUMBER));
+    Node* dims = createNodeFromPrevToken(UINT_PARSED);
+    dims->data.number = rows | (cols << 8);
+    n->children.push_back(dims);
     consume(MB_Close, "Expect close symbol for matrix col count");
 
     for(ushort i = 0; i < rows*cols; i++){

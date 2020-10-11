@@ -587,52 +587,52 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
 	 case 8920: return createToken(TripleLess);
 
 #define NEB_BIG_ONE_TO_ONE_CASES_MACRO_EXPANSION\
-	 case 56633: return Token(Doublestruck_B, curr-2, 2);\
-	 case 56641: return Token(Doublestruck_J, curr-2, 2);\
-	 case 56650: return Token(Doublestruck_S, curr-2, 2);\
-	 case 56654: return Token(Doublestruck_W, curr-2, 2);
+	 case 56633: return Token(Doublestruck_B, line, curr-2, 2);\
+	 case 56641: return Token(Doublestruck_J, line, curr-2, 2);\
+	 case 56650: return Token(Doublestruck_S, line, curr-2, 2);\
+	 case 56654: return Token(Doublestruck_W, line, curr-2, 2);
 
 #define NEB_MATHBRAN_CASES_MACRO_EXPANSION\
-	 case 8594: return Token(MB_AccentArrow, curr-2, 2);\
-	 case 257: return Token(MB_AccentBar, curr-2, 2);\
-	 case 259: return Token(MB_AccentBreve, curr-2, 2);\
-	 case 8943: return Token(MB_AccentDddot, curr-2, 2);\
-	 case 228: return Token(MB_AccentDdot, curr-2, 2);\
-	 case 551: return Token(MB_AccentDot, curr-2, 2);\
-	 case 226: return Token(MB_AccentHat, curr-2, 2);\
-	 case 227: return Token(MB_AccentTilde, curr-2, 2);\
-	 case 98: return Token(MB_Binomial, curr-2, 2);\
-	 case 99: return Token(MB_Cases, curr-2, 2);\
-	 case 8751: return Token(MB_ClosedSurfaceIntegral, curr-2, 2);\
-	 case 8752: return Token(MB_ClosedVolumeIntegral, curr-2, 2);\
-	 case 8750: return Token(MB_ContourIntegral, curr-2, 2);\
-	 case 8720: return Token(MB_Coproduct, curr-2, 2);\
-	 case 8748: return Token(MB_DoubleIntegral, curr-2, 2);\
-	 case 916: return Token(MB_Dualscript, curr-2, 2);\
-	 case 9482: return Token(MB_EvalBar, curr-2, 2);\
-	 case 102: return Token(MB_Fraction, curr-2, 2);\
-	 case 124: return Token(MB_GroupingBar, curr-2, 2);\
-	 case 91: return Token(MB_GroupingBracket, curr-2, 2);\
-	 case 8968: return Token(MB_GroupingCeil, curr-2, 2);\
-	 case 8214: return Token(MB_GroupingDoubleBars, curr-2, 2);\
-	 case 8970: return Token(MB_GroupingFloor, curr-2, 2);\
-	 case 40: return Token(MB_GroupingParen, curr-2, 2);\
-	 case 8600: return Token(MB_Infimum, curr-2, 2);\
-	 case 8747: return Token(MB_Integral, curr-2, 2);\
-	 case 8898: return Token(MB_Intersection, curr-2, 2);\
-	 case 108: return Token(MB_Lim, curr-2, 2);\
-	 case 8862: return Token(MB_Matrix, curr-2, 2);\
-	 case 8593: return Token(MB_Max, curr-2, 2);\
-	 case 8595: return Token(MB_Min, curr-2, 2);\
-	 case 8719: return Token(MB_Product, curr-2, 2);\
-	 case 8730: return Token(MB_Root, curr-2, 2);\
-	 case 95: return Token(MB_Subscript, curr-2, 2);\
-	 case 8721: return Token(MB_Sum, curr-2, 2);\
-	 case 94: return Token(MB_Superscript, curr-2, 2);\
-	 case 8599: return Token(MB_Supremum, curr-2, 2);\
-	 case 8749: return Token(MB_TripleIntegral, curr-2, 2);\
-	 case 8899: return Token(MB_Union, curr-2, 2);\
-	 case 10756: return Token(MB_UnionPlus, curr-2, 2);
+	 case 8594: return Token(MB_AccentArrow, line, curr-2, 2);\
+	 case 257: return Token(MB_AccentBar, line, curr-2, 2);\
+	 case 259: return Token(MB_AccentBreve, line, curr-2, 2);\
+	 case 8943: return Token(MB_AccentDddot, line, curr-2, 2);\
+	 case 228: return Token(MB_AccentDdot, line, curr-2, 2);\
+	 case 551: return Token(MB_AccentDot, line, curr-2, 2);\
+	 case 226: return Token(MB_AccentHat, line, curr-2, 2);\
+	 case 227: return Token(MB_AccentTilde, line, curr-2, 2);\
+	 case 98: return Token(MB_Binomial, line, curr-2, 2);\
+	 case 99: return Token(MB_Cases, line, curr-2, 2);\
+	 case 8751: return Token(MB_ClosedSurfaceIntegral, line, curr-2, 2);\
+	 case 8752: return Token(MB_ClosedVolumeIntegral, line, curr-2, 2);\
+	 case 8750: return Token(MB_ContourIntegral, line, curr-2, 2);\
+	 case 8720: return Token(MB_Coproduct, line, curr-2, 2);\
+	 case 8748: return Token(MB_DoubleIntegral, line, curr-2, 2);\
+	 case 916: return Token(MB_Dualscript, line, curr-2, 2);\
+	 case 9482: return Token(MB_EvalBar, line, curr-2, 2);\
+	 case 102: return Token(MB_Fraction, line, curr-2, 2);\
+	 case 124: return Token(MB_GroupingBar, line, curr-2, 2);\
+	 case 91: return Token(MB_GroupingBracket, line, curr-2, 2);\
+	 case 8968: return Token(MB_GroupingCeil, line, curr-2, 2);\
+	 case 8214: return Token(MB_GroupingDoubleBars, line, curr-2, 2);\
+	 case 8970: return Token(MB_GroupingFloor, line, curr-2, 2);\
+	 case 40: return Token(MB_GroupingParen, line, curr-2, 2);\
+	 case 8600: return Token(MB_Infimum, line, curr-2, 2);\
+	 case 8747: return Token(MB_Integral, line, curr-2, 2);\
+	 case 8898: return Token(MB_Intersection, line, curr-2, 2);\
+	 case 108: return Token(MB_Lim, line, curr-2, 2);\
+	 case 8862: return Token(MB_Matrix, line, curr-2, 2);\
+	 case 8593: return Token(MB_Max, line, curr-2, 2);\
+	 case 8595: return Token(MB_Min, line, curr-2, 2);\
+	 case 8719: return Token(MB_Product, line, curr-2, 2);\
+	 case 8730: return Token(MB_Root, line, curr-2, 2);\
+	 case 95: return Token(MB_Subscript, line, curr-2, 2);\
+	 case 8721: return Token(MB_Sum, line, curr-2, 2);\
+	 case 94: return Token(MB_Superscript, line, curr-2, 2);\
+	 case 8599: return Token(MB_Supremum, line, curr-2, 2);\
+	 case 8749: return Token(MB_TripleIntegral, line, curr-2, 2);\
+	 case 8899: return Token(MB_Union, line, curr-2, 2);\
+	 case 10756: return Token(MB_UnionPlus, line, curr-2, 2);
 
 #define NEB_NUMBER_CASES_MACRO_EXPANSION\
 	 case '0': return scanZeroNumber();\

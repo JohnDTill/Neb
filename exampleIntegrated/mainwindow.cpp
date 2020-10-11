@@ -40,6 +40,7 @@ MainWindow::~MainWindow(){
 
 void MainWindow::on_codeEditChange(){
     const QString code = code_edit->toMathBran();
+    code_edit->clearErrors();
     code_view->setPlainText(code);
 
     Neb::Parser parser(code);
@@ -50,7 +51,7 @@ void MainWindow::on_codeEditChange(){
         if(parser.ok()){
             nodes.push_back(stmt);
         }else{
-            if(!errors.isEmpty()) errors.append('\n');
+            if(!errors.isEmpty()) errors.append("<br>");
             int start_line = 1 + code.leftRef(parser.err_start).count('\n');
             errors.append("Line " + QString::number(start_line) + " | " + parser.err_msg);
 
@@ -58,6 +59,8 @@ void MainWindow::on_codeEditChange(){
             c.setPosition(parser.err_start);
             c.setPosition(parser.err_end, QTextCursor::KeepAnchor);
             c.insertHtml("<span style=\"color:#ff0000;\"><u>" + c.selectedText() + "</u></span>");
+
+            code_edit->reportError(code, parser.err_start, parser.err_end-parser.err_start, parser.err_msg);
         }
     }
 

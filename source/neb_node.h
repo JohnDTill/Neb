@@ -12,7 +12,7 @@ class Node {
 public:
     union Data{
         QString* text;
-        uint8_t order;
+        uint32_t number;
     };
 
     NodeType type;
