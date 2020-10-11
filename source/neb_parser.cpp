@@ -22,7 +22,14 @@ Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
     }
 
     while(match(Newline));
-    if(match(surrounding_terminator)) return nullptr;
+    if(match(EndOfFile)){
+        if(nested){
+            err_msg = "Reached end of file without closing scope";
+            return new Node(ERROR, QString(previous.start));
+        }else{
+            return nullptr;
+        }
+    }
 
     Node* body;
     bool must_terminate = true;
@@ -219,8 +226,11 @@ Node* Parser::ifStatement(TokenType surrounding_terminator){
 Node* Parser::blockStatement(bool nested){
     consume(LeftBracket, "Expect '{' in block statement.");
     Node* body = createNode(BLOCK);
-    while(!match(RightBracket) && err_msg.isEmpty())
+    while(match(Newline));
+    while(!match(RightBracket) && err_msg.isEmpty()){
         body->children.push_back(parseStatement(RightBracket, nested));
+        while(match(Newline));
+    }
 
     return body;
 }
@@ -240,18 +250,24 @@ Node* Parser::algorithm(TokenType surrounding_terminator){
     Node* alg = createNode(ALGORITHM, createNode(IDENTIFIER));
 
     consume(LeftParen, "Expect '(' after algorithm name");
-    if(!match(RightParen)){
-        alg->children.push_back(mathStatement());
-
-        while(!match(RightParen)){
-            consume(Comma, "Expect ',' between algorithm parameters");
+    if(!peek(RightParen)){
+        do {
+            match(Newline);
             alg->children.push_back(mathStatement());
+        } while(match(Comma));
+    }
+    consume(RightParen, "Expect ')' to close algorithm parameter list");
+
+    if(peek(LeftBracket)){
+        alg->children.push_back( blockStatement(true) );
+    }else{
+        Node* s = parseStatement(surrounding_terminator, true);
+        if(s) alg->children.push_back(s);
+        else{
+            err_msg = "Algorithm requires a body";
+            alg->children.push_back(new Node(ERROR, QString(current.start)));
         }
     }
-
-    alg->children.push_back(
-        peek(LeftBracket) ? blockStatement(true) : parseStatement(surrounding_terminator, true)
-    );
 
     return alg;
 }
@@ -320,11 +336,13 @@ Node* Parser::functionDefinition(Node* n){
         consume(Identifier, "Pure function must have an input");
         n->children.push_back(createNode(IDENTIFIER));
 
-        while(!match(RightParen)){
-            consume(Comma, "Expect ',' between function parameters");
+        do {
+            match(Newline);
             consume(Identifier, "Expect identifier");
             n->children.push_back(createNode(IDENTIFIER));
-        }
+        } while(match(Comma));
+
+        consume(RightParen, "Expect ')' to close function parameter list");
 
         consume(MapsTo, "Expect '↦' after parameter list");
         n->children.push_back(expression());
@@ -334,17 +352,14 @@ Node* Parser::functionDefinition(Node* n){
         n = createNode(FUN_SIGNATURE, n);
 
         parsing_dimensions = true;
-        Node* input_type = expression();
-        //DO THIS - validate that input_type has type "set"
-        n->children.push_back(input_type);
-
-        while(!match(RightArrow)){
-            consume(Times, "Expect input type delimiter '×'");
-            Node* param = expression();
+        do{
+            Node* input_type = expression();
             //DO THIS - validate that input_type has type "set"
-            n->children.push_back(param);
-        }
+            n->children.push_back(input_type);
+        } while(match(Times));
         parsing_dimensions = false;
+
+        consume(RightArrow, "Expect '→' after function signature inputs");
 
         Node* output_type = expression();
         //DO THIS - validate that output_type has type "set"
@@ -465,7 +480,7 @@ Node* Parser::rightUnary(){
     Node* expr = exponent();
     while(peek<2>( {Exclam, Tick} )){
         if(match(Exclam)){
-            Node* n = createNode(FACTORIAL);
+            Node* n = createNode(FACTORIAL, expr);
             while(peek(Exclam)){
                 checkGap();
                 advance();
@@ -475,7 +490,7 @@ Node* Parser::rightUnary(){
             return n;
         }else{
             consume(Tick, "Expect '");
-            Node* n = createNode(TICK_DERIVATIVE);
+            Node* n = createNode(TICK_DERIVATIVE, expr);
             while(match(Tick));
             while(peek(Tick)){
                 checkGap();
@@ -685,11 +700,12 @@ Node* Parser::call(Node* id){
     }else{
         Node* n = createNode(CALL, id, first_arg);
 
-        while(!match(RightParen)){
-            consume(Comma, "Expect ',' between call args");
+        while(match(Comma)){
             match(Newline);
             n->children.push_back(boolExpression());
         }
+
+        consume(RightParen, "Expect ')' to close function call");
 
         return n;
     }
