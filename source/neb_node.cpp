@@ -6,7 +6,8 @@ namespace Neb {
 
 NEB_DECLARE_COARSETYPE_INIT
 
-Node::Node(NodeType type) : type(type), coarse_type(initCoarseType(type)){}
+Node::Node(NodeType type, int start, int end)
+    : type(type), start(start), end(end), coarse_type(initCoarseType(type)){}
 
 NEB_DECLARE_NODE_LABELS
 

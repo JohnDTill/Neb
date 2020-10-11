@@ -16,20 +16,14 @@ Parser::~Parser(){
 }
 
 Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
-    if(current.type == Error && !nested){
+    if(!ok() && !nested){
         scanToRecoveryPoint();
         err_msg.clear();
     }
 
     while(match(Newline));
-    if(match(EndOfFile)){
-        if(nested){
-            err_msg = "Reached end of file without closing scope";
-            return new Node(ERROR);
-        }else{
-            return nullptr;
-        }
-    }
+    if(match(EndOfFile))
+        return nested ? error("Reached end of file without closing scope") : nullptr;
 
     Node* body;
     bool must_terminate = true;
@@ -47,7 +41,7 @@ Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
 
     if(current.type == Error){
         Node::deletePostorder(body);
-        return new Node(ERROR);
+        return new Node(ERROR, current.start, current.start + current.length);
     }else{
         return body;
     }
@@ -60,28 +54,28 @@ std::vector<Node*> Parser::parseAll(){
     return stmts;
 }
 
-Node* Parser::createNode(const NodeType& type){
-    Node* n = new Node(type);
+Node* Parser::createNodeFromPrevToken(const NodeType& type){
+    Node* n = new Node(type, previous.start, previous.start + previous.length);
     return n;
 }
 
-Node* Parser::createNode(const NodeType& type, Node* child){
-    Node* n = createNode(type);
+Node* Parser::createNodeFromPrevToken(const NodeType& type, Node* child){
+    Node* n = createNodeFromPrevToken(type);
     n->children.push_back(child);
 
     return n;
 }
 
-Node* Parser::createNode(const NodeType& type, Node* lhs, Node* rhs){
-    Node* n = createNode(type);
+Node* Parser::createNodeFromPrevToken(const NodeType& type, Node* lhs, Node* rhs){
+    Node* n = createNodeFromPrevToken(type);
     n->children.push_back(lhs);
     n->children.push_back(rhs);
 
     return n;
 }
 
-Node* Parser::createNode(uint number){
-    Node* n = createNode(NUMBER);
+Node* Parser::createNodeFromPrevToken(uint number){
+    Node* n = createNodeFromPrevToken(NUMBER);
     n->data.text = new QString();
     n->data.text->setNum(number);
 
@@ -90,7 +84,7 @@ Node* Parser::createNode(uint number){
 
 template<int a>
 Node* Parser::createNode(const NodeType& type, const std::array<Node*,a>& args){
-    Node* n = createNode(type);
+    Node* n = createNodeFromPrevToken(type);
     n->children.insert(std::begin(n->children), std::begin(args), std::end(args));
 
     return n;
@@ -110,18 +104,17 @@ void Parser::scanToRecoveryPoint(){
     }
 }
 
-void Parser::error(const QString& message){
-    error(message, current);
+Node* Parser::error(const QString& message){
+    return error(message, current);
 }
 
-void Parser::error(const QString& message, const Token& t){
-    if(!err_msg.isEmpty()) return;
-
-    err_msg = message;
-
-    current.type = Error;
-    current.start = t.start;
-    current.length = t.length;
+Node* Parser::error(const QString& message, const Token& t){
+    if(err_msg.isEmpty()){
+        err_msg = message;
+        err_start = t.start;
+        err_end = t.start + t.length;
+    }
+    return new Node(ERROR, t.start, t.start + t.length);
 }
 
 void Parser::advance(){
@@ -194,7 +187,7 @@ bool Parser::peek(const std::array<TokenType,n>& types) const{
 Node* Parser::printStatement(){
     advance();
     consume(LeftParen, "Expect '(' in Print stmt.");
-    Node* print_stmt = createNode(PRINT, expression());
+    Node* print_stmt = createNodeFromPrevToken(PRINT, expression());
     consume(RightParen, "Expect ')' to close Print stmt.");
 
     return print_stmt;
@@ -206,7 +199,7 @@ Node* Parser::whileStatement(TokenType surrounding_terminator){
     Node* condition = boolExpression();
     consume(RightParen, "Expect ')' to close Print stmt.");
 
-    return createNode(WHILE,
+    return createNodeFromPrevToken(WHILE,
         condition,
         peek(LeftBracket) ? blockStatement(true) : parseStatement(surrounding_terminator, true));
 }
@@ -217,7 +210,7 @@ Node* Parser::ifStatement(TokenType surrounding_terminator){
     Node* condition = boolExpression();
     consume(RightParen, "Expect ')' to close IF stmt.");
 
-    Node* if_stmt = createNode(IF,
+    Node* if_stmt = createNodeFromPrevToken(IF,
         condition,
         peek(LeftBracket) ? blockStatement(true) : parseStatement(surrounding_terminator, true));
 
@@ -229,7 +222,7 @@ Node* Parser::ifStatement(TokenType surrounding_terminator){
 
 Node* Parser::blockStatement(bool nested){
     consume(LeftBracket, "Expect '{' in block statement.");
-    Node* body = createNode(BLOCK);
+    Node* body = createNodeFromPrevToken(BLOCK);
     while(match(Newline));
     while(!match(RightBracket) && err_msg.isEmpty()){
         body->children.push_back(parseStatement(RightBracket, nested));
@@ -243,15 +236,15 @@ Node* Parser::returnStatement(TokenType surrounding_terminator){
     advance();
 
     if(peek<3>({Newline, Comma, surrounding_terminator}))
-        return createNode(RETURN);
-    else return createNode(RETURN, boolExpression());
+        return createNodeFromPrevToken(RETURN);
+    else return createNodeFromPrevToken(RETURN, boolExpression());
 }
 
 Node* Parser::algorithm(TokenType surrounding_terminator){
     advance();
 
     consume(Identifier, "Expected identifier in algorithm definition");
-    Node* alg = createNode(ALGORITHM, createNode(IDENTIFIER));
+    Node* alg = createNodeFromPrevToken(ALGORITHM, createNodeFromPrevToken(IDENTIFIER));
 
     consume(LeftParen, "Expect '(' after algorithm name");
     if(!peek(RightParen)){
@@ -268,8 +261,8 @@ Node* Parser::algorithm(TokenType surrounding_terminator){
         Node* s = parseStatement(surrounding_terminator, true);
         if(s) alg->children.push_back(s);
         else{
-            err_msg = "Algorithm requires a body";
-            alg->children.push_back(new Node(ERROR));
+            Node::deletePostorder(alg);
+            return error("Algorithm requires a body");
         }
     }
 
@@ -280,24 +273,24 @@ Node* Parser::mathStatement(){
     Node* n = expression();
 
     switch (current.type) {
-        case LeftArrow: advance(); return createNode(ASSIGN, n, expression());
+        case LeftArrow: advance(); return createNodeFromPrevToken(ASSIGN, n, expression());
         case Equals: advance(); return equality(n);
         case Less: advance(); return less(n);
         case LessEqual: advance(); return less(n);
         case Greater: advance(); return greater(n);
         case GreaterEqual: advance(); return greater(n);
-        case In: advance(); return createNode(IN, n, expression());
-        case DefEquals: advance(); return createNode(DEFINE_EQUALS, n, expression());
-        case NotEqual: advance(); return createNode(NOT_EQUAL, n, expression());
-        case Proportional: advance(); return createNode(PROPORTIONAL, n, expression());
+        case In: advance(); return createNodeFromPrevToken(IN, n, expression());
+        case DefEquals: advance(); return createNodeFromPrevToken(DEFINE_EQUALS, n, expression());
+        case NotEqual: advance(); return createNodeFromPrevToken(NOT_EQUAL, n, expression());
+        case Proportional: advance(); return createNodeFromPrevToken(PROPORTIONAL, n, expression());
         case Colon: advance(); return functionDefinition(n);
-        default: return createNode(EXPR_STMT, n);
+        default: return createNodeFromPrevToken(EXPR_STMT, n);
     }
 }
 
 Node* Parser::equality(Node* n){
     match(Newline);
-    Node* equality_stmt = createNode(EQUAL, n, expression());
+    Node* equality_stmt = createNodeFromPrevToken(EQUAL, n, expression());
     while(match(Equals)){
         match(Newline);
         equality_stmt->children.push_back(expression());
@@ -310,7 +303,7 @@ Node* Parser::less(Node* n){
     do{
         bool inclusive = previous.type == LessEqual;
         match(Newline);
-        n = createNode(inclusive ? LESS_EQUAL : LESS, n, expression());
+        n = createNodeFromPrevToken(inclusive ? LESS_EQUAL : LESS, n, expression());
     } while(match<2>({Less, LessEqual}));
 
     return n;
@@ -320,7 +313,7 @@ Node* Parser::greater(Node* n){
     do{
         bool inclusive = previous.type == GreaterEqual;
         match(Newline);
-        n = createNode(inclusive ? GREATER_EQUAL : GREATER, n, expression());
+        n = createNodeFromPrevToken(inclusive ? GREATER_EQUAL : GREATER, n, expression());
     } while(match<2>({Greater, GreaterEqual}));
 
     return n;
@@ -330,20 +323,20 @@ Node* Parser::functionDefinition(Node* n){
     if(n->type != IDENTIFIER){
         error("Expected identifier in function definition");
         Node::deletePostorder(n);
-        return createNode(Error);
+        return createNodeFromPrevToken(Error);
     }
 
     if(match(LeftParen)){
         //example - p : (x,y) ↦ x^y
-        n = createNode(FUN_DEF, n);
+        n = createNodeFromPrevToken(FUN_DEF, n);
 
         consume(Identifier, "Pure function must have an input");
-        n->children.push_back(createNode(IDENTIFIER));
+        n->children.push_back(createNodeFromPrevToken(IDENTIFIER));
 
         do {
             match(Newline);
             consume(Identifier, "Expect identifier");
-            n->children.push_back(createNode(IDENTIFIER));
+            n->children.push_back(createNodeFromPrevToken(IDENTIFIER));
         } while(match(Comma));
 
         consume(RightParen, "Expect ')' to close function parameter list");
@@ -353,7 +346,7 @@ Node* Parser::functionDefinition(Node* n){
         return n;
     }else{
         //example - f : ℝ × ℤ → ℝ
-        n = createNode(FUN_SIGNATURE, n);
+        n = createNodeFromPrevToken(FUN_SIGNATURE, n);
 
         parsing_dimensions = true;
         do{
@@ -384,7 +377,7 @@ Node* Parser::disjunction(){
     Node* expr = (this->*next)();
     if(match(Disjunction)){
         match(Newline);
-        expr = createNode(LOGICAL_OR, expr, (this->*next)());
+        expr = createNodeFromPrevToken(LOGICAL_OR, expr, (this->*next)());
         while(match(Disjunction)){
             match(Newline);
             expr->children.push_back((this->*next)());
@@ -399,7 +392,7 @@ Node* Parser::conjunction(){
     Node* expr = (this->*next)();
     if(match(Conjunction)){
         match(Newline);
-        expr = createNode(LOGICAL_AND, expr, (this->*next)());
+        expr = createNodeFromPrevToken(LOGICAL_AND, expr, (this->*next)());
         while(match(Conjunction)){
             match(Newline);
             expr->children.push_back((this->*next)());
@@ -416,12 +409,12 @@ Node* Parser::addition(){ //Left associative (subtraction is anti-commutative)
         match(Newline);
         Node* rhs = multiplication();
         switch(t){
-            case Plus: expr = createNode(ADDITION, expr, rhs); break;
-            case PlusMinus: expr = createNode(PLUS_MINUS_BINARY, expr, rhs); break;
-            case Minus: expr = createNode(SUBTRACTION, expr, rhs); break;
-            case MinusPlus: expr = createNode(MINUS_PLUS_BINARY, expr, rhs); break;
-            case Cap: expr = createNode(INTERSECTION, expr, rhs); break;
-            case Cup: expr = createNode(UNION, expr, rhs); break;
+            case Plus: expr = createNodeFromPrevToken(ADDITION, expr, rhs); break;
+            case PlusMinus: expr = createNodeFromPrevToken(PLUS_MINUS_BINARY, expr, rhs); break;
+            case Minus: expr = createNodeFromPrevToken(SUBTRACTION, expr, rhs); break;
+            case MinusPlus: expr = createNodeFromPrevToken(MINUS_PLUS_BINARY, expr, rhs); break;
+            case Cap: expr = createNodeFromPrevToken(INTERSECTION, expr, rhs); break;
+            case Cup: expr = createNodeFromPrevToken(UNION, expr, rhs); break;
             default: break;
         }
     }
@@ -437,15 +430,15 @@ Node* Parser::multiplication(){
         match(Newline);
         Node* rhs = implicitMultiplication();
         switch(t){
-            case Backslash: expr = createNode(BACKSLASH, expr, rhs); break;
-            case Divide: expr = createNode(DIVIDE, expr, rhs); break;
-            case DotProduct: expr = createNode(DOT, expr, rhs); break;
-            case Forwardslash: expr = createNode(FORWARDSLASH, expr, rhs); break;
-            case Multiply: expr = createNode(MULTIPLICATION, expr, rhs); break;
-            case ODot: expr = createNode(ODOT, expr, rhs); break;
-            case OuterProduct: expr = createNode(OUTER_PRODUCT, expr, rhs); break;
-            case Percent: expr = createNode(MODULUS, expr, rhs); break;
-            case Times: expr = createNode(CROSS, expr, rhs); break;
+            case Backslash: expr = createNodeFromPrevToken(BACKSLASH, expr, rhs); break;
+            case Divide: expr = createNodeFromPrevToken(DIVIDE, expr, rhs); break;
+            case DotProduct: expr = createNodeFromPrevToken(DOT, expr, rhs); break;
+            case Forwardslash: expr = createNodeFromPrevToken(FORWARDSLASH, expr, rhs); break;
+            case Multiply: expr = createNodeFromPrevToken(MULTIPLICATION, expr, rhs); break;
+            case ODot: expr = createNodeFromPrevToken(ODOT, expr, rhs); break;
+            case OuterProduct: expr = createNodeFromPrevToken(OUTER_PRODUCT, expr, rhs); break;
+            case Percent: expr = createNodeFromPrevToken(MODULUS, expr, rhs); break;
+            case Times: expr = createNodeFromPrevToken(CROSS, expr, rhs); break;
             default: break;
         }
     }
@@ -460,7 +453,7 @@ Node* Parser::implicitMultiplication(){
     if(expr->type == ABS || expr->type == NORM) return expr;
 
     if(peek<NEB_NUM_IMPLICIT_MULT>(NEB_IMPLICIT_MULT_MACRO_EXPANSION)){
-        expr = createNode(IMPLICIT_MULTIPLY, expr, rightUnary());
+        expr = createNodeFromPrevToken(IMPLICIT_MULTIPLY, expr, rightUnary());
 
         while(peek<NEB_NUM_IMPLICIT_MULT>(NEB_IMPLICIT_MULT_MACRO_EXPANSION))
             expr->children.push_back(rightUnary());
@@ -471,11 +464,11 @@ Node* Parser::implicitMultiplication(){
 
 Node* Parser::leftUnary(){
     switch (current.type) {
-        case Minus: advance(); checkGap(); return createNode(UNARY_MINUS, rightUnary());
-        case Not: advance(); checkGap(); return createNode(LOGICAL_NOT, rightUnary());
-        case PlusMinus: advance(); checkGap(); return createNode(PLUS_MINUS_UNARY, rightUnary());
-        case MinusPlus: advance(); checkGap(); return createNode(MINUS_PLUS_UNARY, rightUnary());
-        case Pound: advance(); return createNode(CARDINALITY, script());
+        case Minus: advance(); checkGap(); return createNodeFromPrevToken(UNARY_MINUS, rightUnary());
+        case Not: advance(); checkGap(); return createNodeFromPrevToken(LOGICAL_NOT, rightUnary());
+        case PlusMinus: advance(); checkGap(); return createNodeFromPrevToken(PLUS_MINUS_UNARY, rightUnary());
+        case MinusPlus: advance(); checkGap(); return createNodeFromPrevToken(MINUS_PLUS_UNARY, rightUnary());
+        case Pound: advance(); return createNodeFromPrevToken(CARDINALITY, script());
         default: return rightUnary();
     }
 }
@@ -484,13 +477,12 @@ Node* Parser::rightUnary(){
     Node* expr = exponent();
     while(peek<2>( {Exclam, Tick} )){
         if(match(Exclam)){
-            Node* n = createNode(FACTORIAL, expr);
+            Node* n = createNodeFromPrevToken(FACTORIAL, expr);
             n->data.order = 0;
             while(peek(Exclam)){
                 if(n->data.order == 255){
-                    err_msg = "Cannot have more than 255 factorials";
                     Node::deletePostorder(n);
-                    return new Node(ERROR);
+                    return error("Cannot have more than 255 factorials");
                 }
                 n->data.order++;
 
@@ -501,13 +493,12 @@ Node* Parser::rightUnary(){
             return n;
         }else{
             consume(Tick, "Expect '");
-            Node* n = createNode(TICK_DERIVATIVE, expr);
+            Node* n = createNodeFromPrevToken(TICK_DERIVATIVE, expr);
             n->data.order = 0;
             while(peek(Tick)){
                 if(n->data.order == 255){
-                    err_msg = "Cannot have more than 255 tick derivatives";
                     Node::deletePostorder(n);
-                    return new Node(ERROR);
+                    return error("Cannot have more than 255 tick derivatives");
                 }
                 n->data.order++;
 
@@ -526,7 +517,7 @@ Node* Parser::exponent(){
     Node* n = script();
     if(match(Caret)){
         match(Newline);
-        n = createNode(POWER, n, implicitMultiplication());
+        n = createNodeFromPrevToken(POWER, n, implicitMultiplication());
     }
     return n;
 }
@@ -538,16 +529,16 @@ Node* Parser::script(){
         case MB_Superscript: advance(); return mathBranSuperscript(n);
         case MB_Subscript: advance(); return mathBranSubscript(n);
         case MB_Dualscript: advance(); return mathBranDualscript(n);
-        case SuperscriptLeftParen: return createNode(POWER, n, unicodeSuperscriptGrouping());
-        case SuperscriptNumber: return createNode(POWER, n, unicodeSuperscriptExpression());
-        case SuperscriptIdentifier: return createNode(POWER, n, unicodeSuperscriptExpression());
-        case SuperscriptPlus: return createNode(INCREMENT, n);
-        case SuperscriptMinus: return createNode(DECREMENT, n);
-        case SuperscriptWedge: return createNode(WEDGE, n);
-        case SuperscriptVee: return createNode(VEE, n);
-        case SubscriptLeftParen: return createNode(SUBSCRIPT_ACCESS, n, unicodeSubscriptGrouping());
-        case SubscriptNumber: return createNode(SUBSCRIPT_ACCESS, n, unicodeSubscriptExpression());
-        case SubscriptIdentifier: return createNode(SUBSCRIPT_ACCESS, n, unicodeSubscriptExpression());
+        case SuperscriptLeftParen: return createNodeFromPrevToken(POWER, n, unicodeSuperscriptGrouping());
+        case SuperscriptNumber: return createNodeFromPrevToken(POWER, n, unicodeSuperscriptExpression());
+        case SuperscriptIdentifier: return createNodeFromPrevToken(POWER, n, unicodeSuperscriptExpression());
+        case SuperscriptPlus: return createNodeFromPrevToken(INCREMENT, n);
+        case SuperscriptMinus: return createNodeFromPrevToken(DECREMENT, n);
+        case SuperscriptWedge: return createNodeFromPrevToken(WEDGE, n);
+        case SuperscriptVee: return createNodeFromPrevToken(VEE, n);
+        case SubscriptLeftParen: return createNodeFromPrevToken(SUBSCRIPT_ACCESS, n, unicodeSubscriptGrouping());
+        case SubscriptNumber: return createNodeFromPrevToken(SUBSCRIPT_ACCESS, n, unicodeSubscriptExpression());
+        case SubscriptIdentifier: return createNodeFromPrevToken(SUBSCRIPT_ACCESS, n, unicodeSubscriptExpression());
         default:
             return n;
     }
@@ -567,11 +558,11 @@ Node* Parser::primary(){
         case Beth: return cardinalNumber(BETH);
 
         //Value literal
-        case EmptySet: return createNode(EMPTY_SET);
-        case Infinity: return createNode(INFTY);
+        case EmptySet: return createNodeFromPrevToken(EMPTY_SET);
+        case Infinity: return createNodeFromPrevToken(INFTY);
         case Number: return number();
-        case True: return createNode(TRUE);
-        case False: return createNode(FALSE);
+        case True: return createNodeFromPrevToken(TRUE);
+        case False: return createNodeFromPrevToken(FALSE);
         case String: return string();
 
         //Grouping
@@ -583,16 +574,16 @@ Node* Parser::primary(){
         //Set literal
         case Doublestruck_B: return setLiteral<BOOLEANS>();
         case Doublestruck_C: return setLiteral<COMPLEX_NUMS>();
-        case Doublestruck_H: return createNode(QUATERNIONS);
+        case Doublestruck_H: return createNodeFromPrevToken(QUATERNIONS);
         case Doublestruck_N: return setLiteral<NATURALS>();
         case Doublestruck_Q: return setLiteral<RATIONALS>();
         case Doublestruck_R: return setLiteral<REALS>();
         case Doublestruck_Z: return setLiteral<INTEGERS>();
 
         //Currency
-        case Dollar: return createNode(CURRENCY_DOLLARS, primary());
-        case Euro: return createNode(CURRENCY_EUROS, primary());
-        case PoundSterling: return createNode(CURRENCY_POUNDS, primary());
+        case Dollar: return createNodeFromPrevToken(CURRENCY_DOLLARS, primary());
+        case Euro: return createNodeFromPrevToken(CURRENCY_EUROS, primary());
+        case PoundSterling: return createNodeFromPrevToken(CURRENCY_POUNDS, primary());
 
         //Unicode Math
         case Nabla: return nablaStart();
@@ -632,9 +623,10 @@ Node* Parser::primary(){
         case MB_AccentBar: return mathBranUnary(ACCENT_BAR);
 
         default:
-            error("Expected a primary expression, got \"" +
-                  source.mid(previous.start, previous.length) + '"', previous);
-            return createNode(ERROR);
+            return error("Expected a primary expression, got \"" +
+                         source.mid(previous.start, previous.length) +
+                         '"',
+                         previous);
     }
 }
 
@@ -646,26 +638,26 @@ Node* Parser::boolEquality(){
     Node* n = addition();
 
     switch (current.type) {
-        case Equals: advance(); return createNode(TEST_EQUALITY, n, addition());
-        case NotEqual: advance(); return createNode(TEST_NOT_EQUAL, n, addition());
-        case Less: advance(); return createNode(TEST_LESS, n, addition());
-        case Greater: advance(); return createNode(TEST_GREATER, n, addition());
-        case LessEqual: advance(); return createNode(TEST_LESS_EQUAL, n, addition());
-        case GreaterEqual: advance(); return createNode(TEST_GREATER_EQUAL, n, addition());
-        case In: advance(); return createNode(TEST_IN, n, addition());
-        case NotIn: advance(); return createNode(TEST_NOT_IN, n, addition());
+        case Equals: advance(); return createNodeFromPrevToken(TEST_EQUALITY, n, addition());
+        case NotEqual: advance(); return createNodeFromPrevToken(TEST_NOT_EQUAL, n, addition());
+        case Less: advance(); return createNodeFromPrevToken(TEST_LESS, n, addition());
+        case Greater: advance(); return createNodeFromPrevToken(TEST_GREATER, n, addition());
+        case LessEqual: advance(); return createNodeFromPrevToken(TEST_LESS_EQUAL, n, addition());
+        case GreaterEqual: advance(); return createNodeFromPrevToken(TEST_GREATER_EQUAL, n, addition());
+        case In: advance(); return createNodeFromPrevToken(TEST_IN, n, addition());
+        case NotIn: advance(); return createNodeFromPrevToken(TEST_NOT_IN, n, addition());
         default: return n;
     }
 }
 
 Node* Parser::number(){
-    Node* n = createNode(NUMBER);
+    Node* n = createNodeFromPrevToken(NUMBER);
     n->data.text = new QString(source.mid(previous.start, previous.length));
     return n;
 }
 
 Node* Parser::string(){
-    Node* n = createNode(STRING);
+    Node* n = createNodeFromPrevToken(STRING);
     n->data.text = new QString(source.mid(previous.start, previous.length));
     return n;
 }
@@ -674,7 +666,7 @@ Node* Parser::grouping(const NodeType& t, const TokenType& close){
     Node* n = boolExpression();
     consume(close, "Expect grouping close symbol.");
 
-    return createNode(t, n);
+    return createNodeFromPrevToken(t, n);
 }
 
 Node* Parser::idOnly(){
@@ -683,7 +675,7 @@ Node* Parser::idOnly(){
 }
 
 Node* Parser::idStart(bool id_only){
-    Node* n = createNode(IDENTIFIER);
+    Node* n = createNodeFromPrevToken(IDENTIFIER);
     n->data.text = new QString(source.mid(previous.start, previous.length));
     if(!id_only && match(LeftParen)) return call(n);
     else if(match(MB_Superscript)){
@@ -712,7 +704,7 @@ Node* Parser::idStart(bool id_only){
 }
 
 Node* Parser::call(Node* id){
-    if(match(RightParen)) return createNode(CALL, id);
+    if(match(RightParen)) return createNodeFromPrevToken(CALL, id);
 
     match(Newline);
     Node* first_arg = boolExpression();
@@ -728,7 +720,7 @@ Node* Parser::call(Node* id){
 
         return id;
     }else{
-        Node* n = createNode(CALL, id, first_arg);
+        Node* n = createNodeFromPrevToken(CALL, id, first_arg);
 
         while(match(Comma)){
             match(Newline);
@@ -749,30 +741,30 @@ Node* Parser::setLiteral(){
             checkGap();
             advance();
             if(t == REALS){
-                return createNode(POSITIVE_REALS);
+                return createNodeFromPrevToken(POSITIVE_REALS);
             }else if(t == RATIONALS){
-                return createNode(POSITIVE_RATIONALS);
+                return createNodeFromPrevToken(POSITIVE_RATIONALS);
             }else{
                 error("Set does not support positive script");
-                return createNode(ERROR);
+                return createNodeFromPrevToken(ERROR);
             }
         case SuperscriptMinus:
             checkGap();
             advance();
             if(t == REALS){
-                return createNode(NEGATIVE_REALS);
+                return createNodeFromPrevToken(NEGATIVE_REALS);
             }else if(t == RATIONALS){
-                return createNode(NEGATIVE_RATIONALS);
+                return createNodeFromPrevToken(NEGATIVE_RATIONALS);
             }else{
                 error("Set does not support negative script");
-                return createNode(ERROR);
+                return createNodeFromPrevToken(ERROR);
             }
         case SuperscriptIdentifier:
         case SuperscriptLeftParen:
         case SuperscriptNumber:
-            return createNode(SET_LITERAL_DIMENSIONS, createNode(t), unicodeSuperscriptExpression());
+            return createNodeFromPrevToken(SET_LITERAL_DIMENSIONS, createNodeFromPrevToken(t), unicodeSuperscriptExpression());
         default:
-            return createNode(t);
+            return createNodeFromPrevToken(t);
     }
 }
 
@@ -786,23 +778,23 @@ Node* Parser::setLiteralMathBranScript(const NodeType& t){
             advance();
             consume(MB_Close, "Expect MB close");
             if(t == REALS){
-                return createNode(POSITIVE_REALS);
+                return createNodeFromPrevToken(POSITIVE_REALS);
             }else{
                 error("Set does not support positive script");
-                return createNode(ERROR);
+                return createNodeFromPrevToken(ERROR);
             }
         case Minus:
             advance();
             consume(MB_Close, "Expect MB close");
             if(t == REALS){
-                return createNode(NEGATIVE_REALS);
+                return createNodeFromPrevToken(NEGATIVE_REALS);
             }else{
                 error("Set does not support negative script");
-                return createNode(ERROR);
+                return createNodeFromPrevToken(ERROR);
             }
         default:
             parsing_dimensions = true;
-            Node* n = createNode(SET_LITERAL_DIMENSIONS, createNode(t), addition());
+            Node* n = createNodeFromPrevToken(SET_LITERAL_DIMENSIONS, createNodeFromPrevToken(t), addition());
             while(match(Times)) n->children.push_back(expression());
             parsing_dimensions = false;
             consume(MB_Close, "Expect MB close");
@@ -817,9 +809,9 @@ Node* Parser::unicodeSuperscriptExpression(){
 
     Node* n = unicodeSuperscriptImplicitMult();
     while(match(SuperscriptPlus) || match(SuperscriptMinus)){
-        if(previous.type == SuperscriptMinus) n = createNode(SUBTRACTION, n, unicodeSuperscriptImplicitMult());
+        if(previous.type == SuperscriptMinus) n = createNodeFromPrevToken(SUBTRACTION, n, unicodeSuperscriptImplicitMult());
         else if(n->type == ADDITION) n->children.push_back(unicodeSuperscriptGrouping());
-        else n = createNode(ADDITION, n, unicodeSuperscriptGrouping());
+        else n = createNodeFromPrevToken(ADDITION, n, unicodeSuperscriptGrouping());
     }
 
     return n;
@@ -829,7 +821,7 @@ Node* Parser::unicodeSuperscriptImplicitMult(){
     Node* n = unicodeSuperscriptGrouping();
     if(current.type == SuperscriptLeftParen || current.type == SuperscriptIdentifier){
         checkGap();
-        n = createNode(IMPLICIT_MULTIPLY, n, unicodeSuperscriptGrouping());
+        n = createNodeFromPrevToken(IMPLICIT_MULTIPLY, n, unicodeSuperscriptGrouping());
     }
     while(current.type == SuperscriptLeftParen || current.type == SuperscriptIdentifier){
         checkGap();
@@ -843,7 +835,7 @@ Node* Parser::unicodeSuperscriptGrouping(){
     if(match(SuperscriptLeftParen)){
         Node* n = unicodeSuperscriptExpression<false>();
         consume(SuperscriptRightParen, "Expect right paren");
-        return createNode(GROUP_PAREN, n);
+        return createNodeFromPrevToken(GROUP_PAREN, n);
     }
 
     return unicodeSuperscriptTerminal();
@@ -851,10 +843,10 @@ Node* Parser::unicodeSuperscriptGrouping(){
 
 Node* Parser::unicodeSuperscriptTerminal(){
     if(match(SuperscriptNumber)){
-        return createNode(NUMBER);
+        return createNodeFromPrevToken(NUMBER);
     }else{
         consume(SuperscriptIdentifier, "Expected identifier");
-        Node* n = createNode(IDENTIFIER);
+        Node* n = createNodeFromPrevToken(IDENTIFIER);
 
         return n; //Ignore function calls for now
     }
@@ -866,9 +858,9 @@ Node* Parser::unicodeSubscriptExpression(){
 
     Node* n = unicodeSubscriptImplicitMult();
     while(match(SubscriptPlus) || match(SubscriptMinus)){
-        if(previous.type == SubscriptMinus) n = createNode(SUBTRACTION, n, unicodeSubscriptImplicitMult());
+        if(previous.type == SubscriptMinus) n = createNodeFromPrevToken(SUBTRACTION, n, unicodeSubscriptImplicitMult());
         else if(n->type == ADDITION) n->children.push_back(unicodeSubscriptGrouping());
-        else n = createNode(ADDITION, n, unicodeSubscriptGrouping());
+        else n = createNodeFromPrevToken(ADDITION, n, unicodeSubscriptGrouping());
     }
 
     return n;
@@ -878,7 +870,7 @@ Node* Parser::unicodeSubscriptImplicitMult(){
     Node* n = unicodeSubscriptGrouping();
     if(current.type == SubscriptLeftParen || current.type == SubscriptIdentifier){
         checkGap();
-        n = createNode(IMPLICIT_MULTIPLY, n, unicodeSubscriptGrouping());
+        n = createNodeFromPrevToken(IMPLICIT_MULTIPLY, n, unicodeSubscriptGrouping());
     }
     while(current.type == SubscriptLeftParen || current.type == SubscriptIdentifier){
         checkGap();
@@ -892,7 +884,7 @@ Node* Parser::unicodeSubscriptGrouping(){
     if(match(SubscriptLeftParen)){
         Node* n = unicodeSubscriptExpression<false>();
         consume(SubscriptRightParen, "Expect right paren");
-        return createNode(GROUP_PAREN, n);
+        return createNodeFromPrevToken(GROUP_PAREN, n);
     }
 
     return unicodeSubscriptTerminal();
@@ -900,19 +892,19 @@ Node* Parser::unicodeSubscriptGrouping(){
 
 Node* Parser::unicodeSubscriptTerminal(){
     if(match(SubscriptNumber)){
-        return createNode(NUMBER);
+        return createNodeFromPrevToken(NUMBER);
     }else{
         consume(SubscriptIdentifier, "Expected identifier");
-        Node* n = createNode(IDENTIFIER);
+        Node* n = createNodeFromPrevToken(IDENTIFIER);
 
         return n; //Ignore function calls for now
     }
 }
 
 Node* Parser::nablaStart(){
-    if(match(DotProduct)) return createNode(DIVERGENCE, rightUnary());
-    else if(match(Times)) return createNode(CURL, rightUnary());
-    else return createNode(GRADIENT, rightUnary());
+    if(match(DotProduct)) return createNodeFromPrevToken(DIVERGENCE, rightUnary());
+    else if(match(Times)) return createNodeFromPrevToken(CURL, rightUnary());
+    else return createNodeFromPrevToken(GRADIENT, rightUnary());
 }
 
 Node* Parser::parenStart(){
@@ -922,12 +914,12 @@ Node* Parser::parenStart(){
         Node* range_end = boolExpression();
 
         if(match(RightParen)){
-            return createNode(INTERVAL_OPEN_OPEN, expr, range_end);
+            return createNodeFromPrevToken(INTERVAL_OPEN_OPEN, expr, range_end);
         }else if(match(RightBrace)){
-            return createNode(INTERVAL_OPEN_CLOSE, expr, range_end);
+            return createNodeFromPrevToken(INTERVAL_OPEN_CLOSE, expr, range_end);
         }else{
             consume(Comma, "Invalid interval or sequence");
-            Node* n = createNode(SEQUENCE_ENUMERATED, expr, range_end);
+            Node* n = createNodeFromPrevToken(SEQUENCE_ENUMERATED, expr, range_end);
             do{
                 n->children.push_back(boolExpression());
             } while(match(Comma));
@@ -937,7 +929,7 @@ Node* Parser::parenStart(){
         }
     }else{
         consume(RightParen, "Expect )");
-        return createNode(GROUP_PAREN, expr);
+        return createNodeFromPrevToken(GROUP_PAREN, expr);
     }
 }
 
@@ -948,21 +940,21 @@ Node* Parser::braceStart(){
         Node* range_end = boolExpression();
 
         if(match(RightParen)){
-            return createNode(INTERVAL_CLOSE_OPEN, expr, range_end);
+            return createNodeFromPrevToken(INTERVAL_CLOSE_OPEN, expr, range_end);
         }else if(match(RightBrace)){
-            return createNode(INTERVAL_CLOSE_CLOSE, expr, range_end);
+            return createNodeFromPrevToken(INTERVAL_CLOSE_CLOSE, expr, range_end);
         }else if(match(Semicolon) || match(Newline)){
-            return braceMatrix(createNode<3>(MATRIX, {createNode(2), expr, range_end}), 2, previous.type);
+            return braceMatrix(createNode<3>(MATRIX, {createNodeFromPrevToken(2), expr, range_end}), 2, previous.type);
         }else{
             consume(Comma, "Expect end of interval or matrix delimiter");
-            Node* n = createNode(MATRIX, expr, range_end);
+            Node* n = createNodeFromPrevToken(MATRIX, expr, range_end);
             uint cols = 2;
             do{
                 n->children.push_back(boolExpression());
                 cols++;
             } while(match(Comma));
 
-            n->children.insert(n->children.begin(), createNode(cols));
+            n->children.insert(n->children.begin(), createNodeFromPrevToken(cols));
             if(match(Semicolon) || match(Newline)){
                 return braceMatrix(n, cols, previous.type);
             }else{
@@ -971,10 +963,10 @@ Node* Parser::braceStart(){
             }
         }
     }else if(match(Semicolon) || match(Newline)){
-        return braceMatrix(createNode(MATRIX, createNode(1), expr), 1, previous.type);
+        return braceMatrix(createNodeFromPrevToken(MATRIX, createNodeFromPrevToken(1), expr), 1, previous.type);
     }else{
         consume(RightBrace, "Expect ]");
-        return createNode(GROUP_BRACKET, expr);
+        return createNodeFromPrevToken(GROUP_BRACKET, expr);
     }
 }
 
@@ -998,16 +990,16 @@ Node* Parser::doubleBraceStart(){
     Node* end = boolExpression();
     consume(RightDoubleBrace, "Expect '⟧' to close integer interval");
 
-    return createNode(INTERVAL_INTEGER, start, end);
+    return createNodeFromPrevToken(INTERVAL_INTEGER, start, end);
 }
 
 Node* Parser::setStart(){
-    if(match(RightBracket)) return createNode(EMPTY_SET);
+    if(match(RightBracket)) return createNodeFromPrevToken(EMPTY_SET);
 
     Node* expr = boolExpression();
-    if(match(RightBracket)) return createNode(SET_ENUMERATED, expr); //1 member set
+    if(match(RightBracket)) return createNodeFromPrevToken(SET_ENUMERATED, expr); //1 member set
     else if(current.type == Comma){ //n-member enumerated set
-        expr = createNode(SET_ENUMERATED, expr);
+        expr = createNodeFromPrevToken(SET_ENUMERATED, expr);
         while(match(Comma)){
             match(Newline);
             expr->children.push_back( boolExpression() );
@@ -1017,8 +1009,8 @@ Node* Parser::setStart(){
         return expr;
     }else{ //Set selector
         expr = match(In) ?
-               createNode(SET_BUILDER, createNode(IN, expr, expression())) : // {x ∈ ℝ : ...}
-               createNode(SET_BUILDER, expr); // {x : ...}
+               createNodeFromPrevToken(SET_BUILDER, createNodeFromPrevToken(IN, expr, expression())) : // {x ∈ ℝ : ...}
+               createNodeFromPrevToken(SET_BUILDER, expr); // {x : ...}
 
         consume<2>({Colon, Bar}, "Expect set builder");
 
@@ -1033,10 +1025,10 @@ Node* Parser::setStart(){
 Node* Parser::innerProduct(){
     Node* expr = expression();
     if(match(Comma)){
-        expr = createNode(INNER_PRODUCT, expr, expression());
+        expr = createNodeFromPrevToken(INNER_PRODUCT, expr, expression());
     }else{
         consume(Bar, "Expect '|' or ',' delimiter between inner product args");
-        expr = createNode(INNER_PRODUCT, expression(), expr);
+        expr = createNodeFromPrevToken(INNER_PRODUCT, expression(), expr);
     }
     consume(RightAngle, "Expect '⟩' to close inner product");
 
@@ -1047,7 +1039,7 @@ Node* Parser::integral(const NodeType& type){
     #ifdef INTEGRAL_LOW_PRECEDENCE
     Node* n = createNode(type, implicitMultiplication());
     #else
-    Node* n = createNode(type, expression());
+    Node* n = createNodeFromPrevToken(type, expression());
     #endif
     consume(Doublestruck_d, "Expect differential 'ⅆ' after integral kernal");
     n->children.push_back(idOnly());
@@ -1057,7 +1049,7 @@ Node* Parser::integral(const NodeType& type){
 
 Node* Parser::cardinalNumber(NodeType type){
     if(peek<3>({SubscriptNumber, SubscriptLeftParen, SubscriptIdentifier}))
-        return createNode(type, unicodeSubscriptExpression());
+        return createNodeFromPrevToken(type, unicodeSubscriptExpression());
 
     checkGap();
     consume(MB_Subscript, "Expect cardinal number to have a subscript");
@@ -1065,7 +1057,7 @@ Node* Parser::cardinalNumber(NodeType type){
     Node* degree = expression();
     consume(MB_Close, "Expect close");
 
-    return createNode(type, degree);
+    return createNodeFromPrevToken(type, degree);
 }
 
 Node* Parser::mathBranUnary(const NodeType& t){
@@ -1081,7 +1073,7 @@ Node* Parser::mathBranBinary(const NodeType& t){
     Node* rhs = expression();
     consume(MB_Close, "Expect MB close symbol");
 
-    return createNode(t, lhs, rhs);
+    return createNodeFromPrevToken(t, lhs, rhs);
 }
 
 Node* Parser::mathBranRoot(){
@@ -1091,9 +1083,9 @@ Node* Parser::mathBranRoot(){
     if(match(MB_Open)){
         Node* script = expression();
         consume(MB_Close, "Expect MB close symbol");
-        return createNode(ROOT, body, script);
+        return createNodeFromPrevToken(ROOT, body, script);
     }else{
-        return createNode(SQRT, body);
+        return createNodeFromPrevToken(SQRT, body);
     }
 }
 
@@ -1120,7 +1112,7 @@ Node* Parser::mathBranIntegral(const NodeType& type){
 }
 
 Node* Parser::mathBranCases(){
-    Node* n = createNode(CASES);
+    Node* n = createNodeFromPrevToken(CASES);
 
     consume(MB_Open, "Expect open symbol");
     do{
@@ -1151,7 +1143,7 @@ Node* Parser::mathBranBigOperator(const NodeType& t){
     }
 
     //Body
-    Node* n = createNode(t, expression());
+    Node* n = createNodeFromPrevToken(t, expression());
     if(initializer) n->children.push_back(initializer);
     if(final_value) n->children.push_back(final_value);
 
@@ -1159,21 +1151,21 @@ Node* Parser::mathBranBigOperator(const NodeType& t){
 }
 
 Node* Parser::mathBranMatrix(){
-    Node* n = createNode(MATRIX);
+    Node* n = createNodeFromPrevToken(MATRIX);
 
     consume(MB_Open, "Expect open symbol for matrix row count");
     consume(Number, "Expect matrix row count");
     bool success;
     ushort rows = source.midRef(previous.start, previous.length).toUShort(&success);
     if(!success || rows==0 || rows> 255) error("Matrix column count must be positive");
-    n->children.push_back(createNode(NUMBER));
+    n->children.push_back(createNodeFromPrevToken(NUMBER));
     consume(MB_Close, "Expect close symbol for matrix row count");
 
     consume(MB_Open, "Expect open symbol for matrix col count");
     consume(Number, "Expect matrix col count");
     ushort cols = source.midRef(previous.start, previous.length).toUShort(&success);
     if(!success || cols==0 || cols > 255) error("Matrix column count must be positive");
-    n->children.push_back(createNode(NUMBER));
+    n->children.push_back(createNodeFromPrevToken(NUMBER));
     consume(MB_Close, "Expect close symbol for matrix col count");
 
     for(ushort i = 0; i < rows*cols; i++){
@@ -1197,7 +1189,7 @@ Node* Parser::mathBranFraction(){
     Node* den = expression();
     consume(MB_Close, "Expect close symbol");
 
-    return createNode(FRACTION, num, den);
+    return createNodeFromPrevToken(FRACTION, num, den);
 }
 
 Node* Parser::mathBranDerivative(const NodeType& type, const TokenType& deriv_token){
@@ -1219,7 +1211,7 @@ Node* Parser::mathBranDerivative(const NodeType& type, const TokenType& deriv_to
         consume(MB_Close, "Expect close symbol");
     }
 
-    return createNode(type, expr, wrt);
+    return createNodeFromPrevToken(type, expr, wrt);
 }
 
 Node* Parser::mathBranUnderscriptedFunction(const NodeType& t){
@@ -1247,7 +1239,7 @@ Node* Parser::mathBranSuperscript(Node* body, bool consume_on_start){
         case Plus: return mathBranExponentOp(body, INCREMENT);
         case Minus: if(peek(MB_Close)) return mathBranExponentOp(body, DECREMENT);
         default:
-            Node* n = createNode(POWER, body, expression());
+            Node* n = createNodeFromPrevToken(POWER, body, expression());
             consume(MB_Close, "Expect close symbol");
             return n;
     }
@@ -1256,7 +1248,7 @@ Node* Parser::mathBranSuperscript(Node* body, bool consume_on_start){
 Node* Parser::mathBranExponentOp(Node* body, NodeType op){
     advance();
     consume(MB_Close, "Expect close symbol");
-    return createNode(op, body);
+    return createNodeFromPrevToken(op, body);
 }
 
 Node* Parser::mathBranSubscript(Node* body, bool consume_on_start){
@@ -1265,18 +1257,18 @@ Node* Parser::mathBranSubscript(Node* body, bool consume_on_start){
     switch (current.type) {
         case Comma:{
             advance();
-            Node* n = createNode(SUBSCRIPT_PARTIAL, body, expression());
+            Node* n = createNodeFromPrevToken(SUBSCRIPT_PARTIAL, body, expression());
             consume(MB_Close, "Expect close symbol");
             return n;
         }
         case Bar:{
             advance();
-            Node* n = createNode(EVAL, body, mathStatement());
+            Node* n = createNodeFromPrevToken(EVAL, body, mathStatement());
             consume(MB_Close, "Expect close symbol");
             return n;
         }
         default:
-            Node* n = createNode(SUBSCRIPT_ACCESS, body, expression());
+            Node* n = createNodeFromPrevToken(SUBSCRIPT_ACCESS, body, expression());
             while(match(Comma)) n->children.push_back(expression());
             consume(MB_Close, "Expect close symbol");
             return n;
@@ -1290,7 +1282,7 @@ Node* Parser::mathBranDualscript(Node* body){
 
 Node* Parser::mathBranAccent(const NodeType& t){
     consume(MB_Open, "Expect MB open symbol");
-    Node* n = createNode(t, idOnly());
+    Node* n = createNodeFromPrevToken(t, idOnly());
     consume(MB_Close, "Expect MB close symbol");
 
     return n;
@@ -1298,7 +1290,7 @@ Node* Parser::mathBranAccent(const NodeType& t){
 
 Node* Parser::mathBranAccentArrow(){
     consume(MB_Open, "Expect MB open symbol");
-    Node* n = createNode(ACCENT_ARROW, idOnly());
+    Node* n = createNodeFromPrevToken(ACCENT_ARROW, idOnly());
     if(peek(Identifier)) n->children.push_back(idOnly());
     consume(MB_Close, "Expect MB close symbol");
 

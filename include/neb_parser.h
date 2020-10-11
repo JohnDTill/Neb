@@ -12,6 +12,8 @@ class Scanner;
 class Parser{
 public:
     QString err_msg = "";
+    int err_start;
+    int err_end;
 
 private:
     const QString& source;
@@ -25,17 +27,18 @@ public:
     ~Parser();
     Node* parseStatement(TokenType surrounding_terminator = EndOfFile, bool nested = false);
     std::vector<Node*> parseAll();
+    bool ok() const {return err_msg.isEmpty();}
 
 private:
     //Parser helpers
-    Node* createNode(const NodeType& type);
-    Node* createNode(const NodeType& type, Node* child);
-    Node* createNode(const NodeType& type, Node* lhs, Node* rhs);
+    Node* createNodeFromPrevToken(const NodeType& type);
+    Node* createNodeFromPrevToken(const NodeType& type, Node* child);
+    Node* createNodeFromPrevToken(const NodeType& type, Node* lhs, Node* rhs);
     template<int a> Node* createNode(const NodeType& type, const std::array<Node*,a>& args);
-    Node* createNode(uint number);
+    Node* createNodeFromPrevToken(uint number);
     void scanToRecoveryPoint();
-    void error(const QString& message);
-    void error(const QString& message, const Token& t);
+    Node* error(const QString& message);
+    Node* error(const QString& message, const Token& t);
     void advance();
     void checkGap();
     void consume(TokenType type, const QString& message);

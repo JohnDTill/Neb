@@ -16,6 +16,8 @@ public:
     };
 
     NodeType type;
+    int start;
+    int end;
     #ifdef NDEBUG
     Data data;
     void* hook;
@@ -26,7 +28,7 @@ public:
     CoarseType coarse_type;
     std::vector<Node*> children;
 
-    Node(NodeType type);
+    Node(NodeType type, int start, int end);
     QString toDOT(bool LR = false) const;
     static QString toDOT(const std::vector<Node*>& nodes, bool LR = false);
     static void deletePostorder(Node* n);

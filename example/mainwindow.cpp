@@ -23,7 +23,7 @@ void MainWindow::on_exec_button_clicked(){
 
     std::vector<Neb::Node*> nodes;
     while(Neb::Node* stmt = parser.parseStatement()){
-        if(parser.err_msg.isEmpty()){
+        if(parser.ok()){
             nodes.push_back(stmt);
         }else{
             if(!errors.isEmpty()) errors.append('\n');

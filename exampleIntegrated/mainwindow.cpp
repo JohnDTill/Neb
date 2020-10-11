@@ -47,11 +47,23 @@ void MainWindow::on_codeEditChange(){
 
     std::vector<Neb::Node*> nodes;
     while(Neb::Node* stmt = parser.parseStatement()){
-        if(parser.err_msg.isEmpty()){
+        if(parser.ok()){
             nodes.push_back(stmt);
         }else{
             if(!errors.isEmpty()) errors.append('\n');
-            errors.append(parser.err_msg);
+            int start_line = 1 + code.leftRef(parser.err_start).count('\n');
+            int end_line = start_line +
+                           code.midRef(parser.err_start, parser.err_end-parser.err_start).count('\n');
+            if(start_line == end_line)
+                errors.append("Line " + QString::number(start_line) + " | " + parser.err_msg);
+            else
+                errors.append("Lines " + QString::number(start_line) + '-' +
+                              QString::number(end_line) + " | " + parser.err_msg);
+
+            QTextCursor c = code_view->textCursor();
+            c.setPosition(parser.err_start);
+            c.setPosition(parser.err_end, QTextCursor::KeepAnchor);
+            c.insertHtml("<span style=\"color:#ff0000;\"><u>" + c.selectedText() + "</u></span>");
         }
     }
 
