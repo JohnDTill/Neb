@@ -71,6 +71,9 @@ Node* Parser::createNodeFromPrevToken(const NodeType& type, Node* lhs, Node* rhs
     n->children.push_back(lhs);
     n->children.push_back(rhs);
 
+    n->start = lhs->start;
+    n->end = rhs->end;
+
     return n;
 }
 
@@ -128,7 +131,11 @@ void Parser::advance(){
 }
 
 void Parser::checkGap(){
-    if(previous.start + previous.length != current.start) error("Invalid whitespace");
+    if(previous.start + previous.length != current.start){
+        err_msg = "Invalid whitespace";
+        err_start = previous.start+previous.length;
+        err_end = current.start;
+    }
 }
 
 void Parser::consume(TokenType type, const QString& message){
