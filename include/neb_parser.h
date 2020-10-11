@@ -77,6 +77,8 @@ private:
     Node* boolEquality();
 
     //Specialized rules
+    Node* number();
+    Node* string();
     Node* grouping(const NodeType& t, const TokenType& close);
     Node* idOnly();
     Node* idStart(bool id_only = false);

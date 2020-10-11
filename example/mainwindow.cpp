@@ -26,19 +26,8 @@ void MainWindow::on_exec_button_clicked(){
         if(parser.err_msg.isEmpty()){
             nodes.push_back(stmt);
         }else{
-            QString::size_type index = stmt->data.front().unicode();
-            if(errors.isEmpty()){
-                QTextCursor c = ui->code_edit->textCursor();
-                c.setPosition(index);
-                c.setPosition(index + 1, QTextCursor::KeepAnchor);
-                ui->code_edit->setTextCursor(c);
-                ui->code_edit->setFocus();
-            }else{
-                errors.append('\n');
-            }
-
-            int line = 1 + code.leftRef(index).count('\n');
-            errors.append( "Line " + QString::number(line) + " | " + parser.err_msg);
+            if(!errors.isEmpty()) errors.append('\n');
+            errors.append(parser.err_msg);
         }
     }
 

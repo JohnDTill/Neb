@@ -25,7 +25,7 @@ Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
     if(match(EndOfFile)){
         if(nested){
             err_msg = "Reached end of file without closing scope";
-            return new Node(ERROR, QString(previous.start));
+            return new Node(ERROR);
         }else{
             return nullptr;
         }
@@ -47,7 +47,7 @@ Node* Parser::parseStatement(TokenType surrounding_terminator, bool nested){
 
     if(current.type == Error){
         Node::deletePostorder(body);
-        return new Node(ERROR, QString(current.start));
+        return new Node(ERROR);
     }else{
         return body;
     }
@@ -61,7 +61,7 @@ std::vector<Node*> Parser::parseAll(){
 }
 
 Node* Parser::createNode(const NodeType& type){
-    Node* n = new Node(type, source.mid(previous.start, previous.length));
+    Node* n = new Node(type);
     return n;
 }
 
@@ -82,7 +82,8 @@ Node* Parser::createNode(const NodeType& type, Node* lhs, Node* rhs){
 
 Node* Parser::createNode(uint number){
     Node* n = createNode(NUMBER);
-    n->data = QString::number(number);
+    n->data.text = new QString();
+    n->data.text->setNum(number);
 
     return n;
 }
@@ -268,7 +269,7 @@ Node* Parser::algorithm(TokenType surrounding_terminator){
         if(s) alg->children.push_back(s);
         else{
             err_msg = "Algorithm requires a body";
-            alg->children.push_back(new Node(ERROR, QString(current.start)));
+            alg->children.push_back(new Node(ERROR));
         }
     }
 
@@ -484,21 +485,34 @@ Node* Parser::rightUnary(){
     while(peek<2>( {Exclam, Tick} )){
         if(match(Exclam)){
             Node* n = createNode(FACTORIAL, expr);
+            n->data.order = 0;
             while(peek(Exclam)){
+                if(n->data.order == 255){
+                    err_msg = "Cannot have more than 255 factorials";
+                    Node::deletePostorder(n);
+                    return new Node(ERROR);
+                }
+                n->data.order++;
+
                 checkGap();
                 advance();
-                n->data += '!';
             }
 
             return n;
         }else{
             consume(Tick, "Expect '");
             Node* n = createNode(TICK_DERIVATIVE, expr);
-            while(match(Tick));
+            n->data.order = 0;
             while(peek(Tick)){
+                if(n->data.order == 255){
+                    err_msg = "Cannot have more than 255 tick derivatives";
+                    Node::deletePostorder(n);
+                    return new Node(ERROR);
+                }
+                n->data.order++;
+
                 checkGap();
                 advance();
-                n->data += '\'';
             }
 
             return n;
@@ -555,10 +569,10 @@ Node* Parser::primary(){
         //Value literal
         case EmptySet: return createNode(EMPTY_SET);
         case Infinity: return createNode(INFTY);
-        case Number: return createNode(NUMBER);
+        case Number: return number();
         case True: return createNode(TRUE);
         case False: return createNode(FALSE);
-        case String: return createNode(STRING);
+        case String: return string();
 
         //Grouping
         case LeftCeil: return grouping(CEIL, RightCeil);
@@ -644,6 +658,18 @@ Node* Parser::boolEquality(){
     }
 }
 
+Node* Parser::number(){
+    Node* n = createNode(NUMBER);
+    n->data.text = new QString(source.mid(previous.start, previous.length));
+    return n;
+}
+
+Node* Parser::string(){
+    Node* n = createNode(STRING);
+    n->data.text = new QString(source.mid(previous.start, previous.length));
+    return n;
+}
+
 Node* Parser::grouping(const NodeType& t, const TokenType& close){
     Node* n = boolExpression();
     consume(close, "Expect grouping close symbol.");
@@ -658,11 +684,12 @@ Node* Parser::idOnly(){
 
 Node* Parser::idStart(bool id_only){
     Node* n = createNode(IDENTIFIER);
+    n->data.text = new QString(source.mid(previous.start, previous.length));
     if(!id_only && match(LeftParen)) return call(n);
     else if(match(MB_Superscript)){
         consume(MB_Open, "Expect open symbol");
         if(match(Multiply)){
-            n->data += "^*";
+            n->data.text->append("⁜^⏴*⏵");
             consume(MB_Close, "Expect close symbol");
         }else if(id_only){
             error("Superscript not allowed in this context");
@@ -672,7 +699,7 @@ Node* Parser::idStart(bool id_only){
     }else if(match(MB_Subscript)){
         consume(MB_Open, "Expect open symbol");
         if(match(Multiply)){
-            n->data += "_*";
+            n->data.text->append("⁜_⏴*⏵");
             consume(MB_Close, "Expect close symbol");
         }else if(id_only){
             error("Superscript not allowed in this context");
@@ -691,7 +718,7 @@ Node* Parser::call(Node* id){
     Node* first_arg = boolExpression();
 
     if(match(Bar)){
-        if(id->type != IDENTIFIER || id->data != "P")
+        if(id->type != IDENTIFIER || *id->data.text != "P")
             error("Probablity function can only be represented by P");
 
         id->type = CONDITIONAL_PROBABLITY;

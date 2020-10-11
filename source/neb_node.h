@@ -10,25 +10,25 @@ namespace Neb {
 
 class Node {
 public:
-    typedef void(DotCallback)(QTextStream& out, const Node& n);
-    static void DO_NOTHING(QTextStream&, const Node&){}
+    union Data{
+        QString* text;
+        uint8_t order;
+    };
 
     NodeType type;
-    CoarseType coarse_type;
-    QString data; //Copying all the data is not ideal, but okay in early stage
     #ifdef NDEBUG
+    Data data;
     void* hook;
-    void* type_info;
     #else
-    void* hook = nullptr;
-    void* type_info = nullptr;
+    Data data = {nullptr}; //Internal annotation
+    void* hook = nullptr; //For any external annotation
     #endif
+    CoarseType coarse_type;
     std::vector<Node*> children;
 
     Node(NodeType type);
-    Node(NodeType type, QString data);
-    QString toDOT(bool LR = false, bool typed = true, DotCallback callback = DO_NOTHING) const;
-    static QString toDOT(const std::vector<Node*>& nodes, bool LR = false, bool typed = true, DotCallback callback = DO_NOTHING);
+    QString toDOT(bool LR = false) const;
+    static QString toDOT(const std::vector<Node*>& nodes, bool LR = false);
     static void deletePostorder(Node* n);
 };
 

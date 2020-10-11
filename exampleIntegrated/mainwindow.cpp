@@ -50,15 +50,8 @@ void MainWindow::on_codeEditChange(){
         if(parser.err_msg.isEmpty()){
             nodes.push_back(stmt);
         }else{
-            QString::size_type index = stmt->data.front().unicode();
             if(!errors.isEmpty()) errors.append('\n');
-            int line = 1 + code.leftRef(index).count('\n');
-            errors.append( "Line " + QString::number(line) + " | " + parser.err_msg);
-
-            QTextCursor c = code_view->textCursor();
-            c.setPosition(index);
-            c.setPosition(index + 1, QTextCursor::KeepAnchor);
-            c.insertHtml("<span style=\"color:#ff0000;\"><u>" + c.selectedText() + "</u></span>");
+            errors.append(parser.err_msg);
         }
     }
 
