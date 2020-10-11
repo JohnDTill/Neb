@@ -124,7 +124,10 @@ void Parser::error(const QString& message, const Token& t){
 }
 
 void Parser::advance(){
-    if(current.type == Error) return;
+    if(current.type == Error){
+        previous = current;
+        return;
+    }
 
     previous = current;
     current = scanner.scanToken();

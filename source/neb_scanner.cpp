@@ -69,7 +69,7 @@ Token Scanner::scanToken(){
     #endif
 
     skipWhitespace();
-    if(curr == source.size()) return createToken(EndOfFile);
+    if(curr >= source.size()) return createToken(EndOfFile);
 
     const ushort c = source[curr++].unicode();
 
