@@ -5,6 +5,7 @@ TEMPLATE = lib
 DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 CONFIG += staticlib
+INCLUDEPATH += ../../MathBran/include
 
 CONFIG(debug, debug|release) {
     DESTDIR = $$shell_path($$_PRO_FILE_PWD_)/../lib/debug

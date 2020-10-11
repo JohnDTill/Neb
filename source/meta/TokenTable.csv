@@ -121,7 +121,7 @@ MinusPlus¦∓¦y¦¦¦¦¦
 Multiply¦*¦y¦¦¦¦¦
 Nabla¦∇¦y¦¦¦y¦¦
 NaturalLog¦ln¦¦y¦¦y¦¦
-Newline¦\n¦y¦¦¦¦¦
+Newline¦\n¦¦¦¦¦¦
 Ni¦∋¦y¦¦¦¦¦
 Not¦¬¦y¦¦¦¦¦
 NotEqual¦≠¦y¦¦¦¦¦

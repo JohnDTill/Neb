@@ -7,12 +7,13 @@ namespace Neb {
 
 struct Token {
     TokenType type;
+    int line;
     int start;
     int length;
 
     Token(){}
-    Token(TokenType type, int start, int length = 1)
-        : type(type), start(start), length(length){}
+    Token(TokenType type, int line, int start, int length = 1)
+        : type(type), line(line), start(start), length(length){}
 };
 
 }

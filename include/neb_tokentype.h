@@ -528,7 +528,6 @@ static TokenType getTextLexemeType(const QStringRef& key){ \
 	 case 8723: return createToken(MinusPlus);\
 	 case 42: return createToken(Multiply);\
 	 case 8711: return createToken(Nabla);\
-	 case 10: return createToken(Newline);\
 	 case 8715: return createToken(Ni);\
 	 case 172: return createToken(Not);\
 	 case 8800: return createToken(NotEqual);\

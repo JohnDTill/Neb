@@ -52,13 +52,7 @@ void MainWindow::on_codeEditChange(){
         }else{
             if(!errors.isEmpty()) errors.append('\n');
             int start_line = 1 + code.leftRef(parser.err_start).count('\n');
-            int end_line = start_line +
-                           code.midRef(parser.err_start, parser.err_end-parser.err_start).count('\n');
-            if(start_line == end_line)
-                errors.append("Line " + QString::number(start_line) + " | " + parser.err_msg);
-            else
-                errors.append("Lines " + QString::number(start_line) + '-' +
-                              QString::number(end_line) + " | " + parser.err_msg);
+            errors.append("Line " + QString::number(start_line) + " | " + parser.err_msg);
 
             QTextCursor c = code_view->textCursor();
             c.setPosition(parser.err_start);

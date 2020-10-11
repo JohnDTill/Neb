@@ -29,6 +29,7 @@ public:
     std::vector<Node*> children;
 
     Node(NodeType type, int start, int end);
+    ~Node();
     QString toDOT(bool LR = false) const;
     static QString toDOT(const std::vector<Node*>& nodes, bool LR = false);
     static void deletePostorder(Node* n);
