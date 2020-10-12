@@ -41,7 +41,8 @@ MainWindow::~MainWindow(){
 void MainWindow::on_codeEditChange(){
     const QString code = code_edit->toMathBran();
     code_edit->clearErrors();
-    code_view->setPlainText(code);
+    code_view->clear();
+    code_view->setHtml(code);
 
     Neb::Parser parser(code);
     QString errors;

@@ -336,7 +336,7 @@ Token Scanner::scanString(){
         err_end = source.size()-1;
         return Token(Error, line, start);
     }else{
-        return Token(String, line, start, curr-start-1);
+        return Token(String, line, start-1, curr-start+1);
     }
 }
 
