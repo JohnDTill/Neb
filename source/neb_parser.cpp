@@ -336,13 +336,9 @@ Node* Parser::functionDefinition(Node* n){
         //example - p : (x,y) ↦ x^y
         n = createNodeFromPrevToken(FUN_DEF, n);
 
-        consume(Identifier, "Pure function must have an input");
-        n->children.push_back(createNodeFromPrevToken(IDENTIFIER));
-
         do {
             match(Newline);
-            consume(Identifier, "Expect identifier");
-            n->children.push_back(createNodeFromPrevToken(IDENTIFIER));
+            n->children.push_back(idOnly());
         } while(match(Comma));
 
         consume(RightParen, "Expect ')' to close function parameter list");

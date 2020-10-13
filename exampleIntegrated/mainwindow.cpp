@@ -41,8 +41,7 @@ MainWindow::~MainWindow(){
 void MainWindow::on_codeEditChange(){
     const QString code = code_edit->toMathBran();
     code_edit->clearErrors();
-    code_view->clear();
-    code_view->setHtml(code);
+    code_view->setHtml("<span style=\"color:#000000;\">" + QString(code).replace('\n',"<br>").replace(' ',"&nbsp;") + "</span>");
 
     Neb::Parser parser(code);
     QString errors;
