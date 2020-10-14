@@ -15,6 +15,7 @@ ContourIntegral¦∮¦y¦¦¦y¦¦
 Cos¦cos¦¦y¦¦y¦¦
 Cup¦∪¦y¦¦¦¦¦
 Dagger¦†¦y¦¦¦¦¦
+DecimalNumber¦¦¦¦¦¦¦
 DefEquals¦≔¦y¦¦¦¦¦
 Degree¦°¦y¦¦¦¦¦
 Disjunction¦∨¦y¦¦¦¦¦
@@ -39,8 +40,8 @@ Doublestruck_R¦ℝ¦y¦¦¦¦¦
 Doublestruck_S¦𝕊¦y¦¦¦¦¦
 Doublestruck_W¦𝕎¦y¦¦¦¦¦
 Doublestruck_Z¦ℤ¦y¦¦¦¦¦
-EmptySet¦∅¦y¦¦¦¦¦
 Else¦else¦¦y¦¦¦¦
+EmptySet¦∅¦y¦¦¦¦¦
 EndOfFile¦EndOfFile¦¦¦¦¦¦
 Equals¦=¦y¦¦¦¦¦
 Equivalent¦≡¦y¦¦¦¦¦
@@ -59,6 +60,7 @@ Identifier¦ID¦¦¦¦y¦¦
 If¦if¦¦y¦¦¦¦
 In¦∈¦y¦¦¦¦¦
 Infinity¦∞¦y¦¦¦¦¦
+Integer¦¦¦¦¦¦¦
 Integral¦∫¦y¦¦¦y¦¦
 Laplace¦ℒ¦y¦¦¦¦¦
 LeftAngle¦⟨¦y¦¦¦y¦¦
@@ -121,7 +123,7 @@ MinusPlus¦∓¦y¦¦¦¦¦
 Multiply¦*¦y¦¦¦¦¦
 Nabla¦∇¦y¦¦¦y¦¦
 NaturalLog¦ln¦¦y¦¦y¦¦
-Newline¦\n¦¦¦¦¦¦
+Newline¦\n¦y¦¦¦¦¦
 Ni¦∋¦y¦¦¦¦¦
 Not¦¬¦y¦¦¦¦¦
 NotEqual¦≠¦y¦¦¦¦¦
@@ -132,7 +134,6 @@ NotLess¦≮¦y¦¦¦¦¦
 NotNi¦∌¦y¦¦¦¦¦
 NotSubset¦⊄¦y¦¦¦¦¦
 NotSubsetEq¦⊈¦y¦¦¦¦¦
-Number¦¦¦¦¦¦¦
 ODot¦⨀¦y¦¦¦¦¦
 OuterProduct¦⊗¦y¦¦¦¦¦
 Partial¦∂¦y¦¦¦¦¦

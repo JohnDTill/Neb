@@ -25,7 +25,6 @@ public:
     Data data = {nullptr}; //Internal annotation
     void* hook = nullptr; //For any external annotation
     #endif
-    CoarseType coarse_type;
     std::vector<Node*> children;
 
     Node(NodeType type, int start, int end);

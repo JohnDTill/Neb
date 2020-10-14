@@ -62,7 +62,8 @@ enum NodeType{
     MODULUS,
     MULTIPLICATION,
     NORM,
-    NUMBER,
+    INTEGER_LITERAL,
+    DECIMAL_LITERAL,
     ODOT,
     OUTER_PRODUCT,
     PARTIAL,
@@ -152,7 +153,7 @@ enum NodeType{
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[141] { \
+static const QString labels[142] { \
     "false", \
     ">", \
     "≥", \
@@ -207,6 +208,7 @@ static const QString labels[141] { \
     "%", \
     "*", \
     "‖ ‖", \
+    "", \
     "", \
     "⨀", \
     "⊗", \
@@ -295,113 +297,6 @@ static const QString labels[141] { \
     "return", \
     "while", \
 };
-
-enum CoarseType{
-    CT_Untyped,
-    CT_Boolean,
-    CT_Function,
-    CT_Numeric,
-    CT_Sequence,
-    CT_Set_Boolean,
-    CT_Set_Numeric,
-    CT_String,
-    CT_Void,
-};
-
-#define NEB_DECLARE_COARSETYPE_LABELS \
-static const QString coarsetype_labels[9] { \
-    "U", \
-    "B", \
-    "F", \
-    "N", \
-    "SEQ", \
-    "SETB", \
-    "SETN", \
-    "STR", \
-    "V", \
-};
-
-#define NEB_DECLARE_COARSETYPE_INIT \
-static CoarseType initCoarseType(const NodeType& type){ \
-    if(type >= ACCENT_ARROW) return CT_Untyped; \
-    else if(type >= STRING) return CT_String; \
-    else if(type >= COMPLEX_NUMS) return CT_Set_Numeric; \
-    else if(type >= BOOLEANS) return CT_Set_Boolean; \
-    else if(type >= SEQUENCE_ENUMERATED) return CT_Sequence; \
-    else if(type >= ABS) return CT_Numeric; \
-    else return CT_Boolean; \
-}
-
-#define NEB_DECLARE_IS_EXPR \
-static bool isExpr(const NodeType& type){ \
-    return type < ALGORITHM; \
-}
-
-#define NEB_NUM_NODETYPES 141
-
-#define NEB_HOMOGENOUS_BOOLEAN_ARGS \
-    case Neb::LOGICAL_AND: \
-    case Neb::LOGICAL_NOT: \
-    case Neb::LOGICAL_OR: \
-
-#define NEB_HOMOGENOUS_NUMERIC_ARGS \
-    case Neb::GREATER: \
-    case Neb::GREATER_EQUAL: \
-    case Neb::LESS: \
-    case Neb::LESS_EQUAL: \
-    case Neb::TEST_GREATER: \
-    case Neb::TEST_GREATER_EQUAL: \
-    case Neb::TEST_LESS: \
-    case Neb::TEST_LESS_EQUAL: \
-    case Neb::ABS: \
-    case Neb::ADDITION: \
-    case Neb::BINOMIAL: \
-    case Neb::CEIL: \
-    case Neb::CROSS: \
-    case Neb::CURL: \
-    case Neb::CURRENCY_DOLLARS: \
-    case Neb::CURRENCY_EUROS: \
-    case Neb::CURRENCY_POUNDS: \
-    case Neb::DAGGER: \
-    case Neb::DECREMENT: \
-    case Neb::DIVERGENCE: \
-    case Neb::DIVIDE: \
-    case Neb::DOT: \
-    case Neb::FACTORIAL: \
-    case Neb::FLOOR: \
-    case Neb::FORWARDSLASH: \
-    case Neb::FRACTION: \
-    case Neb::INCREMENT: \
-    case Neb::INNER_PRODUCT: \
-    case Neb::LIMIT: \
-    case Neb::MATRIX: \
-    case Neb::MODULUS: \
-    case Neb::MULTIPLICATION: \
-    case Neb::NORM: \
-    case Neb::ODOT: \
-    case Neb::OUTER_PRODUCT: \
-    case Neb::ROOT: \
-    case Neb::SQRT: \
-    case Neb::SUMMATION: \
-    case Neb::TRANSPOSE: \
-    case Neb::UNARY_MINUS: \
-    case Neb::VEE: \
-    case Neb::WEDGE: \
-    case Neb::INTERVAL_CLOSE_CLOSE: \
-    case Neb::INTERVAL_CLOSE_OPEN: \
-    case Neb::INTERVAL_INTEGER: \
-    case Neb::INTERVAL_OPEN_CLOSE: \
-    case Neb::INTERVAL_OPEN_OPEN: \
-    case Neb::SET_ENUMERATED: \
-    case Neb::PROPORTIONAL: \
-
-#define NEB_HOMOGENOUS_SET_NUMERIC_ARGS \
-    case Neb::INTERSECTION: \
-    case Neb::NARY_INTERSECTION: \
-    case Neb::NARY_UNION: \
-    case Neb::NARY_UNIONPLUS: \
-    case Neb::UNION: \
-    case Neb::CARDINALITY: \
 
 }
 

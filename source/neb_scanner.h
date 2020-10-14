@@ -12,7 +12,6 @@ class Scanner{
 private:
     const QString& source;
     int curr = 0;
-    int line = 0;
     #ifndef NEB_IDENTIFIERS_USE_MULTIPLE_CHARS
     int id_stop;
     #endif

@@ -78,7 +78,7 @@ Node* Parser::createNodeFromPrevToken(const NodeType& type, Node* lhs, Node* rhs
 }
 
 Node* Parser::createNodeFromPrevToken(uint number){
-    Node* n = createNodeFromPrevToken(NUMBER);
+    Node* n = createNodeFromPrevToken(INTEGER_LITERAL);
     n->data.text = new QString();
     n->data.text->setNum(number);
 
@@ -560,9 +560,10 @@ Node* Parser::primary(){
         case Beth: return cardinalNumber(BETH);
 
         //Value literal
+        case DecimalNumber: return integer();
         case EmptySet: return createNodeFromPrevToken(EMPTY_SET);
         case Infinity: return createNodeFromPrevToken(INFTY);
-        case Number: return number();
+        case Integer: return integer();
         case True: return createNodeFromPrevToken(TRUE);
         case False: return createNodeFromPrevToken(FALSE);
         case String: return string();
@@ -652,8 +653,14 @@ Node* Parser::boolEquality(){
     }
 }
 
-Node* Parser::number(){
-    Node* n = createNodeFromPrevToken(NUMBER);
+Node* Parser::integer(){
+    Node* n = createNodeFromPrevToken(INTEGER_LITERAL);
+    n->data.text = new QString(source.mid(previous.start, previous.length));
+    return n;
+}
+
+Node* Parser::decimal(){
+    Node* n = createNodeFromPrevToken(DECIMAL_LITERAL);
     n->data.text = new QString(source.mid(previous.start, previous.length));
     return n;
 }
@@ -845,7 +852,21 @@ Node* Parser::unicodeSuperscriptGrouping(){
 
 Node* Parser::unicodeSuperscriptTerminal(){
     if(match(SuperscriptNumber)){
-        return createNodeFromPrevToken(NUMBER);
+        Node* n = createNodeFromPrevToken(INTEGER_LITERAL);
+        n->data.text = new QString(previous.length);
+        for(int i = 0; i < previous.length; i++){
+            const ushort& ch = source[previous.start+i].unicode();
+            switch (ch) {
+                case 8304: n->data.text[i] = '0'; break;
+                case 185:  n->data.text[i] = '1'; break;
+                case 178:  n->data.text[i] = '2'; break;
+                case 179:  n->data.text[i] = '3'; break;
+                default:
+                    n->data.text[i] = ch - 8308 + '4';
+                    Q_ASSERT(n->data.text[i] >= '4' && n->data.text[i] <= '9');
+            }
+        }
+        return n;
     }else{
         consume(SuperscriptIdentifier, "Expected identifier");
         Node* n = createNodeFromPrevToken(IDENTIFIER);
@@ -894,7 +915,13 @@ Node* Parser::unicodeSubscriptGrouping(){
 
 Node* Parser::unicodeSubscriptTerminal(){
     if(match(SubscriptNumber)){
-        return createNodeFromPrevToken(NUMBER);
+        Node* n = createNodeFromPrevToken(INTEGER_LITERAL);
+        n->data.text = new QString(previous.length);
+        for(int i = 0; i < previous.length; i++){
+            n->data.text[i] =source[previous.start+i].unicode() - 8320 + '0';
+            Q_ASSERT(n->data.text[i] >= '0' && n->data.text[i] <= '9');
+        }
+        return n;
     }else{
         consume(SubscriptIdentifier, "Expected identifier");
         Node* n = createNodeFromPrevToken(IDENTIFIER);
@@ -1156,14 +1183,14 @@ Node* Parser::mathBranMatrix(){
     Node* n = createNodeFromPrevToken(MATRIX);
 
     consume(MB_Open, "Expect open symbol for matrix row count");
-    consume(Number, "Expect matrix row count");
+    consume(Integer, "Expect matrix row count");
     bool success;
     ushort rows = source.midRef(previous.start, previous.length).toUShort(&success);
     if(!success || rows==0 || rows> 255) error("Matrix column count must be positive");
     consume(MB_Close, "Expect close symbol for matrix row count");
 
     consume(MB_Open, "Expect open symbol for matrix col count");
-    consume(Number, "Expect matrix col count");
+    consume(Integer, "Expect matrix col count");
     ushort cols = source.midRef(previous.start, previous.length).toUShort(&success);
     if(!success || cols==0 || cols > 255) error("Matrix column count must be positive");
     Node* dims = createNodeFromPrevToken(UINT_PARSED);

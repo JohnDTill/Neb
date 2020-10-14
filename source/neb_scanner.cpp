@@ -84,7 +84,6 @@ Token Scanner::scanToken(){
         case USHORT_MAX: return scanBigToken();
         case MB_USHORT_CONSTRUCT_SYMBOL: return scanMathBranToken();
         case '"': return scanString();
-        case '\n': line++; return Token(Newline, line-1, curr-1);
         default:
             if(isLetter(c)) return scanIdentifier();
             else if(isSuperscriptLetter(c)) return scanSuperscriptIdentifier();
@@ -98,7 +97,7 @@ Token Scanner::scanToken(){
 }
 
 Token Scanner::createToken(TokenType t){
-    return Token(t, line, curr-1);
+    return Token(t, curr-1);
 }
 
 void Scanner::skipWhitespace(){
@@ -135,7 +134,7 @@ Token Scanner::scanBigToken(){
             err_msg = "Unrecognized big token: " + source.mid(curr-2, 2);
             err_start = curr-2;
             err_end = curr;
-            return Token(Error, line, curr-2, 2);
+            return Token(Error, curr-2, 2);
     }
 }
 
@@ -172,7 +171,7 @@ Token Scanner::scanIdentifier(){
     TokenType t = getTextLexemeType(source.midRef(start, len));
 
     #ifdef NEB_IDENTIFIERS_USE_MULTIPLE_CHARS
-    return Token(t, line, start, len);
+    return Token(t, start, len);
     #else
     if(t == Identifier){
         if(len==1) return Token(Identifier, line, start, len);
@@ -206,7 +205,7 @@ Token Scanner::scanSuperscriptIdentifier(){
     while(curr != source.size() && isSuperscriptLetterOrDigit(source[curr].unicode()))
         curr++;
 
-    return Token(SuperscriptIdentifier, line, start, curr-start);
+    return Token(SuperscriptIdentifier, start, curr-start);
 }
 
 Token Scanner::scanSubscriptIdentifier(){
@@ -214,7 +213,7 @@ Token Scanner::scanSubscriptIdentifier(){
     while(curr != source.size() && isSubscriptLetterOrDigit(source[curr].unicode()))
       curr++;
 
-    return Token(SuperscriptIdentifier, line, start, curr-start);
+    return Token(SuperscriptIdentifier, start, curr-start);
 }
 #endif
 
@@ -229,7 +228,7 @@ Token Scanner::scanNonzeroNumber(){
                 err_msg = "Digits must come after decimal point";
                 err_start = start;
                 err_end = curr;
-                return Token(Error, line, start, curr - start);
+                return Token(Error, start, curr - start);
             }
         }else if(!isDigit(c)){
             break;
@@ -237,34 +236,34 @@ Token Scanner::scanNonzeroNumber(){
         curr++;
     }
 
-    return Token(Number, line, start, curr - start);
+    return Token(decimal_available ? Integer : DecimalNumber, start, curr - start);
 }
 
 Token Scanner::scanZeroNumber(){
     QString::size_type start = curr-1;
-    if(curr == source.size()) return Token(Number, line, start);
+    if(curr == source.size()) return Token(Integer, start);
 
     ushort c = source[curr].unicode();
     if(isDigit(c)){
         err_msg = "Numbers cannot have leading zeroes";
         err_start = start;
         err_end = curr;
-        return Token(Error, line, start, 2);
+        return Token(Error, start, 2);
     }else if(c == '.'){
         if(++curr == source.size() || !source[curr].isDigit()){
             err_msg = "Digits must come after decimal point";
             err_start = start;
             err_end = curr;
-            return Token(Error, line, start, curr - start);
+            return Token(Error, start, curr - start);
         }
         while(curr != source.size()){
             ushort c = source[curr].unicode();
             if(!isDigit(c)) break;
             curr++;
         }
-        return Token(Number, line, start, curr - start);
+        return Token(DecimalNumber, start, curr - start);
     }else{
-        return Token(Number, line, start);
+        return Token(Integer, start);
     }
 }
 
@@ -275,20 +274,20 @@ Token Scanner::scanSuperscriptNonzeroNumber(){
         else curr++;
     }
 
-    return Token(SuperscriptNumber, line, start, curr - start);
+    return Token(SuperscriptNumber, start, curr - start);
 }
 
 Token Scanner::scanSuperscriptZeroNumber(){
     QString::size_type start = curr-1;
-    if(curr == source.size()) return Token(SuperscriptNumber, line, start);
+    if(curr == source.size()) return Token(SuperscriptNumber, start);
 
     if(isSuperscriptDigit(source[curr].unicode())){
         err_msg = "Numbers cannot have leading zeroes";
         err_start = start;
         err_end = curr;
-        return Token(Error, line, start, 2);
+        return Token(Error, start, 2);
     }else{
-        return Token(SuperscriptNumber, line, start);
+        return Token(SuperscriptNumber, start);
     }
 }
 
@@ -299,20 +298,20 @@ Token Scanner::scanSubscriptNonzeroNumber(){
         else curr++;
     }
 
-    return Token(SubscriptNumber, line, start, curr - start);
+    return Token(SubscriptNumber, start, curr - start);
 }
 
 Token Scanner::scanSubscriptZeroNumber(){
     QString::size_type start = curr-1;
-    if(curr == source.size()) return Token(SubscriptNumber, line, start);
+    if(curr == source.size()) return Token(SubscriptNumber, start);
 
     if(isSubscriptDigit(source[curr].unicode())){
         err_msg = "Numbers cannot have leading zeroes";
         err_start = start;
         err_end = curr;
-        return Token(Error, line, start, 2);
+        return Token(Error, start, 2);
     }else{
-        return Token(SubscriptNumber, line, start);
+        return Token(SubscriptNumber, start);
     }
 }
 
@@ -324,7 +323,7 @@ Token Scanner::scanString(){
             err_msg = "String not terminated";
             err_start = start-1;
             err_end = curr;
-            return Token(Error, line, start);
+            return Token(Error, start);
         }
         curr++;
     }
@@ -334,9 +333,9 @@ Token Scanner::scanString(){
         err_msg = "Reached end of file while scanning string";
         err_start = start-1;
         err_end = source.size()-1;
-        return Token(Error, line, start);
+        return Token(Error, start);
     }else{
-        return Token(String, line, start-1, curr-start+1);
+        return Token(String, start-1, curr-start+1);
     }
 }
 

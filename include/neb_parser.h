@@ -35,7 +35,7 @@ private:
     Node* createNodeFromPrevToken(const NodeType& type, Node* child);
     Node* createNodeFromPrevToken(const NodeType& type, Node* lhs, Node* rhs);
     template<int a> Node* createNode(const NodeType& type, const std::array<Node*,a>& args);
-    Node* createNodeFromPrevToken(uint number);
+    Node* createNodeFromPrevToken(uint integer);
     void scanToRecoveryPoint();
     Node* error(const QString& message);
     Node* error(const QString& message, const Token& t);
@@ -80,7 +80,8 @@ private:
     Node* boolEquality();
 
     //Specialized rules
-    Node* number();
+    Node* integer();
+    Node* decimal();
     Node* string();
     Node* grouping(const NodeType& t, const TokenType& close);
     Node* idOnly();

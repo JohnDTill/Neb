@@ -4,15 +4,14 @@
 
 namespace Neb {
 
-NEB_DECLARE_COARSETYPE_INIT
-
 Node::Node(NodeType type, int start, int end)
-    : type(type), start(start), end(end), coarse_type(initCoarseType(type)){}
+    : type(type), start(start), end(end) {}
 
 Node::~Node(){
     switch (type) {
+        case DECIMAL_LITERAL:
         case IDENTIFIER:
-        case NUMBER:
+        case INTEGER_LITERAL:
         case STRING:
             delete data.text;
         default: return;
@@ -21,21 +20,28 @@ Node::~Node(){
 
 NEB_DECLARE_NODE_LABELS
 
-NEB_DECLARE_COARSETYPE_LABELS
-
-NEB_DECLARE_IS_EXPR 
-
 static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
     uint64_t id = curr++;
 
     out << "\tn" << QString::number(id) << "[label=\"" << labels[n.type];
-    if(n.type == IDENTIFIER) out << *n.data.text;
-    else if(n.type == NUMBER) out << *n.data.text;
-    else if(n.type == STRING) out << "\\\"" << *n.data.text << "\\\"";
-    else if((n.type == TICK_DERIVATIVE || n.type == FACTORIAL) && n.data.number)
-        out << n.data.number+1;
-    else if(n.type == UINT_PARSED)
-        out << (n.data.number & 255) << QString("×") << (n.data.number >> 8);
+    switch (n.type){
+        case DECIMAL_LITERAL:
+        case IDENTIFIER:
+        case INTEGER_LITERAL:
+            out << *n.data.text;
+            break;
+        case STRING:
+            out << "\\\"" << *n.data.text << "\\\"";
+            break;
+        case FACTORIAL:
+        case TICK_DERIVATIVE:
+            out << n.data.number+1;
+            break;
+        case UINT_PARSED:
+            out << (n.data.number & 255) << QString("×") << (n.data.number >> 8);
+            break;
+        default: break;
+    }
     out << '"';
     if(n.type == IDENTIFIER) out << ", style=filled, fillcolor=lightblue";
     else if(n.type == ERROR) out << ", style=filled, fillcolor=red";
