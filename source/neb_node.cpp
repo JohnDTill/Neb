@@ -16,6 +16,8 @@ Node::~Node(){
             delete data.text;
         default: return;
     }
+
+    Q_ASSERT(hook == nullptr);
 }
 
 NEB_DECLARE_NODE_LABELS
@@ -49,8 +51,8 @@ static uint64_t writeDOT(QTextStream& out, const Node& n, uint64_t& curr){
 
     out << "]\n";
 
-    for(Node* n : n.children){
-        uint64_t child_id = writeDOT(out, *n, curr);
+    for(Node* c : n.children){
+        uint64_t child_id = writeDOT(out, *c, curr);
         out << "\tn" << QString::number(id) << "->n" << QString::number(child_id) << '\n';
     }
 

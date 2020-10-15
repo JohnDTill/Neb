@@ -125,6 +125,7 @@ private:
     Node* mathBranSuperscript(Node* body, bool consume_on_start = true);
     Node* mathBranExponentOp(Node* body, NodeType op);
     Node* mathBranSubscript(Node* body, bool consume_on_start = true);
+    Node* slice();
     Node* mathBranDualscript(Node* body);
     Node* mathBranAccent(const NodeType& t);
     Node* mathBranAccentArrow();

@@ -1298,11 +1298,21 @@ Node* Parser::mathBranSubscript(Node* body, bool consume_on_start){
             return n;
         }
         default:
-            Node* n = createNodeFromPrevToken(SUBSCRIPT_ACCESS, body, expression());
-            while(match(Comma)) n->children.push_back(expression());
+            Node* n = createNodeFromPrevToken(SUBSCRIPT_ACCESS, body, slice());
+            while(match(Comma)) n->children.push_back(slice());
             consume(MB_Close, "Expect close symbol");
             return n;
     }
+}
+
+Node* Parser::slice(){
+    Node* n = expression();
+    if(match(Colon)){
+        n = createNodeFromPrevToken(SLICE, n, expression());
+        if(match(Colon)) n = createNodeFromPrevToken(SLICE, n, expression());
+    }
+
+    return n;
 }
 
 Node* Parser::mathBranDualscript(Node* body){

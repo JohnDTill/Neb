@@ -71,6 +71,7 @@ enum NodeType{
     PRODUCT,
     ROOT,
     SQRT,
+    SLICE,
     SUBSCRIPT_PARTIAL,
     SUMMATION,
     TRANSPOSE,
@@ -153,7 +154,7 @@ enum NodeType{
 };
 
 #define NEB_DECLARE_NODE_LABELS \
-static const QString labels[142] { \
+static const QString labels[143] { \
     "false", \
     ">", \
     "≥", \
@@ -217,6 +218,7 @@ static const QString labels[142] { \
     "∏", \
     "⁜∛", \
     "⁜√", \
+    ":", \
     "∂", \
     "Σ", \
     "⊤", \
