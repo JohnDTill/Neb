@@ -12,6 +12,9 @@ The parser is implemented with recursive descent, and uses several LibreOffice s
 
 ![DiffusionEq.png](DiffusionEq.png?raw=true "Good luck interpreting an equation like this, but we can parse it!")
 
+![LinearControlEq.png](LinearControlEq.png?raw=true "Matrices too!")
+
+
 ## Prerequisites
 
 * Qt (https://www.qt.io/download)
